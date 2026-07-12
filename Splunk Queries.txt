@@ -1,0 +1,259 @@
+# Zero Logon
+
+# index="your index name here" (sourcetype="<windows_sourcetype_security>" OR source="windows_source_security") EventCode="4742" OR EventCode="4624" AND (src_user="*anonymous*" OR member_id="*S-1-0*")
+| eval local_system=mvindex(upper(split(user,"$")),0)
+| search host=local_system
+| table _time EventCode dest host ComputerName src_user Account_Name local_system user Security_ID member_id src_nt_domain dest_nt_domain
+
+# Successful Logons
+index="your index name here" source="WinEventLog:security" EventCode=4624 Logon_Type IN (2,7,10,11) NOT user IN ("DWM-*", "UMFD-*")
+| eval Workstation_Name=lower(Workstation_Name)
+| eval host=lower(host)
+| eval hammer=_time 
+| bucket span=12h hammer 
+| stats values(Logon_Type) as "Logon Type" count sparkline by user host, hammer, Workstation_Name
+| rename hammer as "12 hour blocks" host as "Target Host" Workstation_Name as "Source Host"
+| convert ctime("12 hour blocks")
+| sort - "12 hour blocks"
+
+# Failed Logons
+index="your index name here" source="WinEventLog:security" EventCode=4625
+| eval Workstation_Name=lower(Workstation_Name)
+| eval host=lower(host) 
+| eval hammer=_time 
+| bucket span=5m hammer 
+| stats count sparkline by user host, hammer, Workstation_Name
+| rename hammer as "5 minute blocks" host as "Target Host" Workstation_Name as "Source Host"
+| convert ctime("5 minute blocks")
+
+# Pass the hash
+index="your index name here" ( EventCode=4624 Logon_Type=3 ) OR ( EventCode=4625 Logon_Type=3 ) Authentication_Package="NTLM" NOT Account_Domain=YOURDOMAIN NOT Account_Name="ANONYMOUS LOGON"
+
+# Failed RDP Attempt
+index="your index name here" source=WinEventLog:Security sourcetype=WinEventLog:security Logon_Type=10 EventCode=4625 
+| eval Date=strftime(_time, "%Y/%m/%d") 
+| rex "Failed:\s+.*\s+Account\sName:\s+(?<TargetAccount>\S+)\s" 
+| stats count by Date, TargetAccount, Failure_Reason, host 
+| sort - Date
+
+# File Deletion Attempts
+index="your index name here" sourcetype="WinEventLog:Security" EventCode=564 
+| eval Date=strftime(_time, "%Y/%m/%d") 
+| stats count by Date, Image_File_Name, Type, host 
+| sort - Date
+
+# index="your index name here" source="WinEventLog:security" sourcetype="WinEventLog:Security" EventCode=4625 Sub_Status=0xC0000064 
+| eval Date=strftime(_time, "%Y/%m/%d") 
+| rex "Which\sLogon\sFailed:\s+Security\sID:\s+\S.*\s+\w+\s\w+\S\s.(?<uacct>\S.*)" 
+| stats count by Date, uacct, host 
+| rename count as "Attempts" 
+| sort - Attempts
+
+# Privilege Escalation Detection
+index="your index name here" sourcetype="WinEventLog:Security" (EventCode=576 OR EventCode=4672 OR EventCode=577 OR EventCode=4673 OR EventCode=578 OR EventCode=4674) 
+| stats count by user
+
+# network_connections/Sysmon
+index=sysmon EventCode=3 source="XmlWinEventLog:Microsoft-Windows-Sysmon/Operational"  NOT process_exec IN ("Microsoft.SharePoint.exe", "AgentUpgrader.exe", "OneDrive.exe"m "OneDriveStandaloneUpdater.exe")
+| fields User, SourceIp, DestinationIp, DestinationPort, process_exec, DestinationPortName, protocol, direction, count
+| stats count VALUES(protocol) as protocol by process_exec, User, SourceIp, DestinationIp, DestinationPort, DestinationPortName, direction 
+| sort -_time
+
+# Chạy mã độc trong thư mục Downloads
+index=Sysmon sourcetype="WinEventLog:Microsoft-Windows-Sysmon/Operational" EventCode=1 
+Image IN ("*\\cmd.exe","*\\powershell.exe","*\\pwsh.exe","*\\mshta.exe","*\\cscript.exe","*\\wscript.exe")
+CommandLine="*\\Downloads\\*"
+| table _time, Computer, User, ParentImage, Image, CommandLine
+| sort - _time
+
+# Powershell download
+index=sysmon sourcetype="WinEventLog:Microsoft-Windows-Sysmon/Operational" EventCode=1 
+Image IN ("*\\powershell.exe","*\\pwsh.exe") 
+CommandLine IN ("*Invoke-WebRequest*","*IWR*","*Net.WebClient*","*DownloadString*","*DownloadFile*","*curl*","*wget*")
+| table _time, Computer, User, ParentImage, Image, CommandLine
+| sort - _time
+
+# Exe thực thi trong AppData, ProgramData, Public
+index=sysmon sourcetype="WinEventLog:Microsoft-Windows-Sysmon/Operational" EventCode=1 
+Image IN ("*\\AppData\\*","*\\Users\\Public\\*","*\\ProgramData\\*")
+| table _time, Computer, User, ParentImage, Image, CommandLine
+| sort - _time
+
+# Phát hiện initial access
+index=sysmon sourcetype="WinEventLog:Microsoft-Windows-Sysmon/Operational" EventCode=1 
+ParentImage="*\\explorer.exe" 
+Image IN ("*\\cmd.exe","*\\powershell.exe","*\\pwsh.exe","*\\mshta.exe","*\\cscript.exe","*\\wscript.exe","*\\rundll32.exe","*\\regsvr32.exe")
+| table _time, Computer, User, ParentImage, Image, CommandLine
+| sort - _time
+
+# Phát hiện truy cập SMB
+index=sysmon sourcetype="WinEventLog:Microsoft-Windows-Sysmon/Operational" EventCode=1 
+(Image="\\\\*" OR CommandLine="*\\\\*\\*")
+| table _time, Computer, User, ParentImage, Image, CommandLine
+| sort - _time
+
+# Phát hiện exe được thả vào C:\Windows
+index=sysmon sourcetype="WinEventLog:Microsoft-Windows-Sysmon/Operational" EventCode=11 
+TargetFilename="*.exe" 
+TargetFilename IN ("*\\Windows\\*","*\\Windows\\System32\\*")
+| table _time, Computer, User, Image, TargetFilename
+| sort - _time
+
+# Phát hiện service mới được tạo
+index=... sourcetype="WinEventLog:Security" EventCode=4697 
+| table _time, Computer, Account_Name, Service_Name, Service_File_Name
+| sort - _time
+
+# sql injection
+index=... sourcetype=iis 
+(cs_uri_query="*union*select*" OR cs_uri_query="*' OR '1'='1*" OR cs_uri_query="*information_schema*" 
+OR cs_uri_query="*xp_cmdshell*" OR cs_uri_query="*waitfor*delay*" OR cs_uri_stem="*union*select*")
+| table _time, c_ip, cs_method, cs_uri_stem, cs_uri_query, sc_status, cs_User_Agent
+| sort - _time
+
+# webshell
+index=... sourcetype=iis 
+cs_uri_stem IN ("*.aspx","*.asp","*.ashx","*.php","*.jsp") 
+cs_uri_stem IN ("*/upload*","*/uploads/*","*/images/*","*/files/*")
+| table _time, c_ip, cs_uri_stem, sc_status
+| sort - _time
+
+# Liệt kê tiến trình con của w3wp.exe
+index=sysmon sourcetype="WinEventLog:Microsoft-Windows-Sysmon/Operational" EventCode=1 
+ParentImage="*\\w3wp.exe"
+| table _time, Computer, User, ParentImage, Image, CommandLine
+| sort - _time
+
+# Phát hiện powershell lạ
+index=sysmon sourcetype="WinEventLog:Microsoft-Windows-Sysmon/Operational" EventCode=1 
+Image IN ("*\\powershell.exe","*\\pwsh.exe") 
+CommandLine IN ("*-enc*","*-EncodedCommand*","*-w hidden*","*-WindowStyle Hidden*","*-nop*","*-NoProfile*","*-ep bypass*","*-ExecutionPolicy Bypass*","*FromBase64String*","*-c *")
+| table _time, Computer, User, ParentImage, Image, CommandLine
+| sort - _time
+
+# Phát hiện tạo run key
+index=sysmon sourcetype="WinEventLog:Microsoft-Windows-Sysmon/Operational" EventCode=13 
+TargetObject IN ("*\\CurrentVersion\\Run\\*","*\\CurrentVersion\\RunOnce\\*","*\\CurrentVersion\\RunServices\\*","*\\Explorer\\Shell Folders\\*","*\\Winlogon\\Shell*","*\\Winlogon\\Userinit*")
+| table _time, Computer, User, Image, TargetObject, Details
+| sort - _time
+
+# Tạo scheduled task
+index=... sourcetype="WinEventLog:Security" EventCode=4698 
+| table _time, Computer, Account_Name, Task_Name
+| sort - _time
+
+index=sysmon sourcetype="WinEventLog:Microsoft-Windows-Sysmon/Operational" EventCode=1 
+(Image="*\\schtasks.exe" CommandLine="*/create*") OR CommandLine="*Register-ScheduledTask*"
+| table _time, Computer, User, ParentImage, CommandLine
+| sort - _time
+
+index=sysmon sourcetype="WinEventLog:Microsoft-Windows-Sysmon/Operational" EventCode=13 
+TargetObject IN ("*\\Image File Execution Options\\*","*\\AppInit_DLLs*","*\\Winlogon\\Notify\\*","*\\Windows\\CurrentVersion\\Explorer\\User Shell Folders*","*\\Services\\*\\ImagePath","*\\Control\\Lsa\\*")
+| table _time, Computer, User, Image, TargetObject, Details
+| sort - _time
+
+index=sysmon sourcetype="WinEventLog:Microsoft-Windows-Sysmon/Operational" EventCode IN (19,20,21)
+| table _time, Computer, EventCode, User, Operation, Consumer, Filter, Destination
+| sort - _time
+
+index=sysmon sourcetype="WinEventLog:Microsoft-Windows-Sysmon/Operational" EventCode=11 
+TargetFilename IN ("*\\Start Menu\\Programs\\Startup\\*","*\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\*")
+| table _time, Computer, User, Image, TargetFilename
+| sort - _time
+
+# Thêm người dùng vào nhóm admin
+index=... sourcetype="WinEventLog:Security" 
+EventCode IN (4728,4732,4756) 
+Group_Name IN ("Administrators","Domain Admins","Enterprise Admins","Schema Admins","Backup Operators","Account Operators","Server Operators","Remote Desktop Users","Group Policy Creator Owners")
+| table _time, Computer, Subject_Account_Name, Group_Name, Member_Account_Name, EventCode
+| sort - _time
+
+index=sysmon sourcetype="WinEventLog:Microsoft-Windows-Sysmon/Operational" EventCode=2 
+TargetFilename IN ("*.exe","*.dll","*.sys","*.ps1","*.bat","*.vbs","*.scr","*.hta")
+TargetFilename IN ("*\\Temp\\*","*\\AppData\\*","*\\ProgramData\\*","*\\Users\\Public\\*","*\\Windows\\*","*\\Downloads\\*")
+| table _time, Computer, User, Image, TargetFilename, PreviousCreationUtcTime, CreationUtcTime
+| sort - _time
+
+index=sysmon sourcetype="WinEventLog:Microsoft-Windows-Sysmon/Operational" EventCode=2 
+| eval new_time=strptime(CreationUtcTime,"%Y-%m-%d %H:%M:%S.%N")
+| eval diff_days=round((_time - new_time)/86400, 1)
+| where diff_days > 30
+| table _time, Computer, User, Image, TargetFilename, PreviousCreationUtcTime, CreationUtcTime, diff_days
+| sort - diff_days
+
+index=sysmon sourcetype="WinEventLog:Microsoft-Windows-Sysmon/Operational" EventCode=1 
+Image IN ("*\\whoami.exe","*\\net.exe","*\\net1.exe","*\\nltest.exe","*\\systeminfo.exe","*\\ipconfig.exe","*\\hostname.exe","*\\tasklist.exe","*\\quser.exe","*\\qwinsta.exe","*\\arp.exe","*\\route.exe","*\\netstat.exe","*\\nbtstat.exe","*\\dsquery.exe","*\\wmic.exe","*\\reg.exe","*\\query.exe")
+| table _time, Computer, User, ParentImage, Image, CommandLine
+| sort - _time
+
+index=sysmon sourcetype="WinEventLog:Microsoft-Windows-Sysmon/Operational" EventCode=11 
+TargetFilename="*evil.exe"
+| table _time, Computer, User, Image, TargetFilename
+| sort _time
+
+index=sysmon sourcetype="WinEventLog:Microsoft-Windows-Sysmon/Operational" EventCode=1 
+Image="*evil.exe"
+| table _time, Computer, User, ParentImage, ParentCommandLine, Image, CommandLine, ProcessGuid, ProcessId
+| sort _time
+
+index=sysmon sourcetype="WinEventLog:Microsoft-Windows-Sysmon/Operational" EventCode=1 
+ProcessId=4728 Computer="VICTIM-PC"
+| table _time, Computer, User, ParentImage, ParentCommandLine, Image, CommandLine, ProcessGuid, ProcessId
+| sort _time
+
+index=sysmon sourcetype="WinEventLog:Microsoft-Windows-Sysmon/Operational" 
+ParentProcessGuid="{XXXXXXXX-XXXX-...}"
+| table _time, EventCode, Image, CommandLine, TargetFilename, DestinationIp, TargetObject
+| sort _time
+
+# brute force iis
+index=... sourcetype=iis 
+cs_method=POST 
+cs_uri_stem IN ("*/login*","*/logon*","*/signin*","*/auth*","*/account/login*","*/j_security_check*")
+| bin _time span=5m 
+| stats count as attempts, dc(cs_uri_stem) as endpoints, values(sc_status) as codes by c_ip, _time
+| where attempts > 20
+| sort - attempts
+
+# Đăng nhập thất bại Microsoft SQL Server
+index=... sourcetype="WinEventLog:Application" 
+(SourceName="MSSQLSERVER" OR SourceName="MSSQL*") EventCode=33205
+| table _time, Computer, Message
+| sort - _time
+
+index=... sourcetype="WinEventLog:Application" EventCode=33205 
+(Message="*CREATE LOGIN*" OR Message="*CREATE USER*" OR Message="*ALTER SERVER ROLE*" OR Message="*ADD MEMBER*" OR Message="*sysadmin*" OR Message="*GRANT*")
+| rex field=Message "statement:(?<statement>[^\n]+)"
+| rex field=Message "server_principal_name:(?<db_user>[^\n]+)"
+| table _time, Computer, db_user, statement
+| sort - _time
+
+# Lateral Movement
+index=sysmon sourcetype="WinEventLog:Microsoft-Windows-Sysmon/Operational" EventCode=1 
+ParentImage="*\\wsmprovhost.exe"
+| table _time, Computer, User, ParentImage, Image, CommandLine
+| sort - _time
+
+# Sysmon ID 3 — kết nối mạng tới port WinRM (5985/5986)
+index=sysmon sourcetype="WinEventLog:Microsoft-Windows-Sysmon/Operational" EventCode=3 
+(DestinationPort=5985 OR DestinationPort=5986)
+| table _time, Computer, User, Image, SourceIp, DestinationIp, DestinationPort
+| sort - _time
+
+#  Security 4624 — network logon qua WinRM
+index=... sourcetype="WinEventLog:Security" EventCode=4624 Logon_Type=3 
+Process_Name="*\\winrshost.exe" OR Process_Name="*\\wsmprovhost.exe"
+| table _time, Computer, Account_Name, Workstation_Name, Source_Network_Address, Logon_Type
+| sort - _time
+
+# WMI Persistence
+index=sysmon sourcetype="WinEventLog:Microsoft-Windows-Sysmon/Operational" EventCode IN (19,20,21)
+| table _time, Computer, EventCode, User, Operation, Name, Query, Destination, Consumer, Filter
+| sort - _time
+
+# WMI command line
+index=sysmon sourcetype="WinEventLog:Microsoft-Windows-Sysmon/Operational" EventCode=1 
+Image="*\\wmic.exe" 
+CommandLine IN ("*process call create*","*/node:*","*node:*","*os get*","*shadowcopy delete*","*product where*")
+| table _time, Computer, User, ParentImage, Image, CommandLine
+| sort - _time

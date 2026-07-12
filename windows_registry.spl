@@ -1,0 +1,1299 @@
+# ── Potential Persistence Via Disk Cleanup Handler - Registry ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects when an attacker modifies values of the Disk Cleanup Handler in the registry to achieve persistence. The disk cleanup manager is part of the operating system. It displays the dialog box […] Th
+EventCode=4657 Channel="Security" OperationType="%%1904" ObjectName="*\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\VolumeCaches\\*" NOT (ObjectName IN ("*\\Active Setup Temp Folders", "*\\BranchCache", "*\\Content Indexer Cleaner", "*\\D3D Shader Cache", "*\\Delivery Optimization Files", "*\\Device Driver Packages", "*\\Diagnostic Data Viewer database files", "*\\Downloaded Program Files", "*\\DownloadsFolder", "*\\Feedback Hub Archive log files", "*\\Internet Cache Files", "*\\Language Pack", "*\\Microsoft Office Temp Files", "*\\Offline Pages Files", "*\\Old ChkDsk Files", "*\\Previous Installations", "*\\Recycle Bin", "*\\RetailDemo Offline Content", "*\\Setup Log Files", "*\\System error memory dump files", "*\\System error minidump files", "*\\Temporary Files", "*\\Temporary Setup Files", "*\\Temporary Sync Files", "*\\Thumbnail Cache", "*\\Update Cleanup", "*\\Upgrade Discarded Files", "*\\User file versions", "*\\Windows Defender", "*\\Windows Error Reporting Files", "*\\Windows ESD installation files", "*\\Windows Upgrade Log Files"))
+
+# ── Creation of a Local Hidden User Account by Registry ──
+# Mức độ  : Cao
+# Chi tiết: Sysmon registry detection of a local hidden user account.
+EventCode=4657 Channel="Security" ObjectName="*\\SAM\\SAM\\Domains\\Account\\Users\\Names\\*" ObjectName="*$\\(Default)" ProcessName="*\\lsass.exe"
+
+# ── UAC Bypass Via Wsreset ──
+# Mức độ  : Cao
+# Mục đích: Leo thang đặc quyền
+# Chi tiết: Unfixed method for UAC bypass from Windows 10. WSReset.exe file associated with the Windows Store. It will run a binary file contained in a low-privilege registry.
+EventCode=4657 Channel="Security" ObjectName="*\\AppX82a6gwre4fdg3bt635tn5ctqjf8msdd2\\Shell\\open\\command"
+
+# ── CMSTP Execution Registry Event ──
+# Mức độ  : Cao
+# Chi tiết: Detects various indicators of Microsoft Connection Manager Profile Installer execution
+EventCode=4657 Channel="Security" ObjectName="*\\cmmgr32.exe*"
+
+# ── Windows Defender Threat Severity Default Action Modified ──
+# Mức độ  : Cao
+# Chi tiết: Detects modifications or creations of Windows Defender's default threat action settings based on severity to 'allow' or take 'no action'. This is a highly suspicious configuration change that effectiv
+EventCode=4657 Channel="Security" ObjectName="*\\Microsoft\\Windows Defender\\Threats\\ThreatSeverityDefaultAction\\*" ObjectName IN ("*\\1", "*\\2", "*\\4", "*\\5") NewValue IN ("DWORD (0x00000006)", "DWORD (0x00000009)")
+
+# ── Disable Security Events Logging Adding Reg Key MiniNt ──
+# Mức độ  : Cao
+# Mục đích: Sửa registry
+# Chi tiết: Detects the addition of a key 'MiniNt' to the registry. Upon a reboot, Windows Event Log service will stop writing events.
+EventCode=4657 Channel="Security" (ObjectName="\\REGISTRY\\MACHINE\\SYSTEM\\CurrentControlSet\\Control\\MiniNt" OperationType="%%1904") OR NewName="HKLM\\SYSTEM\\CurrentControlSet\\Control\\MiniNt"
+
+# ── Wdigest CredGuard Registry Modification ──
+# Mức độ  : Cao
+# Mục đích: Sửa registry
+# Chi tiết: Detects potential malicious modification of the property value of IsCredGuardEnabled from HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest to disable Cred Guard on a system. This is us
+EventCode=4657 Channel="Security" ObjectName="*\\IsCredGuardEnabled"
+
+# ── Esentutl Volume Shadow Copy Service Keys ──
+# Mức độ  : Cao
+# Mục đích: Dump thông tin xác thực
+# Chi tiết: Detects the volume shadow copy service initialization and processing via esentutl. Registry keys such as HKLM\\System\\CurrentControlSet\\Services\\VSS\\Diag\\VolSnap\\Volume are captured.
+EventCode=4657 Channel="Security" ObjectName="*System\\CurrentControlSet\\Services\\VSS*" ProcessName="*esentutl.exe" NOT ObjectName="*System\\CurrentControlSet\\Services\\VSS\\Start*"
+
+# ── Windows Credential Editor Registry ──
+# Mức độ  : Nghiêm trọng
+# Mục đích: Dump thông tin xác thực
+# Chi tiết: Detects the use of Windows Credential Editor (WCE)
+EventCode=4657 Channel="Security" ObjectName="*Services\\WCESERVICE\\Start*"
+
+# ── HybridConnectionManager Service Installation - Registry ──
+# Mức độ  : Cao
+# Chi tiết: Detects the installation of the Azure Hybrid Connection Manager service to allow remote code execution from Azure function.
+EventCode=4657 Channel="Security" ObjectName="*\\Services\\HybridConnectionManager*" OR (OperationType="%%1905" NewValue="*Microsoft.HybridConnectionManager.Listener.exe*")
+
+# ── Registry Entries For Azorult Malware ──
+# Mức độ  : Nghiêm trọng
+# Mục đích: Sửa registry
+# Chi tiết: Detects the presence of a registry key created during Azorult execution
+EventCode=4657 Channel="Security" EventCode IN (12, 13) ObjectName="*SYSTEM\\*" ObjectName="*\\services\\localNETService"
+
+# ── Potential Qakbot Registry Activity ──
+# Mức độ  : Cao
+# Mục đích: Sửa registry
+# Chi tiết: Detects a registry key used by IceID in a campaign that distributes malicious OneNote files
+EventCode=4657 Channel="Security" ObjectName="*\\Software\\firm\\soft\\Name"
+
+# ── Path To Screensaver Binary Modified ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects value modification of registry key containing path to binary used as screensaver.
+EventCode=4657 Channel="Security" ObjectName="*\\Control Panel\\Desktop\\SCRNSAVE.EXE" NOT (ProcessName IN ("*\\rundll32.exe", "*\\explorer.exe"))
+
+# ── Narrator's Feedback-Hub Persistence ──
+# Mức độ  : Cao
+# Mục đích: Persistence qua autorun
+# Chi tiết: Detects abusing Windows 10 Narrator's Feedback-Hub
+EventCode=4657 Channel="Security" (OperationType="%%1906" ObjectName="*\\AppXypsaf9f1qserqevf0sws76dx4k9a5206\\Shell\\open\\command\\DelegateExecute") OR ObjectName="*\\AppXypsaf9f1qserqevf0sws76dx4k9a5206\\Shell\\open\\command\\(Default)"
+
+# ── NetNTLM Downgrade Attack - Registry ──
+# Mức độ  : Cao
+# Mục đích: Sửa registry
+# Chi tiết: Detects NetNTLM downgrade attack
+EventCode=4657 Channel="Security" ObjectName="*SYSTEM\\*" ObjectName="*ControlSet*" ObjectName="*\\Control\\Lsa*" (ObjectName="*\\lmcompatibilitylevel" NewValue IN ("DWORD (0x00000000)", "DWORD (0x00000001)", "DWORD (0x00000002)")) OR (ObjectName="*\\NtlmMinClientSec" NewValue IN ("DWORD (0x00000000)", "DWORD (0x00000010)", "DWORD (0x00000020)", "DWORD (0x00000030)")) OR ObjectName="*\\RestrictSendingNTLMTraffic"
+
+# ── New DLL Added to AppCertDlls Registry Key ──
+# Mức độ  : Trung bình
+# Chi tiết: Dynamic-link libraries (DLLs) that are specified in the AppCertDLLs value in the Registry key can be abused to obtain persistence and privilege escalation by causing a malicious DLL to be loaded and r
+EventCode=4657 Channel="Security" ObjectName="\\REGISTRY\\MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\AppCertDlls" OR NewName="HKLM\\SYSTEM\\CurentControlSet\\Control\\Session Manager\\AppCertDlls"
+
+# ── New DLL Added to AppInit_DLLs Registry Key ──
+# Mức độ  : Trung bình
+# Chi tiết: DLLs that are specified in the AppInit_DLLs value in the Registry key HKLM\Software\Microsoft\Windows NT\CurrentVersion\Windows are loaded by user32.dll into every process that loads user32.dll
+EventCode=4657 Channel="Security" ObjectName IN ("*\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Windows\\AppInit_Dlls", "*\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows NT\\CurrentVersion\\Windows\\AppInit_Dlls") OR NewName IN ("*\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Windows\\AppInit_Dlls", "*\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows NT\\CurrentVersion\\Windows\\AppInit_Dlls") NOT NewValue="(Empty)"
+
+# ── Office Application Startup - Office Test ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects the addition of office test registry that allows a user to specify an arbitrary DLL that will be executed every time an Office application is started
+EventCode=4657 Channel="Security" ObjectName="*\\Software\\Microsoft\\Office test\\Special\\Perf*"
+
+# ── Windows Registry Trust Record Modification ──
+# Mức độ  : Trung bình
+# Mục đích: Phishing
+# Chi tiết: Alerts on trust record modification within the registry, indicating usage of macros
+EventCode=4657 Channel="Security" ObjectName="*\\Security\\Trusted Documents\\TrustRecords*"
+
+# ── Registry Persistence Mechanisms in Recycle Bin ──
+# Mức độ  : Cao
+# Mục đích: Persistence qua autorun
+# Chi tiết: Detects persistence registry keys for Recycle Bin
+EventCode=4657 Channel="Security" (NewName="*\\CLSID\\{645FF040-5081-101B-9F08-00AA002F954E}\\shell\\open*" OperationType="%%1905") OR (OperationType="%%1905" ObjectName="*\\CLSID\\{645FF040-5081-101B-9F08-00AA002F954E}\\shell\\open\\command\\(Default)*")
+
+# ── New PortProxy Registry Entry Added ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects the modification of the PortProxy registry key which is used for port forwarding.
+EventCode=4657 Channel="Security" ObjectName="*\\Services\\PortProxy\\v4tov4\\tcp\\*"
+
+# ── RedMimicry Winnti Playbook Registry Manipulation ──
+# Mức độ  : Cao
+# Mục đích: Sửa registry
+# Chi tiết: Detects actions caused by the RedMimicry Winnti playbook
+EventCode=4657 Channel="Security" ObjectName="*\\REGISTRY\\MACHINE\\SOFTWARE\\Microsoft\\HTMLHelp\\data*"
+
+# ── WINEKEY Registry Modification ──
+# Mức độ  : Cao
+# Mục đích: Persistence qua autorun
+# Chi tiết: Detects potential malicious modification of run keys by winekey or team9 backdoor
+EventCode=4657 Channel="Security" ObjectName="*Software\\Microsoft\\Windows\\CurrentVersion\\Run\\Backup Mgr"
+
+# ── Run Once Task Configuration in Registry ──
+# Mức độ  : Trung bình
+# Mục đích: Sửa registry
+# Chi tiết: Rule to detect the configuration of Run Once registry key. Configured payload can be run by runonce.exe /AlternateShellStartup
+EventCode=4657 Channel="Security" ObjectName="*\\Microsoft\\Active Setup\\Installed Components*" ObjectName="*\\StubPath" NOT ((NewValue="*C:\\Program Files\\Google\\Chrome\\Application\\*" NewValue="*\\Installer\\chrmstp.exe\" --configure-user-settings --verbose-logging --system-level*") OR (NewValue IN ("*C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\*", "*C:\\Program Files\\Microsoft\\Edge\\Application\\*") NewValue="*\\Installer\\setup.exe\" --configure-user-settings --verbose-logging --system-level --msedge --channel=stable"))
+
+# ── Shell Open Registry Keys Manipulation ──
+# Mức độ  : Cao
+# Mục đích: Leo thang đặc quyền
+# Chi tiết: Detects the shell open key manipulation (exefile and ms-settings) used for persistence and the pattern of UAC Bypass using fodhelper.exe, computerdefaults.exe, slui.exe via registry keys (e.g. UACMe 3
+EventCode=4657 Channel="Security" (OperationType="%%1905" ObjectName="*Classes\\ms-settings\\shell\\open\\command\\SymbolicLinkValue" NewValue="*\\Software\\Classes\\{*") OR ObjectName="*Classes\\ms-settings\\shell\\open\\command\\DelegateExecute" OR (OperationType="%%1905" ObjectName IN ("*Classes\\ms-settings\\shell\\open\\command\\(Default)", "*Classes\\exefile\\shell\\open\\command\\(Default)") NOT NewValue="(Empty)")
+
+# ── Potential Credential Dumping Via LSASS SilentProcessExit Technique ──
+# Mức độ  : Nghiêm trọng
+# Mục đích: Dump thông tin xác thực
+# Chi tiết: Detects changes to the Registry in which a monitor program gets registered to dump the memory of the lsass.exe process
+EventCode=4657 Channel="Security" ObjectName="*Microsoft\\Windows NT\\CurrentVersion\\SilentProcessExit\\lsass.exe*"
+
+# ── Security Support Provider (SSP) Added to LSA Configuration ──
+# Mức độ  : Cao
+# Mục đích: Persistence qua autorun
+# Chi tiết: Detects the addition of a SSP to the registry. Upon a reboot or API call, SSP DLLs gain access to encrypted and plaintext passwords stored in Windows.
+EventCode=4657 Channel="Security" ObjectName IN ("*\\Control\\Lsa\\Security Packages", "*\\Control\\Lsa\\OSConfig\\Security Packages") NOT (ProcessName IN ("C:\\Windows\\system32\\msiexec.exe", "C:\\Windows\\syswow64\\MsiExec.exe") OR NOT ProcessName=*)
+
+# ── Sticky Key Like Backdoor Usage - Registry ──
+# Mức độ  : Nghiêm trọng
+# Chi tiết: Detects the usage and installation of a backdoor that uses an option to register a malicious debugger for built-in tools that are accessible in the login screen
+EventCode=4657 Channel="Security" ObjectName IN ("*\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options\\sethc.exe\\Debugger", "*\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options\\utilman.exe\\Debugger", "*\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options\\osk.exe\\Debugger", "*\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options\\Magnify.exe\\Debugger", "*\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options\\Narrator.exe\\Debugger", "*\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options\\DisplaySwitch.exe\\Debugger", "*\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options\\atbroker.exe\\Debugger", "*\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options\\HelpPane.exe\\Debugger")
+
+# ── Atbroker Registry Change ──
+# Mức độ  : Trung bình
+# Mục đích: Persistence qua autorun
+# Chi tiết: Detects creation/modification of Assistive Technology applications and persistence with usage of 'at'
+EventCode=4657 Channel="Security" ObjectName IN ("*Software\\Microsoft\\Windows NT\\CurrentVersion\\Accessibility\\ATs*", "*Software\\Microsoft\\Windows NT\\CurrentVersion\\Accessibility\\Configuration*") NOT ((ProcessName="C:\\Windows\\system32\\atbroker.exe" ObjectName="*\\Microsoft\\Windows NT\\CurrentVersion\\Accessibility\\Configuration*" NewValue="(Empty)") OR (ProcessName="C:\\Windows\\Installer\\MSI*" ObjectName="*Software\\Microsoft\\Windows NT\\CurrentVersion\\Accessibility\\ATs*"))
+
+# ── Suspicious Run Key from Download ──
+# Mức độ  : Cao
+# Mục đích: Persistence qua autorun
+# Chi tiết: Detects the suspicious RUN keys created by software located in Download or temporary Outlook/Internet Explorer directories
+EventCode=4657 Channel="Security" ProcessName IN ("*\\AppData\\Local\\Packages\\Microsoft.Outlook_*", "*\\AppData\\Local\\Microsoft\\Olk\\Attachments\\*", "*\\Downloads\\*", "*\\Temporary Internet Files\\Content.Outlook\\*", "*\\Local Settings\\Temporary Internet Files\\*") ObjectName IN ("*\\Software\\Microsoft\\Windows\\CurrentVersion\\Run*", "*\\Software\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\Run*", "*\\Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\Run*")
+
+# ── DLL Load via LSASS ──
+# Mức độ  : Cao
+# Mục đích: Persistence qua autorun
+# Chi tiết: Detects a method to load DLL via LSASS process using an undocumented Registry key
+EventCode=4657 Channel="Security" ObjectName IN ("*\\CurrentControlSet\\Services\\NTDS\\DirectoryServiceExtPt*", "*\\CurrentControlSet\\Services\\NTDS\\LsaDbExtPt*") NOT (ProcessName="C:\\Windows\\system32\\lsass.exe" NewValue IN ("%%systemroot%%\\system32\\ntdsa.dll", "%%systemroot%%\\system32\\lsadb.dll"))
+
+# ── Suspicious Camera and Microphone Access ──
+# Mức độ  : Cao
+# Chi tiết: Detects Processes accessing the camera and microphone from suspicious folder
+EventCode=4657 Channel="Security" ObjectName="*\\Software\\Microsoft\\Windows\\CurrentVersion\\CapabilityAccessManager\\ConsentStore\\*" ObjectName="*\\NonPackaged*" ObjectName IN ("*microphone*", "*webcam*") ObjectName IN ("*:#Windows#Temp#*", "*:#$Recycle.bin#*", "*:#Temp#*", "*:#Users#Public#*", "*:#Users#Default#*", "*:#Users#Desktop#*")
+
+# ── Registry Tampering by Potentially Suspicious Processes ──
+# Mức độ  : Trung bình
+# Mục đích: Sửa registry; Thực thi lệnh/script
+# Chi tiết: Detects suspicious registry modifications made by suspicious processes such as script engine processes such as WScript, or CScript etc. These processes are rarely used for legitimate registry modifica
+EventCode=4657 Channel="Security" ProcessName IN ("*\\mshta.exe", "*\\wscript.exe", "*\\cscript.exe") NOT (NewValue="Binary Data" OR NOT NewValue=* OR (ProcessName="*\\wscript.exe" ObjectName IN ("*SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Notifications\\Data\\*", "*\\Services\\bam\\State\\UserSettings\\S-1-*", "*Software\\Microsoft\\Windows Script\\Settings\\Telemetry\\wscript.exe\\*", "*Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\\*")) OR (ProcessName="*\\wscript.exe" ObjectName="*\\wscript.exe*"))
+
+# ── Enable Remote Connection Between Anonymous Computer - AllowAnonymousCallback ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects enabling of the "AllowAnonymousCallback" registry value, which allows a remote connection between computers that do not have a trust relationship.
+EventCode=4657 Channel="Security" ObjectName="*\\Microsoft\\WBEM\\CIMOM\\AllowAnonymousCallback*" NewValue="DWORD (0x00000001)"
+
+# ── Registry Persistence via Service in Safe Mode ──
+# Mức độ  : Cao
+# Chi tiết: Detects the modification of the registry to allow a driver or service to persist in Safe Mode.
+EventCode=4657 Channel="Security" ObjectName IN ("*\\Control\\SafeBoot\\Minimal\\*", "*\\Control\\SafeBoot\\Network\\*") ObjectName="*\\(Default)" NewValue="Service" NOT ((ProcessName="C:\\WINDOWS\\system32\\msiexec.exe" ObjectName IN ("*\\Control\\SafeBoot\\Minimal\\SAVService\\(Default)", "*\\Control\\SafeBoot\\Network\\SAVService\\(Default)")) OR (ProcessName="*\\MBAMInstallerService.exe" ObjectName="*\\MBAMService\\(Default)" NewValue="Service") OR (ProcessName="C:\\Hexnode\\Hexnode Agent\\Current\\HexnodeAgent.exe" ObjectName IN ("*\\Control\\SafeBoot\\Minimal\\Hexnode Updater\\(Default)", "*\\Control\\SafeBoot\\Network\\Hexnode Updater\\(Default)", "*\\Control\\SafeBoot\\Minimal\\Hexnode Agent\\(Default)", "*\\Control\\SafeBoot\\Network\\Hexnode Agent\\(Default)") NewValue="Service"))
+
+# ── Add Port Monitor Persistence in Registry ──
+# Mức độ  : Trung bình
+# Mục đích: Persistence qua autorun
+# Chi tiết: Adversaries may use port monitors to run an attacker supplied DLL during system boot for persistence or privilege escalation. A port monitor can be set through the AddMonitor API call to set a DLL to 
+EventCode=4657 Channel="Security" ObjectName="*\\Control\\Print\\Monitors\\*" NewValue="*.dll" NOT ((ProcessName="C:\\Windows\\System32\\spoolsv.exe" ObjectName="*\\Control\\Print\\Monitors\\CutePDF Writer Monitor v4.0\\Driver*" NewValue="cpwmon64_v40.dll" SubjectUserName IN ("*AUTHORI*", "*AUTORI*")) OR ObjectName="*\\Control\\Print\\Monitors\\MONVNC\\Driver*" OR (ObjectName="*Control\\Print\\Environments\\*" ObjectName="*\\Drivers\\*" ObjectName="*\\VNC Printer*"))
+
+# ── Add Debugger Entry To AeDebug For Persistence ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects when an attacker adds a new "Debugger" value to the "AeDebug" key in order to achieve persistence which will get invoked when an application crashes
+EventCode=4657 Channel="Security" ObjectName="*\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\AeDebug\\Debugger*" NewValue="*.dll" NOT NewValue="\"C:\\WINDOWS\\system32\\vsjitdebugger.exe\" -p %ld -e %ld -j 0x%p"
+
+# ── Allow RDP Remote Assistance Feature ──
+# Mức độ  : Trung bình
+# Mục đích: Sửa registry
+# Chi tiết: Detect enable rdp feature to allow specific user to rdp connect on the targeted machine
+EventCode=4657 Channel="Security" ObjectName="*System\\CurrentControlSet\\Control\\Terminal Server\\fAllowToGetHelp" NewValue="DWORD (0x00000001)"
+
+# ── Potential AMSI COM Server Hijacking ──
+# Mức độ  : Cao
+# Chi tiết: Detects changes to the AMSI come server registry key in order disable AMSI scanning functionalities. When AMSI attempts to starts its COM component, it will query its registered CLSID and return a non
+EventCode=4657 Channel="Security" ObjectName="*\\CLSID\\{fdb00e52-a214-4aa1-8fba-4357bb0072ec}\\InProcServer32\\(Default)" NOT NewValue="%windir%\\system32\\amsi.dll"
+
+# ── AMSI Disabled via Registry Modification ──
+# Mức độ  : Cao
+# Chi tiết: Detects attempts to disable AMSI (Anti-Malware Scan Interface) by modifying the AmsiEnable registry value. Anti-Malware Scan Interface (AMSI) is a security feature in Windows that allows applications 
+EventCode=4657 Channel="Security" ObjectName="*\\Software\\Microsoft\\Windows Script\\Settings\\AmsiEnable" NewValue="DWORD (0x00000000)"
+
+# ── Classes Autorun Keys Modification ──
+# Mức độ  : Trung bình
+# Mục đích: Persistence qua autorun
+# Chi tiết: Detects modification of Windows Registry Classes keys used for persistence. Adversaries modify these autostart extensibility points (ASEP) to execute malicious code when file types are opened or actio
+EventCode=4657 Channel="Security" ObjectName="*\\Software\\Classes*" ObjectName IN ("*\\Folder\\ShellEx\\ExtShellFolderViews*", "*\\Folder\\ShellEx\\DragDropHandlers*", "*\\Folder\\Shellex\\ColumnHandlers*", "*\\Filter*", "*\\Exefile\\Shell\\Open\\Command\\(Default)*", "*\\Directory\\Shellex\\DragDropHandlers*", "*\\Directory\\Shellex\\CopyHookHandlers*", "*\\CLSID\\{AC757296-3522-4E11-9862-C17BE5A1767E}\\Instance*", "*\\CLSID\\{ABE3B9A4-257D-4B97-BD1A-294AF496222E}\\Instance*", "*\\CLSID\\{7ED96837-96F0-4812-B211-F13C24117ED3}\\Instance*", "*\\CLSID\\{083863F1-70DE-11d0-BD40-00A0C911CE86}\\Instance*", "*\\Classes\\AllFileSystemObjects\\ShellEx\\DragDropHandlers*", "*\\.exe*", "*\\.cmd*", "*\\ShellEx\\PropertySheetHandlers*", "*\\ShellEx\\ContextMenuHandlers*") NOT (ProcessName="C:\\Windows\\System32\\drvinst.exe" OR NewValue="(Empty)" OR NOT NewValue=* OR (ProcessName="C:\\Windows\\System32\\svchost.exe" ObjectName="*\\lnkfile\\shellex\\ContextMenuHandlers\\*")) NOT NewValue="{807583E5-5146-11D5-A672-00B0D022E945}"
+
+# ── Common Autorun Keys Modification ──
+# Mức độ  : Trung bình
+# Mục đích: Persistence qua autorun
+# Chi tiết: Detects modification of autostart extensibility point (ASEP) in registry.
+EventCode=4657 Channel="Security" ObjectName IN ("*\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows CE Services\\AutoStart*", "*\\Software\\Wow6432Node\\Microsoft\\Command Processor\\Autorun*", "*\\SOFTWARE\\Wow6432Node\\Microsoft\\Active Setup\\Installed Components*", "*\\SOFTWARE\\Microsoft\\Windows CE Services\\AutoStartOnDisconnect*", "*\\SOFTWARE\\Microsoft\\Windows CE Services\\AutoStartOnConnect*", "*\\SYSTEM\\Setup\\CmdLine*", "*\\Software\\Microsoft\\Ctf\\LangBarAddin*", "*\\Software\\Microsoft\\Command Processor\\Autorun*", "*\\SOFTWARE\\Microsoft\\Active Setup\\Installed Components*", "*\\SOFTWARE\\Classes\\Protocols\\Handler*", "*\\SOFTWARE\\Classes\\Protocols\\Filter*", "*\\SOFTWARE\\Classes\\Htmlfile\\Shell\\Open\\Command\\(Default)*", "*\\Environment\\UserInitMprLogonScript*", "*\\SOFTWARE\\Policies\\Microsoft\\Windows\\Control Panel\\Desktop\\Scrnsave.exe*", "*\\Software\\Microsoft\\Internet Explorer\\UrlSearchHooks*", "*\\SOFTWARE\\Microsoft\\Internet Explorer\\Desktop\\Components*", "*\\Software\\Classes\\Clsid\\{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}\\Inprocserver32*", "*\\Control Panel\\Desktop\\Scrnsave.exe*") NOT (NewValue="(Empty)" OR NOT NewValue=* OR ProcessName="C:\\Windows\\System32\\poqexec.exe") NOT (ObjectName IN ("*\\Office\\ClickToRun\\REGISTRY\\MACHINE\\Software\\Classes\\PROTOCOLS\\Handler\\*", "*\\ClickToRunStore\\HKMU\\SOFTWARE\\Classes\\PROTOCOLS\\Handler\\*") OR NewValue IN ("{314111c7-a502-11d2-bbca-00c04f8ec294}", "{3459B272-CC19-4448-86C9-DDC3B4B2FAD3}", "{42089D2D-912D-4018-9087-2B87803E93FB}", "{5504BE45-A83B-4808-900A-3A5C36E7F77A}", "{807583E5-5146-11D5-A672-00B0D022E945}") OR ObjectName="*\\SOFTWARE\\Microsoft\\Active Setup\\Installed Components\\{8A69D345-D564-463c-AFF1-A69D9E530F96}*" OR ObjectName="*\\SOFTWARE\\Microsoft\\Active Setup\\Installed Components\\{9459C573-B17A-45AE-9F64-1857B5D58CEE}*" OR ObjectName="*\\Software\\Microsoft\\Active Setup\\Installed Components\\{89820200-ECBD-11cf-8B85-00AA005B4383}*" OR ProcessName IN ("C:\\Program Files (x86)\\Microsoft Office\\root\\integration\\integrator.exe", "C:\\Program Files\\Microsoft Office\\root\\integration\\integrator.exe") OR (ProcessName IN ("C:\\Program Files\\Common Files\\Microsoft Shared\\ClickToRun\\*", "C:\\Program Files\\Common Files\\Microsoft Shared\\ClickToRun\\Updates\\*") ProcessName="*\\OfficeClickToRun.exe"))
+
+# ── CurrentControlSet Autorun Keys Modification ──
+# Mức độ  : Trung bình
+# Mục đích: Persistence qua autorun
+# Chi tiết: Detects modification of autostart extensibility point (ASEP) in registry.
+EventCode=4657 Channel="Security" ObjectName="*\\SYSTEM\\CurrentControlSet\\Control*" ObjectName IN ("*\\Terminal Server\\WinStations\\RDP-Tcp\\InitialProgram*", "*\\Terminal Server\\Wds\\rdpwd\\StartupPrograms*", "*\\SecurityProviders\\SecurityProviders*", "*\\SafeBoot\\AlternateShell*", "*\\Print\\Providers*", "*\\Print\\Monitors*", "*\\NetworkProvider\\Order*", "*\\Lsa\\Notification Packages*", "*\\Lsa\\Authentication Packages*", "*\\BootVerificationProgram\\ImagePath*") NOT (NewValue="(Empty)" OR (ProcessName="C:\\Windows\\System32\\spoolsv.exe" ObjectName="*\\Print\\Monitors\\CutePDF Writer Monitor*" NewValue IN ("cpwmon64_v40.dll", "CutePDF Writer")) OR (ProcessName="C:\\Windows\\System32\\spoolsv.exe" ObjectName="*Print\\Monitors\\Appmon\\Ports\\Microsoft.Office.OneNote_*" SubjectUserName IN ("*AUTHORI*", "*AUTORI*")) OR (ProcessName="C:\\Windows\\System32\\poqexec.exe" ObjectName="*\\NetworkProvider\\Order\\ProviderOrder") OR (ProcessName="C:\\Windows\\System32\\spoolsv.exe" ObjectName="*\\Print\\Monitors\\MONVNC\\Driver" NewValue="VNCpm.dll"))
+
+# ── CurrentVersion Autorun Keys Modification ──
+# Mức độ  : Trung bình
+# Mục đích: Persistence qua autorun
+# Chi tiết: Detects modification of autostart extensibility point (ASEP) in registry.
+EventCode=4657 Channel="Security" ObjectName="*\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion*" ObjectName IN ("*\\ShellServiceObjectDelayLoad*", "*\\Run\\*", "*\\RunOnce\\*", "*\\RunOnceEx\\*", "*\\RunServices\\*", "*\\RunServicesOnce\\*", "*\\Policies\\System\\Shell*", "*\\Policies\\Explorer\\Run*", "*\\Group Policy\\Scripts\\Startup*", "*\\Group Policy\\Scripts\\Shutdown*", "*\\Group Policy\\Scripts\\Logon*", "*\\Group Policy\\Scripts\\Logoff*", "*\\Explorer\\ShellServiceObjects*", "*\\Explorer\\ShellIconOverlayIdentifiers*", "*\\Explorer\\ShellExecuteHooks*", "*\\Explorer\\SharedTaskScheduler*", "*\\Explorer\\Browser Helper Objects*", "*\\Authentication\\PLAP Providers*", "*\\Authentication\\Credential Providers*", "*\\Authentication\\Credential Provider Filters*") NOT (NewValue="(Empty)" OR ObjectName="*\\NgcFirst\\ConsecutiveSwitchCount" OR ProcessName IN ("*\\AppData\\Local\\Microsoft\\OneDrive\\Update\\OneDriveSetup.exe", "*\\AppData\\Roaming\\Spotify\\Spotify.exe", "*\\AppData\\Local\\WebEx\\WebexHost.exe") OR ProcessName IN ("C:\\WINDOWS\\system32\\devicecensus.exe", "C:\\Windows\\system32\\winsat.exe", "C:\\Program Files\\Microsoft OneDrive\\StandaloneUpdater\\OneDriveSetup.exe", "C:\\Program Files (x86)\\Microsoft OneDrive\\StandaloneUpdater\\OneDriveSetup.exe", "C:\\Program Files\\Microsoft OneDrive\\Update\\OneDriveSetup.exe", "C:\\Program Files (x86)\\Microsoft OneDrive\\Update\\OneDriveSetup.exe", "C:\\Program Files\\Microsoft Office\\root\\integration\\Addons\\OneDriveSetup.exe", "C:\\Program Files (x86)\\Microsoft Office\\root\\integration\\Addons\\OneDriveSetup.exe", "C:\\Program Files\\KeePass Password Safe 2\\ShInstUtil.exe", "C:\\Program Files\\Everything\\Everything.exe", "C:\\Program Files (x86)\\Microsoft Office\\root\\integration\\integrator.exe", "C:\\Program Files\\Microsoft Office\\root\\integration\\integrator.exe") OR NOT NewValue=* OR (ProcessName="C:\\Windows\\system32\\LogonUI.exe" ObjectName IN ("*\\Authentication\\Credential Providers\\{D6886603-9D2F-4EB2-B667-1971041FA96B}\\*", "*\\Authentication\\Credential Providers\\{BEC09223-B018-416D-A0AC-523971B639F5}\\*", "*\\Authentication\\Credential Providers\\{8AF662BF-65A0-4D0A-A540-A338A999D36F}\\*", "*\\Authentication\\Credential Providers\\{27FBDB57-B613-4AF2-9D7E-4FA7A66C21AD}\\*")) OR ProcessName IN ("C:\\Program Files (x86)\\Microsoft\\EdgeUpdate\\Install\\*", "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\*", "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe*") OR ProcessName="C:\\Program Files\\Windows Defender\\MsMpEng.exe" OR (ProcessName="*\\Microsoft\\Teams\\current\\Teams.exe" NewValue="*\\Microsoft\\Teams\\Update.exe --processStart *") OR (ProcessName="C:\\Windows\\system32\\userinit.exe" NewValue="ctfmon.exe /n")) NOT ((ProcessName="C:\\Windows\\system32\\regsvr32.exe" ObjectName="*DropboxExt*" NewValue="*A251-47B7-93E1-CDD82E34AF8B}") OR (ObjectName="*\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\\Opera Browser Assistant" NewValue="C:\\Program Files\\Opera\\assistant\\browser_assistant.exe") OR (ObjectName="*\\Software\\Microsoft\\Windows\\CurrentVersion\\Run\\Opera Stable" NewValue IN ("C:\\Program Files\\Opera\\launcher.exe", "C:\\Program Files (x86)\\Opera\\launcher.exe")) OR (ObjectName="*\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\\iTunesHelper" NewValue="\"C:\\Program Files\\iTunes\\iTunesHelper.exe\"") OR (ObjectName="*\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnce\\zoommsirepair" NewValue="\"C:\\Program Files\\Zoom\\bin\\installer.exe\" /repair") OR (ObjectName="*\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\\Greenshot" NewValue="C:\\Program Files\\Greenshot\\Greenshot.exe") OR (ObjectName="*\\Software\\Microsoft\\Windows\\CurrentVersion\\Run\\GoogleDriveFS" NewValue="C:\\Program Files\\Google\\Drive File Stream\\*" NewValue="*\\GoogleDriveFS.exe*") OR (ObjectName="*GoogleDrive*" NewValue IN ("{CFE8B367-77A7-41D7-9C90-75D16D7DC6B6}", "{A8E52322-8734-481D-A7E2-27B309EF8D56}", "{C973DA94-CBDF-4E77-81D1-E5B794FBD146}", "{51EF1569-67EE-4AD6-9646-E726C3FFC8A2}")) OR (NewValue IN ("C:\\Windows\\system32\\cmd.exe /q /c rmdir /s /q \"C:\\Users\\*", "C:\\Windows\\system32\\cmd.exe /q /c del /q \"C:\\Users\\*") NewValue="*\\AppData\\Local\\Microsoft\\OneDrive\\*") OR (ObjectName="*\\Microsoft\\Windows\\CurrentVersion\\RunOnce\\{*" NewValue="*\\AppData\\Local\\Package Cache\\{*" NewValue="*}\\python-*" NewValue="*.exe\" /burn.runonce") OR (ProcessName IN ("C:\\Program Files\\Common Files\\Microsoft Shared\\ClickToRun\\*", "C:\\Program Files (x86)\\Common Files\\Microsoft Shared\\ClickToRun\\*") ProcessName="*\\OfficeClickToRun.exe") OR (ProcessName="*\\Microsoft\\Teams\\current\\Teams.exe" NewValue="*\\Microsoft\\Teams\\Update.exe --processStart*") OR (ProcessName IN ("*C:\\Program Files\\AVG\\Antivirus\\Setup\\*", "*C:\\Program Files (x86)\\AVG\\Antivirus\\Setup\\*", "*\\instup.exe*") NewValue IN ("\"C:\\Program Files\\AVG\\Antivirus\\AvLaunch.exe\" /gui", "\"C:\\Program Files (x86)\\AVG\\Antivirus\\AvLaunch.exe\" /gui", "{472083B0-C522-11CF-8763-00608CC02F24}", "{472083B1-C522-11CF-8763-00608CC02F24}")) OR (ProcessName IN ("*C:\\Program Files\\Avast Software\\Avast\\Setup\\*", "*C:\\Program Files (x86)\\Avast Software\\Avast\\Setup\\*", "*\\instup.exe*") NewValue IN ("\"C:\\Program Files\\Avast Software\\Avast\\AvLaunch.exe\" /gui", "\"C:\\Program Files (x86)\\Avast Software\\Avast\\AvLaunch.exe\" /gui")) OR (ProcessName IN ("C:\\Program Files\\AVG\\Antivirus\\avgToolsSvc.exe", "C:\\Program Files (x86)\\AVG\\Antivirus\\avgToolsSvc.exe") ObjectName="*\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\StartupApproved\\Run\\*" NewValue="Binary Data") OR (ProcessName IN ("*\\aurora-agent-64.exe", "*\\aurora-agent.exe") ObjectName="*\\Microsoft\\Windows\\CurrentVersion\\Run\\aurora-dashboard" NewValue="C:\\Program Files\\Aurora-Agent\\tools\\aurora-dashboard.exe") OR (ObjectName="*\\Microsoft\\Windows\\CurrentVersion\\Run\\Everything" NewValue="*\\Everything\\Everything.exe\" -startup") OR (ObjectName="*\\Software\\Microsoft\\Windows\\CurrentVersion\\Run\\Discord" NewValue="*\\Discord\\Update.exe --processStart Discord.exe"))
+
+# ── CurrentVersion NT Autorun Keys Modification ──
+# Mức độ  : Trung bình
+# Mục đích: Persistence qua autorun
+# Chi tiết: Detects modification of autostart extensibility point (ASEP) in registry.
+EventCode=4657 Channel="Security" ObjectName="*\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion*" ObjectName IN ("*\\Winlogon\\VmApplet*", "*\\Winlogon\\Userinit*", "*\\Winlogon\\Taskman*", "*\\Winlogon\\Shell*", "*\\Winlogon\\GpExtensions*", "*\\Winlogon\\AppSetup*", "*\\Winlogon\\AlternateShells\\AvailableShells*", "*\\Windows\\IconServiceLib*", "*\\Windows\\Appinit_Dlls*", "*\\Image File Execution Options*", "*\\Font Drivers*", "*\\Drivers32*", "*\\Windows\\Run*", "*\\Windows\\Load*") NOT (NewValue="(Empty)" OR NOT NewValue=* OR ProcessName="C:\\Windows\\System32\\poqexec.exe" OR (ObjectName="*\\Image File Execution Options\\*" ObjectName IN ("*\\DisableExceptionChainValidation", "*\\MitigationOptions")) OR (ProcessName="C:\\Windows\\system32\\svchost.exe" ObjectName IN ("*\\Winlogon\\GPExtensions\\{827D319E-6EAC-11D2-A4EA-00C04F79F83A}\\PreviousPolicyAreas*", "*\\Winlogon\\GPExtensions\\{827D319E-6EAC-11D2-A4EA-00C04F79F83A}\\MaxNoGPOListChangesInterval*") NewValue IN ("DWORD (0x00000001)", "DWORD (0x00000009)", "DWORD (0x000003c0)")) OR (ProcessName="C:\\Windows\\System32\\RuntimeBroker.exe" ObjectName="*\\runtimebroker.exe\\Microsoft.Windows.ShellExperienceHost*")) NOT ((ProcessName="C:\\Program Files (x86)\\Microsoft\\Temp\\*" ProcessName="*\\MicrosoftEdgeUpdate.exe") OR (ProcessName IN ("C:\\Program Files (x86)\\Avira\\Antivirus\\avguard.exe*", "C:\\Program Files\\Avira\\Antivirus\\avguard.exe*") ObjectName="*SOFTWARE\\WOW6432Node\\Avira\\Antivirus\\Overwrite_Keys\\HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon\\*" ObjectName IN ("*\\userinit\\UseAsDefault", "*\\shell\\UseAsDefault") NewValue IN ("explorer.exe", "C:\\Windows\\system32\\userinit.exe,")) OR ObjectName IN ("*\\ClickToRunStore\\REGISTRY\\MACHINE\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\*", "*\\ClickToRun\\REGISTRY\\MACHINE\\Software\\Microsoft\\Windows NT\\CurrentVersion\\*") OR ProcessName IN ("C:\\Program Files\\Microsoft Office\\root\\integration\\integrator.exe", "C:\\Program Files (x86)\\Microsoft Office\\root\\integration\\integrator.exe") OR (ProcessName IN ("C:\\Program Files\\Common Files\\Microsoft Shared\\ClickToRun\\*", "C:\\Program Files\\Common Files\\Microsoft Shared\\ClickToRun\\Updates\\*") ProcessName="*\\OfficeClickToRun.exe") OR (ProcessName="C:\\Windows\\Microsoft.NET\\Framework*" ProcessName="*\\ngen.exe") OR (ProcessName="*\\AppData\\Local\\Microsoft\\OneDrive\\StandaloneUpdater\\OneDriveSetup.exe" ObjectName="*\\Microsoft\\Windows\\CurrentVersion\\RunOnce\\Delete Cached Update Binary" NewValue="C:\\Windows\\system32\\cmd.exe /q /c del /q \"C:\\Users\\*" NewValue="*\\AppData\\Local\\Microsoft\\OneDrive\\Update\\OneDriveSetup.exe\""))
+
+# ── Internet Explorer Autorun Keys Modification ──
+# Mức độ  : Trung bình
+# Mục đích: Persistence qua autorun
+# Chi tiết: Detects modification of autostart extensibility point (ASEP) in registry.
+EventCode=4657 Channel="Security" ObjectName IN ("*\\Software\\Wow6432Node\\Microsoft\\Internet Explorer*", "*\\Software\\Microsoft\\Internet Explorer*") ObjectName IN ("*\\Toolbar*", "*\\Extensions*", "*\\Explorer Bars*") NOT (NewValue="(Empty)" OR ObjectName IN ("*\\Extensions\\{2670000A-7350-4f3c-8081-5663EE0C6C49}*", "*\\Extensions\\{31D09BA0-12F5-4CCE-BE8A-2923E76605DA}*", "*\\Extensions\\{789FE86F-6FC4-46A1-9849-EDE0DB0C95CA}*", "*\\Extensions\\{A95fe080-8f5d-11d2-a20b-00aa003c157a}*") OR ObjectName IN ("*\\Toolbar\\ShellBrowser\\ITBar7Layout", "*\\Toolbar\\ShowDiscussionButton", "*\\Toolbar\\Locked"))
+
+# ── Office Autorun Keys Modification ──
+# Mức độ  : Trung bình
+# Mục đích: Persistence qua autorun
+# Chi tiết: Detects modification of autostart extensibility point (ASEP) in registry. Adversaries may modify these keys to execute malicious code when Office files are opened. There are various legitimate add-ins
+EventCode=4657 Channel="Security" ObjectName IN ("*\\Software\\Wow6432Node\\Microsoft\\Office*", "*\\Software\\Microsoft\\Office*") ObjectName IN ("*\\Word\\Addins*", "*\\PowerPoint\\Addins*", "*\\Outlook\\Addins*", "*\\Onenote\\Addins*", "*\\Excel\\Addins*", "*\\Access\\Addins*", "*test\\Special\\Perf*") NOT (NewValue="(Empty)" OR NOT NewValue=* OR (ProcessName IN ("C:\\Program Files\\Microsoft Office\\*", "C:\\Program Files (x86)\\Microsoft Office\\*", "C:\\PROGRA~2\\MICROS~2\\Office*", "C:\\Windows\\System32\\msiexec.exe*", "C:\\Windows\\SysWOW64\\msiexec.exe*", "C:\\Windows\\System32\\regsvr32.exe*", "C:\\Windows\\SysWOW64\\regsvr32.exe *") ObjectName IN ("*\\Excel\\Addins\\AdHocReportingExcelClientLib.AdHocReportingExcelClientAddIn.1\\*", "*\\Excel\\Addins\\ExcelPlugInShell.PowerMapConnect\\*", "*\\Excel\\Addins\\NativeShim\\*", "*\\Excel\\Addins\\NativeShim.InquireConnector.1\\*", "*\\Excel\\Addins\\PowerPivotExcelClientAddIn.NativeEntry.1\\*", "*\\Outlook\\AddIns\\AccessAddin.DC\\*", "*\\Outlook\\AddIns\\ColleagueImport.ColleagueImportAddin\\*", "*\\Outlook\\AddIns\\EvernoteCC.EvernoteContactConnector\\*", "*\\Outlook\\AddIns\\EvernoteOLRD.Connect\\*", "*\\Outlook\\Addins\\OneNote.OutlookAddin*", "*\\Outlook\\Addins\\DriveFSExtensionLib.Connect\\*", "*\\Outlook\\Addins\\GoogleAppsSync.Connect\\*", "*\\Outlook\\Addins\\Microsoft.VbaAddinForOutlook.1\\*", "*\\Outlook\\Addins\\OcOffice.OcForms\\*", "*\\Outlook\\Addins\\OscAddin.Connect\\*", "*\\Outlook\\Addins\\OutlookChangeNotifier.Connect\\*", "*\\Outlook\\Addins\\UCAddin.LyncAddin.1*", "*\\Outlook\\Addins\\UCAddin.UCAddin.1*", "*\\Outlook\\Addins\\UmOutlookAddin.FormRegionAddin\\*", "*AddinTakeNotesService\\FriendlyName*")) OR (ProcessName IN ("C:\\Program Files\\Common Files\\Microsoft Shared\\ClickToRun\\*", "C:\\Program Files\\Common Files\\Microsoft Shared\\ClickToRun\\Updates\\*") ProcessName="*\\OfficeClickToRun.exe") OR (ProcessName IN ("C:\\Program Files\\Common Files\\Microsoft Shared\\VSTO\\*", "C:\\Program Files (x86)\\Microsoft Shared\\VSTO\\*") ProcessName="*\\VSTOInstaller.exe")) NOT ((ProcessName IN ("C:\\Program Files\\AVG\\Antivirus\\RegSvr.exe", "C:\\Program Files\\AVG\\Antivirus\\x86\\RegSvr.exe") ObjectName="*\\Microsoft\\Office\\Outlook\\Addins\\Antivirus.AsOutExt\\*") OR (ProcessName IN ("C:\\Program Files\\Avast Software\\Avast\\RegSvr.exe", "C:\\Program Files\\Avast Software\\Avast\\x86\\RegSvr.exe") ObjectName="*\\Microsoft\\Office\\Outlook\\Addins\\Avast.AsOutExt\\*"))
+
+# ── Session Manager Autorun Keys Modification ──
+# Mức độ  : Trung bình
+# Mục đích: Persistence qua autorun
+# Chi tiết: Detects modification of autostart extensibility point (ASEP) in registry.
+EventCode=4657 Channel="Security" ObjectName="*\\System\\CurrentControlSet\\Control\\Session Manager*" ObjectName IN ("*\\SetupExecute*", "*\\S0InitialCommand*", "*\\KnownDlls*", "*\\Execute*", "*\\BootExecute*", "*\\AppCertDlls*") NOT NewValue="(Empty)"
+
+# ── System Scripts Autorun Keys Modification ──
+# Mức độ  : Trung bình
+# Mục đích: Persistence qua autorun
+# Chi tiết: Detects modification of autostart extensibility point (ASEP) in registry.
+EventCode=4657 Channel="Security" ObjectName="*\\Software\\Policies\\Microsoft\\Windows\\System\\Scripts*" ObjectName IN ("*\\Startup*", "*\\Shutdown*", "*\\Logon*", "*\\Logoff*") NOT NewValue="(Empty)"
+
+# ── WinSock2 Autorun Keys Modification ──
+# Mức độ  : Trung bình
+# Mục đích: Persistence qua autorun
+# Chi tiết: Detects modification of autostart extensibility point (ASEP) in registry.
+EventCode=4657 Channel="Security" ObjectName="*\\System\\CurrentControlSet\\Services\\WinSock2\\Parameters*" ObjectName IN ("*\\Protocol_Catalog9\\Catalog_Entries*", "*\\NameSpace_Catalog5\\Catalog_Entries*") NOT (NewValue="(Empty)" OR ProcessName="C:\\Windows\\System32\\MsiExec.exe" OR ProcessName="C:\\Windows\\syswow64\\MsiExec.exe")
+
+# ── Wow6432Node CurrentVersion Autorun Keys Modification ──
+# Mức độ  : Trung bình
+# Mục đích: Persistence qua autorun
+# Chi tiết: Detects modification of autostart extensibility point (ASEP) in registry.
+EventCode=4657 Channel="Security" ObjectName="*\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion*" ObjectName IN ("*\\ShellServiceObjectDelayLoad*", "*\\Run\\*", "*\\RunOnce\\*", "*\\RunOnceEx\\*", "*\\RunServices\\*", "*\\RunServicesOnce\\*", "*\\Explorer\\ShellServiceObjects*", "*\\Explorer\\ShellIconOverlayIdentifiers*", "*\\Explorer\\ShellExecuteHooks*", "*\\Explorer\\SharedTaskScheduler*", "*\\Explorer\\Browser Helper Objects*") NOT (NewValue="(Empty)" OR NOT NewValue=* OR NewValue="\"C:\\ProgramData\\Package Cache\\{d21a4f20-968a-4b0c-bf04-a38da5f06e41}\\windowsdesktop-runtime-*" OR (ProcessName="*\\VC_redist.x64.exe" NewValue="*}\\VC_redist.x64.exe\" /burn.runonce") OR (ProcessName IN ("C:\\ProgramData\\Package Cache*", "C:\\Windows\\Temp\\*") ProcessName IN ("*\\winsdksetup.exe*", "*\\windowsdesktop-runtime-*", "*\\AspNetCoreSharedFrameworkBundle-*") NewValue="* /burn.runonce") OR (ProcessName="C:\\Windows\\Installer\\MSI*" ObjectName="*\\Explorer\\Browser Helper Objects*") OR (ProcessName="C:\\WINDOWS\\system32\\msiexec.exe" ObjectName="*\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Run\\*") OR (ProcessName="*C:\\Program Files (x86)\\Microsoft\\EdgeUpdate\\Install\\{*" ProcessName="*\\setup.exe*")) NOT ((ProcessName="C:\\Program Files\\Common Files\\Microsoft Shared\\ClickToRun\\OfficeClickToRun.exe" ObjectName="*\\Office\\ClickToRun\\REGISTRY\\MACHINE\\Software\\Wow6432Node\\*") OR (ProcessName IN ("C:\\Program Files\\Microsoft Office\\root\\integration\\integrator.exe", "C:\\Program Files (x86)\\Microsoft Office\\root\\integration\\integrator.exe") ObjectName="*\\Explorer\\Browser Helper Objects\\{31D09BA0-12F5-4CCE-BE8A-2923E76605DA}\\*") OR NewValue="*-A251-47B7-93E1-CDD82E34AF8B}" OR NewValue="grpconv -o" OR (NewValue="*C:\\Program Files*" NewValue="*\\Dropbox\\Client\\Dropbox.exe*" NewValue="* /systemstartup*") OR ObjectName="*\\Explorer\\Browser Helper Objects\\{92EF2EAD-A7CE-4424-B0DB-499CF856608E}\\NoExplorer" OR (ProcessName="*\\windowsdesktop-runtime-*" ObjectName IN ("*\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\RunOnce\\{e2d1ae32-dd1d-4ad7-a298-10e42e7840fc}", "*\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\RunOnce\\{7037b699-7382-448c-89a7-4765961d2537}") NewValue="\"C:\\ProgramData\\Package Cache\\*" NewValue="*.exe\" /burn.runonce") OR (ProcessName IN ("C:\\Program Files\\Common Files\\Microsoft Shared\\ClickToRun\\*", "C:\\Program Files\\Common Files\\Microsoft Shared\\ClickToRun\\Updates\\*") ProcessName="*\\OfficeClickToRun.exe") OR (ObjectName="*\\SOFTWARE\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\Run\\Discord" NewValue="*Discord.exe --checkInstall") OR (NewValue="*\\Avira.OE.Setup.Bundle.exe\" /burn.runonce" ProcessName="*\\Avira.OE.Setup.Bundle.exe") OR (ProcessName="*\\instup.exe" ObjectName="*\\SOFTWARE\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\RunOnce\\AvRepair" NewValue="*instup.exe\" /instop:repair /wait") OR (ProcessName="*\\instup.exe" ObjectName IN ("*\\SOFTWARE\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\Explorer\\ShellIconOverlayIdentifiers\\00avg\\(Default)", "*\\SOFTWARE\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\Explorer\\ShellIconOverlayIdentifiers\\00asw\\(Default)") NewValue IN ("{472083B1-C522-11CF-8763-00608CC02F24}", "{472083B0-C522-11CF-8763-00608CC02F24}")))
+
+# ── Wow6432Node Classes Autorun Keys Modification ──
+# Mức độ  : Trung bình
+# Mục đích: Persistence qua autorun
+# Chi tiết: Detects modification of autostart extensibility point (ASEP) in registry.
+EventCode=4657 Channel="Security" ObjectName="*\\Software\\Wow6432Node\\Classes*" ObjectName IN ("*\\Folder\\ShellEx\\ExtShellFolderViews*", "*\\Folder\\ShellEx\\DragDropHandlers*", "*\\Folder\\ShellEx\\ColumnHandlers*", "*\\Directory\\Shellex\\DragDropHandlers*", "*\\Directory\\Shellex\\CopyHookHandlers*", "*\\CLSID\\{AC757296-3522-4E11-9862-C17BE5A1767E}\\Instance*", "*\\CLSID\\{ABE3B9A4-257D-4B97-BD1A-294AF496222E}\\Instance*", "*\\CLSID\\{7ED96837-96F0-4812-B211-F13C24117ED3}\\Instance*", "*\\CLSID\\{083863F1-70DE-11d0-BD40-00A0C911CE86}\\Instance*", "*\\AllFileSystemObjects\\ShellEx\\DragDropHandlers*", "*\\ShellEx\\PropertySheetHandlers*", "*\\ShellEx\\ContextMenuHandlers*") NOT NewValue="(Empty)"
+
+# ── Wow6432Node Windows NT CurrentVersion Autorun Keys Modification ──
+# Mức độ  : Trung bình
+# Mục đích: Persistence qua autorun
+# Chi tiết: Detects modification of autostart extensibility point (ASEP) in registry.
+EventCode=4657 Channel="Security" ObjectName="*\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows NT\\CurrentVersion*" ObjectName IN ("*\\Windows\\Appinit_Dlls*", "*\\Image File Execution Options*", "*\\Drivers32*") NOT (NewValue="(Empty)" OR NOT NewValue=* OR NewValue="*\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options")
+
+# ── New BgInfo.EXE Custom DB Path Registry Configuration ──
+# Mức độ  : Trung bình
+# Mục đích: Sửa registry
+# Chi tiết: Detects setting of a new registry database value related to BgInfo configuration. Attackers can for example set this value to save the results of the commands executed by BgInfo in order to exfiltrate
+EventCode=4657 Channel="Security" ObjectName="*\\Software\\Winternals\\BGInfo\\Database"
+
+# ── New BgInfo.EXE Custom VBScript Registry Configuration ──
+# Mức độ  : Trung bình
+# Mục đích: Sửa registry
+# Chi tiết: Detects setting of a new registry value related to BgInfo configuration, which can be abused to execute custom VBScript via "BgInfo.exe"
+EventCode=4657 Channel="Security" ObjectName="*\\Software\\Winternals\\BGInfo\\UserFields\\*" NewValue="4*"
+
+# ── New BgInfo.EXE Custom WMI Query Registry Configuration ──
+# Mức độ  : Trung bình
+# Mục đích: Sửa registry
+# Chi tiết: Detects setting of a new registry value related to BgInfo configuration, which can be abused to execute custom WMI query via "BgInfo.exe"
+EventCode=4657 Channel="Security" ObjectName="*\\Software\\Winternals\\BGInfo\\UserFields\\*" NewValue="6*"
+
+# ── Bypass UAC Using DelegateExecute ──
+# Mức độ  : Cao
+# Mục đích: Leo thang đặc quyền
+# Chi tiết: Bypasses User Account Control using a fileless method
+EventCode=4657 Channel="Security" ObjectName="*\\open\\command\\DelegateExecute" NewValue="(Empty)"
+
+# ── Bypass UAC Using Event Viewer ──
+# Mức độ  : Cao
+# Mục đích: Persistence qua autorun
+# Chi tiết: Bypasses User Account Control using Event Viewer and a relevant Windows Registry modification
+EventCode=4657 Channel="Security" ObjectName="*_Classes\\mscfile\\shell\\open\\command\\(Default)" NOT NewValue="%SystemRoot%\\system32\\mmc.exe \"%1\" %*"
+
+# ── Bypass UAC Using SilentCleanup Task ──
+# Mức độ  : Cao
+# Mục đích: Leo thang đặc quyền
+# Chi tiết: Detects the setting of the environement variable "windir" to a non default value. Attackers often abuse this variable in order to trigger a UAC bypass via the "SilentCleanup" task. The SilentCleanup t
+EventCode=4657 Channel="Security" ObjectName="*\\Environment\\windir" NOT NewValue="%SystemRoot%"
+
+# ── Default RDP Port Changed to Non Standard Port ──
+# Mức độ  : Cao
+# Mục đích: Persistence qua autorun
+# Chi tiết: Detects changes to the default RDP port. Remote desktop is a common feature in operating systems. It allows a user to log into a remote system using an interactive session with a graphical user interf
+EventCode=4657 Channel="Security" ObjectName="*\\Control\\Terminal Server\\WinStations\\RDP-Tcp\\PortNumber" NOT NewValue="DWORD (0x00000d3d)"
+
+# ── IE Change Domain Zone ──
+# Mức độ  : Trung bình
+# Chi tiết: Hides the file extension through modification of the registry
+EventCode=4657 Channel="Security" ObjectName="*\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\\ZoneMap\\Domains\\*" NOT (NewValue IN ("DWORD (0x00000000)", "DWORD (0x00000001)", "(Empty)"))
+
+# ── Sysmon Driver Altitude Change ──
+# Mức độ  : Cao
+# Chi tiết: Detects changes in Sysmon driver altitude value. If the Sysmon driver is configured to load at an altitude of another registered service, it will fail to load at boot.
+EventCode=4657 Channel="Security" ObjectName="*\\Services\\*" ObjectName="*\\Instances\\Sysmon Instance\\Altitude"
+
+# ── Change Winevt Channel Access Permission Via Registry ──
+# Mức độ  : Cao
+# Chi tiết: Detects tampering with the "ChannelAccess" registry key in order to change access to Windows event channel.
+EventCode=4657 Channel="Security" ObjectName="*\\Microsoft\\Windows\\CurrentVersion\\WINEVT\\Channels\\*" ObjectName="*\\ChannelAccess" NewValue IN ("*(A;;0x1;;;LA)*", "*(A;;0x1;;;SY)*", "*(A;;0x5;;;BA)*") NOT (ProcessName="C:\\Windows\\servicing\\TrustedInstaller.exe" OR (ProcessName="C:\\Windows\\WinSxS\\*" ProcessName="*\\TiWorker.exe"))
+
+# ── Running Chrome VPN Extensions via the Registry 2 VPN Extension ──
+# Mức độ  : Cao
+# Chi tiết: Running Chrome VPN Extensions via the Registry install 2 vpn extension
+EventCode=4657 Channel="Security" ObjectName="*Software\\Wow6432Node\\Google\\Chrome\\Extensions*" ObjectName="*update_url" ObjectName IN ("*fdcgdnkidjaadafnichfpabhfomcebme*", "*fcfhplploccackoneaefokcmbjfbkenj*", "*bihmplhobchoageeokmgbdihknkjbknd*", "*gkojfkhlekighikafcpjkiklfbnlmeio*", "*jajilbjjinjmgcibalaakngmkilboobh*", "*gjknjjomckknofjidppipffbpoekiipm*", "*nabbmpekekjknlbkgpodfndbodhijjem*", "*kpiecbcckbofpmkkkdibbllpinceiihk*", "*nlbejmccbhkncgokjcmghpfloaajcffj*", "*omghfjlpggmjjaagoclmmobgdodcjboh*", "*bibjcjfmgapbfoljiojpipaooddpkpai*", "*mpcaainmfjjigeicjnlkdfajbioopjko*", "*jljopmgdobloagejpohpldgkiellmfnc*", "*lochiccbgeohimldjooaakjllnafhaid*", "*nhnfcgpcbfclhfafjlooihdfghaeinfc*", "*ookhnhpkphagefgdiemllfajmkdkcaim*", "*namfblliamklmeodpcelkokjbffgmeoo*", "*nbcojefnccbanplpoffopkoepjmhgdgh*", "*majdfhpaihoncoakbjgbdhglocklcgno*", "*lnfdmdhmfbimhhpaeocncdlhiodoblbd*", "*eppiocemhmnlbhjplcgkofciiegomcon*", "*cocfojppfigjeefejbpfmedgjbpchcng*", "*foiopecknacmiihiocgdjgbjokkpkohc*", "*hhdobjgopfphlmjbmnpglhfcgppchgje*", "*jgbaghohigdbgbolncodkdlpenhcmcge*", "*inligpkjkhbpifecbdjhmdpcfhnlelja*", "*higioemojdadgdbhbbbkfbebbdlfjbip*", "*hipncndjamdcmphkgngojegjblibadbe*", "*iolonopooapdagdemdoaihahlfkncfgg*", "*nhfjkakglbnnpkpldhjmpmmfefifedcj*", "*jpgljfpmoofbmlieejglhonfofmahini*", "*fgddmllnllkalaagkghckoinaemmogpe*", "*ejkaocphofnobjdedneohbbiilggdlbi*", "*keodbianoliadkoelloecbhllnpiocoi*", "*hoapmlpnmpaehilehggglehfdlnoegck*", "*poeojclicodamonabcabmapamjkkmnnk*", "*dfkdflfgjdajbhocmfjolpjbebdkcjog*", "*kcdahmgmaagjhocpipbodaokikjkampi*", "*klnkiajpmpkkkgpgbogmcgfjhdoljacg*", "*lneaocagcijjdpkcabeanfpdbmapcjjg*", "*pgfpignfckbloagkfnamnolkeaecfgfh*", "*jplnlifepflhkbkgonidnobkakhmpnmh*", "*jliodmnojccaloajphkingdnpljdhdok*", "*hnmpcagpplmpfojmgmnngilcnanddlhb*", "*ffbkglfijbcbgblgflchnbphjdllaogb*", "*kcndmbbelllkmioekdagahekgimemejo*", "*jdgilggpfmjpbodmhndmhojklgfdlhob*", "*bihhflimonbpcfagfadcnbbdngpopnjb*", "*ppajinakbfocjfnijggfndbdmjggcmde*", "*oofgbpoabipfcfjapgnbbjjaenockbdp*", "*bhnhkdgoefpmekcgnccpnhjfdgicfebm*", "*knmmpciebaoojcpjjoeonlcjacjopcpf*", "*dhadilbmmjiooceioladdphemaliiobo*", "*jedieiamjmoflcknjdjhpieklepfglin*", "*mhngpdlhojliikfknhfaglpnddniijfh*", "*omdakjcmkglenbhjadbccaookpfjihpa*", "*npgimkapccfidfkfoklhpkgmhgfejhbj*", "*akeehkgglkmpapdnanoochpfmeghfdln*", "*gbmdmipapolaohpinhblmcnpmmlgfgje*", "*aigmfoeogfnljhnofglledbhhfegannp*", "*cgojmfochfikphincbhokimmmjenhhgk*", "*ficajfeojakddincjafebjmfiefcmanc*", "*ifnaibldjfdmaipaddffmgcmekjhiloa*", "*jbnmpdkcfkochpanomnkhnafobppmccn*", "*apcfdffemoinopelidncddjbhkiblecc*", "*mjolnodfokkkaichkcjipfgblbfgojpa*", "*oifjbnnafapeiknapihcmpeodaeblbkn*", "*plpmggfglncceinmilojdkiijhmajkjh*", "*mjnbclmflcpookeapghfhapeffmpodij*", "*bblcccknbdbplgmdjnnikffefhdlobhp*", "*aojlhgbkmkahabcmcpifbolnoichfeep*", "*lcmammnjlbmlbcaniggmlejfjpjagiia*", "*knajdeaocbpmfghhmijicidfcmdgbdpm*", "*bdlcnpceagnkjnjlbbbcepohejbheilk*", "*edknjdjielmpdlnllkdmaghlbpnmjmgb*", "*eidnihaadmmancegllknfbliaijfmkgo*", "*ckiahbcmlmkpfiijecbpflfahoimklke*", "*macdlemfnignjhclfcfichcdhiomgjjb*", "*chioafkonnhbpajpengbalkececleldf*", "*amnoibeflfphhplmckdbiajkjaoomgnj*", "*llbhddikeonkpbhpncnhialfbpnilcnc*", "*pcienlhnoficegnepejpfiklggkioccm*", "*iocnglnmfkgfedpcemdflhkchokkfeii*", "*igahhbkcppaollcjeaaoapkijbnphfhb*", "*njpmifchgidinihmijhcfpbdmglecdlb*", "*ggackgngljinccllcmbgnpgpllcjepgc*", "*kchocjcihdgkoplngjemhpplmmloanja*", "*bnijmipndnicefcdbhgcjoognndbgkep*", "*lklekjodgannjcccdlbicoamibgbdnmi*", "*dbdbnchagbkhknegmhgikkleoogjcfge*", "*egblhcjfjmbjajhjhpmnlekffgaemgfh*", "*ehbhfpfdkmhcpaehaooegfdflljcnfec*", "*bkkgdjpomdnfemhhkalfkogckjdkcjkg*", "*almalgbpmcfpdaopimbdchdliminoign*", "*akkbkhnikoeojlhiiomohpdnkhbkhieh*", "*gbfgfbopcfokdpkdigfmoeaajfmpkbnh*", "*bniikohfmajhdcffljgfeiklcbgffppl*", "*lejgfmmlngaigdmmikblappdafcmkndb*", "*ffhhkmlgedgcliajaedapkdfigdobcif*", "*gcknhkkoolaabfmlnjonogaaifnjlfnp*", "*pooljnboifbodgifngpppfklhifechoe*", "*fjoaledfpmneenckfbpdfhkmimnjocfa*", "*aakchaleigkohafkfjfjbblobjifikek*", "*dpplabbmogkhghncfbfdeeokoefdjegm*", "*padekgcemlokbadohgkifijomclgjgif*", "*bfidboloedlamgdmenmlbipfnccokknp*")
+
+# ── ClickOnce Trust Prompt Tampering ──
+# Mức độ  : Trung bình
+# Mục đích: Sửa registry
+# Chi tiết: Detects changes to the ClickOnce trust prompt registry key in order to enable an installation from different locations such as the Internet.
+EventCode=4657 Channel="Security" ObjectName="*\\SOFTWARE\\MICROSOFT\\.NETFramework\\Security\\TrustManager\\PromptingLevel\\*" ObjectName IN ("*\\Internet", "*\\LocalIntranet", "*\\MyComputer", "*\\TrustedSites", "*\\UntrustedSites") NewValue="Enabled"
+
+# ── Potential CobaltStrike Service Installations - Registry ──
+# Mức độ  : Cao
+# Mục đích: Di chuyển ngang mạng
+# Chi tiết: Detects known malicious service installs that appear in cases in which a Cobalt Strike beacon elevates privileges or lateral movement.
+EventCode=4657 Channel="Security" ObjectName="*\\System\\CurrentControlSet\\Services*" OR (ObjectName="*\\System\\ControlSet*" ObjectName="*\\Services*") (NewValue="*ADMIN$*" NewValue="*.exe*") OR (NewValue="*%COMSPEC%*" NewValue="*start*" NewValue="*powershell*")
+
+# ── COM Hijack via Sdclt ──
+# Mức độ  : Cao
+# Mục đích: Leo thang đặc quyền
+# Chi tiết: Detects changes to 'HKCU\Software\Classes\Folder\shell\open\command\DelegateExecute'
+EventCode=4657 Channel="Security" ObjectName="*\\Software\\Classes\\Folder\\shell\\open\\command\\DelegateExecute*"
+
+# ── CrashControl CrashDump Disabled ──
+# Mức độ  : Trung bình
+# Mục đích: Sửa registry
+# Chi tiết: Detects disabling the CrashDump per registry (as used by HermeticWiper)
+EventCode=4657 Channel="Security" ObjectName="*SYSTEM\\CurrentControlSet\\Control\\CrashControl*" NewValue="DWORD (0x00000000)"
+
+# ── Security Event Logging Disabled via MiniNt Registry Key - Registry Set ──
+# Mức độ  : Cao
+# Mục đích: Sửa registry
+# Chi tiết: Detects the addition of the 'MiniNt' key to the registry. Upon a reboot, Windows Event Log service will stop writing events. Windows Event Log is a service that collects and stores event logs from the
+EventCode=4657 Channel="Security" ObjectName="\\REGISTRY\\MACHINE\\System\\CurrentControlSet\\Control\\MiniNt\\(Default)"
+
+# ── Service Binary in Suspicious Folder ──
+# Mức độ  : Cao
+# Mục đích: Sửa registry
+# Chi tiết: Detect the creation of a service with a service binary located in a suspicious directory
+EventCode=4657 Channel="Security" (ObjectName="\\REGISTRY\\MACHINE\\System\\CurrentControlSet\\Services\\*" ObjectName="*\\Start" ProcessName IN ("*\\Users\\Public\\*", "*\\Perflogs\\*", "*\\ADMIN$\\*", "*\\Temp\\*") NewValue IN ("DWORD (0x00000000)", "DWORD (0x00000001)", "DWORD (0x00000002)")) OR (ObjectName="\\REGISTRY\\MACHINE\\System\\CurrentControlSet\\Services\\*" ObjectName="*\\ImagePath" NewValue IN ("*\\Users\\Public\\*", "*\\Perflogs\\*", "*\\ADMIN$\\*", "*\\Temp\\*")) NOT ((ProcessName="*\\Common Files\\*" ProcessName="*\\Temp\\*") OR (ObjectName="*\\CurrentControlSet\\Services\\MBAMInstallerService\\ImagePath" NewValue="*\\AppData\\Local\\Temp\\MBAMInstallerService.exe\"" ProcessName="C:\\Windows\\system32\\services.exe"))
+
+# ── Windows Credential Guard Disabled - Registry ──
+# Mức độ  : Cao
+# Chi tiết: Detects attempts to disable Windows Credential Guard by setting registry values to 0. Credential Guard uses virtualization-based security to isolate secrets so that only privileged system software can
+EventCode=4657 Channel="Security" ObjectName IN ("*\\DeviceGuard\\EnableVirtualizationBasedSecurity", "*\\DeviceGuard\\LsaCfgFlags", "*\\Lsa\\LsaCfgFlags") NewValue="DWORD (0x00000000)"
+
+# ── Custom File Open Handler Executes PowerShell ──
+# Mức độ  : Cao
+# Chi tiết: Detects the abuse of custom file open handler, executing powershell
+EventCode=4657 Channel="Security" ObjectName="*shell\\open\\command\\*" NewValue="*powershell*" NewValue="*-command*"
+
+# ── Potential Registry Persistence Attempt Via DbgManagedDebugger ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects the addition of the "Debugger" value to the "DbgManagedDebugger" key in order to achieve persistence. Which will get invoked when an application crashes
+EventCode=4657 Channel="Security" ObjectName="*\\Microsoft\\.NETFramework\\DbgManagedDebugger" NOT NewValue="\"C:\\Windows\\system32\\vsjitdebugger.exe\" PID %d APPDOM %d EXTEXT \"%s\" EVTHDL %d"
+
+# ── Windows Defender Exclusions Added - Registry ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects the Setting of Windows Defender Exclusions
+EventCode=4657 Channel="Security" ObjectName="*\\Microsoft\\Windows Defender\\Exclusions*"
+
+# ── Potentially Suspicious Desktop Background Change Via Registry ──
+# Mức độ  : Trung bình
+# Mục đích: Sửa registry
+# Chi tiết: Detects registry value settings that would replace the user's desktop background. This is a common technique used by malware to change the desktop background to a ransom note or other image.
+EventCode=4657 Channel="Security" ObjectName IN ("*Control Panel\\Desktop*", "*CurrentVersion\\Policies\\ActiveDesktop*", "*CurrentVersion\\Policies\\System*") (ObjectName="*NoChangingWallpaper" NewValue="DWORD (0x00000001)") OR ObjectName="*\\Wallpaper" OR (ObjectName="*\\WallpaperStyle" NewValue="2") NOT (ProcessName="*\\svchost.exe" OR (ObjectName="*\\Control Panel\\Desktop\\Wallpaper" NewValue="(Empty)") OR ProcessName="*C:\\Windows\\Explorer.EXE") NOT (ProcessName IN ("C:\\Program Files\\Amazon\\EC2Launch\\EC2Launch.exe", "C:\\Program Files (x86)\\Amazon\\EC2Launch\\EC2Launch.exe") ObjectName="*\\Control Panel\\Desktop\\Wallpaper")
+
+# ── Antivirus Filter Driver Disallowed On Dev Drive - Registry ──
+# Mức độ  : Cao
+# Chi tiết: Detects activity that indicates a user disabling the ability for Antivirus mini filter to inspect a "Dev Drive".
+EventCode=4657 Channel="Security" ObjectName="*\\FilterManager\\FltmgrDevDriveAllowAntivirusFilter" NewValue="DWORD (0x00000000)"
+
+# ── Windows Hypervisor Enforced Code Integrity Disabled ──
+# Mức độ  : Cao
+# Chi tiết: Detects changes to the HypervisorEnforcedCodeIntegrity registry key and the "Enabled" value being set to 0 in order to disable the Hypervisor Enforced Code Integrity feature. This allows an attacker t
+EventCode=4657 Channel="Security" ObjectName IN ("*\\Control\\DeviceGuard\\HypervisorEnforcedCodeIntegrity", "*\\Control\\DeviceGuard\\Scenarios\\HypervisorEnforcedCodeIntegrity\\Enabled", "*\\Microsoft\\Windows\\DeviceGuard\\HypervisorEnforcedCodeIntegrity") NewValue="DWORD (0x00000000)"
+
+# ── Hypervisor Enforced Paging Translation Disabled ──
+# Mức độ  : Cao
+# Chi tiết: Detects changes to the "DisableHypervisorEnforcedPagingTranslation" registry value. Where the it is set to "1" in order to disable the Hypervisor Enforced Paging Translation feature.
+EventCode=4657 Channel="Security" ObjectName="*\\DisableHypervisorEnforcedPagingTranslation" NewValue="DWORD (0x00000001)"
+
+# ── DHCP Callout DLL Installation ──
+# Mức độ  : Cao
+# Mục đích: Sửa registry
+# Chi tiết: Detects the installation of a Callout DLL via CalloutDlls and CalloutEnabled parameter in Registry, which can be used to execute code in context of the DHCP server (restart required)
+EventCode=4657 Channel="Security" ObjectName IN ("*\\Services\\DHCPServer\\Parameters\\CalloutDlls", "*\\Services\\DHCPServer\\Parameters\\CalloutEnabled")
+
+# ── Disable Administrative Share Creation at Startup ──
+# Mức độ  : Trung bình
+# Mục đích: Xóa dấu vết
+# Chi tiết: Administrative shares are hidden network shares created by Microsoft Windows NT operating systems that grant system administrators remote access to every disk volume on a network-connected system
+EventCode=4657 Channel="Security" ObjectName="*\\Services\\LanmanServer\\Parameters\\*" ObjectName IN ("*\\AutoShareWks", "*\\AutoShareServer") NewValue="DWORD (0x00000000)"
+
+# ── Potential AutoLogger Sessions Tampering ──
+# Mức độ  : Cao
+# Chi tiết: Detects tampering with autologger trace sessions which is a technique used by attackers to disable logging. The AutoLogger event tracing session records events up that occur early in the operating sys
+EventCode=4657 Channel="Security" ObjectName="*\\Control\\WMI\\Autologger\\*" ObjectName IN ("*\\EventLog-*", "*\\Defender*") ObjectName IN ("*\\Enabled", "*\\Start") NewValue="DWORD (0x00000000)" NOT (ProcessName="C:\\Windows\\system32\\wevtutil.exe" OR (ProcessName IN ("C:\\ProgramData\\Microsoft\\Windows Defender\\Platform\\*", "C:\\Program Files\\Windows Defender\\*", "C:\\Program Files (x86)\\Windows Defender\\*") ProcessName="*\\MsMpEng.exe" ObjectName IN ("*\\DefenderApiLogger\\*", "*\\DefenderAuditLogger\\*")))
+
+# ── Disable Microsoft Defender Firewall via Registry ──
+# Mức độ  : Trung bình
+# Chi tiết: Adversaries may disable or modify system firewalls in order to bypass controls limiting network usage
+EventCode=4657 Channel="Security" ObjectName="*\\Services\\SharedAccess\\Parameters\\FirewallPolicy\\*" ObjectName="*\\EnableFirewall" NewValue="DWORD (0x00000000)"
+
+# ── Disable Internal Tools or Feature in Registry ──
+# Mức độ  : Trung bình
+# Mục đích: Sửa registry
+# Chi tiết: Detects registry modifications that change features of internal Windows tools (malware like Agent Tesla uses this technique)
+EventCode=4657 Channel="Security" (ObjectName IN ("*SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\DisableCMD", "*SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\NoControlPanel", "*SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\NoRun", "*SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\StartMenuLogOff", "*SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System\\DisableChangePassword", "*SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System\\DisableLockWorkstation", "*SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System\\DisableRegistryTools", "*SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System\\DisableTaskmgr", "*SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System\\NoDispBackgroundPage", "*SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System\\NoDispCPL", "*SOFTWARE\\Policies\\Microsoft\\Windows\\Explorer\\DisableNotificationCenter", "*SOFTWARE\\Policies\\Microsoft\\Windows\\System\\DisableCMD") NewValue="DWORD (0x00000001)") OR (ObjectName IN ("*SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System\\ConsentPromptBehaviorAdmin", "*Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\System\\InactivityTimeoutSecs", "*SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System\\shutdownwithoutlogon", "*SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\PushNotifications\\ToastEnabled", "*SYSTEM\\CurrentControlSet\\Control\\Storage\\Write Protection", "*SYSTEM\\CurrentControlSet\\Control\\StorageDevicePolicies\\WriteProtect") NewValue="DWORD (0x00000000)")
+
+# ── Disable Macro Runtime Scan Scope ──
+# Mức độ  : Cao
+# Chi tiết: Detects tampering with the MacroRuntimeScanScope registry key to disable runtime scanning of enabled macros
+EventCode=4657 Channel="Security" ObjectName="*\\SOFTWARE\\*" ObjectName="*\\Microsoft\\Office\\*" ObjectName="*\\Common\\Security*" ObjectName="*\\MacroRuntimeScanScope" NewValue="DWORD (0x00000000)"
+
+# ── Disable Privacy Settings Experience in Registry ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects registry modifications that disable Privacy Settings Experience
+EventCode=4657 Channel="Security" ObjectName="*\\SOFTWARE\\Policies\\Microsoft\\Windows\\OOBE\\DisablePrivacyExperience" NewValue="DWORD (0x00000000)"
+
+# ── Disable Windows Security Center Notifications ──
+# Mức độ  : Trung bình
+# Mục đích: Sửa registry
+# Chi tiết: Detect set UseActionCenterExperience to 0 to disable the Windows security center notification
+EventCode=4657 Channel="Security" ObjectName="*Windows\\CurrentVersion\\ImmersiveShell\\UseActionCenterExperience" NewValue="DWORD (0x00000000)"
+
+# ── Registry Disable System Restore ──
+# Mức độ  : Cao
+# Mục đích: Phá hủy backup/recovery
+# Chi tiết: Detects the modification of the registry to disable a system restore on the computer
+EventCode=4657 Channel="Security" ObjectName IN ("*\\Policies\\Microsoft\\Windows NT\\SystemRestore*", "*\\Microsoft\\Windows NT\\CurrentVersion\\SystemRestore*") ObjectName IN ("*DisableConfig", "*DisableSR") NewValue="DWORD (0x00000001)"
+
+# ── Windows Defender Service Disabled - Registry ──
+# Mức độ  : Cao
+# Chi tiết: Detects when an attacker or tool disables the  Windows Defender service (WinDefend) via the registry
+EventCode=4657 Channel="Security" ObjectName="*\\Services\\WinDefend\\Start" NewValue="DWORD (0x00000004)"
+
+# ── Windows Event Log Access Tampering Via Registry ──
+# Mức độ  : Cao
+# Mục đích: Persistence qua autorun; Sửa registry
+# Chi tiết: Detects changes to the Windows EventLog channel permission values. It focuses on changes to the Security Descriptor Definition Language (SDDL) string, as modifications to these values can restrict acc
+EventCode=4657 Channel="Security" (ObjectName="*\\SYSTEM\\CurrentControlSet\\Services\\EventLog\\*" ObjectName="*\\CustomSD") OR (ObjectName IN ("*\\Policies\\Microsoft\\Windows\\EventLog\\*", "*\\Microsoft\\Windows\\CurrentVersion\\WINEVT\\Channels*") ObjectName="*\\ChannelAccess") NewValue="*D:(D;*" OR (NewValue="*D:(*" NewValue="*)(D;*") NOT (ProcessName="C:\\Windows\\servicing\\TrustedInstaller.exe" OR (ProcessName="C:\\Windows\\WinSxS\\*" ProcessName="*\\TiWorker.exe")) NOT (ProcessName="" OR NOT ProcessName=*)
+
+# ── Disable Windows Firewall by Registry ──
+# Mức độ  : Trung bình
+# Chi tiết: Detect set EnableFirewall to 0 to disable the Windows firewall
+EventCode=4657 Channel="Security" ObjectName IN ("*\\SOFTWARE\\Policies\\Microsoft\\WindowsFirewall\\StandardProfile\\EnableFirewall", "*\\SOFTWARE\\Policies\\Microsoft\\WindowsFirewall\\DomainProfile\\EnableFirewall") NewValue="DWORD (0x00000000)"
+
+# ── Disable Windows Event Logging Via Registry ──
+# Mức độ  : Cao
+# Chi tiết: Detects tampering with the "Enabled" registry key in order to disable Windows logging of a Windows event channel
+EventCode=4657 Channel="Security" ObjectName="*\\Microsoft\\Windows\\CurrentVersion\\WINEVT\\Channels\\*" ObjectName="*\\Enabled" NewValue="DWORD (0x00000000)" NOT (ProcessName="C:\\Windows\\system32\\wevtutil.exe" OR (ProcessName="C:\\Windows\\winsxs\\*" ProcessName="*\\TiWorker.exe") OR (ProcessName="C:\\Windows\\System32\\svchost.exe" ObjectName IN ("*\\Microsoft\\Windows\\CurrentVersion\\WINEVT\\Channels\\Microsoft-Windows-FileInfoMinifilter*", "*\\Microsoft\\Windows\\CurrentVersion\\WINEVT\\Channels\\Microsoft-Windows-ASN1\\*", "*\\Microsoft\\Windows\\CurrentVersion\\WINEVT\\Channels\\Microsoft-Windows-Kernel-AppCompat\\*", "*\\Microsoft\\Windows\\CurrentVersion\\WINEVT\\Channels\\Microsoft-Windows-Runtime\\Error\\*", "*\\Microsoft\\Windows\\CurrentVersion\\WINEVT\\Channels\\Microsoft-Windows-CAPI2/Operational\\*")) OR (ProcessName="C:\\Windows\\servicing\\TrustedInstaller.exe" ObjectName="*\\Microsoft\\Windows\\CurrentVersion\\WINEVT\\Channels\\Microsoft-Windows-Compat-Appraiser*")) NOT (ProcessName="" OR NOT ProcessName=*)
+
+# ── Disable Exploit Guard Network Protection on Windows Defender ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects disabling Windows Defender Exploit Guard Network Protection
+EventCode=4657 Channel="Security" ObjectName="*SOFTWARE\\Policies\\Microsoft\\Windows Defender Security Center\\App and Browser protection\\DisallowExploitProtectionOverride*" NewValue="DWORD (00000001)"
+
+# ── Disabled Windows Defender Eventlog ──
+# Mức độ  : Cao
+# Chi tiết: Detects the disabling of the Windows Defender eventlog as seen in relation to Lockbit 3.0 infections
+EventCode=4657 Channel="Security" ObjectName="*\\Microsoft\\Windows\\CurrentVersion\\WINEVT\\Channels\\Microsoft-Windows-Windows Defender/Operational\\Enabled*" NewValue="DWORD (0x00000000)"
+
+# ── Disable PUA Protection on Windows Defender ──
+# Mức độ  : Cao
+# Chi tiết: Detects disabling Windows Defender PUA protection
+EventCode=4657 Channel="Security" ObjectName="*\\Policies\\Microsoft\\Windows Defender\\PUAProtection*" NewValue="DWORD (0x00000000)"
+
+# ── Disable Tamper Protection on Windows Defender ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects disabling Windows Defender Tamper Protection
+EventCode=4657 Channel="Security" ObjectName="*\\Microsoft\\Windows Defender\\Features\\TamperProtection*" NewValue="DWORD (0x00000000)" NOT ((ProcessName="C:\\ProgramData\\Microsoft\\Windows Defender\\Platform\\*" ProcessName="*\\MsMpEng.exe") OR ProcessName="C:\\Program Files\\Windows Defender\\MsMpEng.exe")
+
+# ── Add DisallowRun Execution to Registry ──
+# Mức độ  : Trung bình
+# Mục đích: Sửa registry
+# Chi tiết: Detect set DisallowRun to 1 to prevent user running specific computer program
+EventCode=4657 Channel="Security" ObjectName="*Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\DisallowRun" NewValue="DWORD (0x00000001)"
+
+# ── Persistence Via Disk Cleanup Handler - Autorun ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects when an attacker modifies values of the Disk Cleanup Handler in the registry to achieve persistence via autorun. The disk cleanup manager is part of the operating system. It displays the dialo
+EventCode=4657 Channel="Security" ObjectName="*\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\VolumeCaches\\*" (ObjectName="*\\Autorun*" NewValue="DWORD (0x00000001)") OR (ObjectName IN ("*\\CleanupString*", "*\\PreCleanupString*") NewValue IN ("*cmd*", "*powershell*", "*rundll32*", "*mshta*", "*cscript*", "*wscript*", "*wsl*", "*\\Users\\Public\\*", "*\\Windows\\TEMP\\*", "*\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\*"))
+
+# ── DNS-over-HTTPS Enabled by Registry ──
+# Mức độ  : Trung bình
+# Mục đích: Sửa registry
+# Chi tiết: Detects when a user enables DNS-over-HTTPS. This can be used to hide internet activity or be used to hide the process of exfiltrating data. With this enabled organization will lose visibility into dat
+EventCode=4657 Channel="Security" (ObjectName="*\\SOFTWARE\\Policies\\Microsoft\\Edge\\BuiltInDnsClientEnabled" NewValue="DWORD (0x00000001)") OR (ObjectName="*\\SOFTWARE\\Google\\Chrome\\DnsOverHttpsMode" NewValue="secure") OR (ObjectName="*\\SOFTWARE\\Policies\\Mozilla\\Firefox\\DNSOverHTTPS\\Enabled" NewValue="DWORD (0x00000001)")
+
+# ── New DNS ServerLevelPluginDll Installed ──
+# Mức độ  : Cao
+# Mục đích: Sửa registry
+# Chi tiết: Detects the installation of a DNS plugin DLL via ServerLevelPluginDll parameter in registry, which can be used to execute code in context of the DNS server (restart required)
+EventCode=4657 Channel="Security" ObjectName="*\\services\\DNS\\Parameters\\ServerLevelPluginDll"
+
+# ── ETW Logging Disabled In .NET Processes - Sysmon Registry ──
+# Mức độ  : Cao
+# Mục đích: Sửa registry
+# Chi tiết: Potential adversaries stopping ETW providers recording loaded .NET assemblies.
+EventCode=4657 Channel="Security" (ObjectName="*SOFTWARE\\Microsoft\\.NETFramework\\ETWEnabled" NewValue="DWORD (0x00000000)") OR (ObjectName IN ("*\\COMPlus_ETWEnabled", "*\\COMPlus_ETWFlags") NewValue IN (0, "DWORD (0x00000000)"))
+
+# ── Directory Service Restore Mode(DSRM) Registry Value Tampering ──
+# Mức độ  : Cao
+# Chi tiết: Detects changes to "DsrmAdminLogonBehavior" registry value. During a Domain Controller (DC) promotion, administrators create a Directory Services Restore Mode (DSRM) local administrator account with a
+EventCode=4657 Channel="Security" ObjectName="*\\Control\\Lsa\\DsrmAdminLogonBehavior" NOT NewValue="DWORD (0x00000000)"
+
+# ── Periodic Backup For System Registry Hives Enabled ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects the enabling of the "EnablePeriodicBackup" registry value. Once enabled, The OS will backup System registry hives on restarts to the "C:\Windows\System32\config\RegBack" folder. Windows create
+EventCode=4657 Channel="Security" ObjectName="*\\Control\\Session Manager\\Configuration Manager\\EnablePeriodicBackup" NewValue="DWORD (0x00000001)"
+
+# ── Windows Recall Feature Enabled - Registry ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects the enabling of the Windows Recall feature via registry manipulation. Windows Recall can be enabled by setting the value of "DisableAIDataAnalysis" to "0". Adversaries may enable Windows Recal
+EventCode=4657 Channel="Security" ObjectName="*\\Software\\Policies\\Microsoft\\Windows\\WindowsAI\\DisableAIDataAnalysis" NewValue="DWORD (0x00000000)"
+
+# ── Enabling COR Profiler Environment Variables ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects .NET Framework CLR and .NET Core CLR "cor_enable_profiling" and "cor_profiler" variables being set and configured.
+EventCode=4657 Channel="Security" ObjectName IN ("*\\COR_ENABLE_PROFILING", "*\\COR_PROFILER", "*\\CORECLR_ENABLE_PROFILING") OR ObjectName="*\\CORECLR_PROFILER_PATH*"
+
+# ── Scripted Diagnostics Turn Off Check Enabled - Registry ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects enabling TurnOffCheck which can be used to bypass defense of MSDT Follina vulnerability
+EventCode=4657 Channel="Security" ObjectName="*\\Policies\\Microsoft\\Windows\\ScriptedDiagnostics\\TurnOffCheck" NewValue="DWORD (0x00000001)"
+
+# ── Potential EventLog File Location Tampering ──
+# Mức độ  : Cao
+# Chi tiết: Detects tampering with EventLog service "file" key. In order to change the default location of an Evtx file. This technique is used to tamper with log collection and alerting
+EventCode=4657 Channel="Security" ObjectName="*\\SYSTEM\\CurrentControlSet\\Services\\EventLog\\*" ObjectName="*\\File" NOT NewValue="*\\System32\\Winevt\\Logs\\*"
+
+# ── Suspicious Application Allowed Through Exploit Guard ──
+# Mức độ  : Cao
+# Chi tiết: Detects applications being added to the "allowed applications" list of exploit guard in order to bypass controlled folder settings
+EventCode=4657 Channel="Security" ObjectName="*SOFTWARE\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\Controlled Folder Access\\AllowedApplications*" ObjectName IN ("*\\Users\\Public\\*", "*\\AppData\\Local\\Temp\\*", "*\\Desktop\\*", "*\\PerfLogs\\*", "*\\Windows\\Temp\\*")
+
+# ── Change User Account Associated with the FAX Service ──
+# Mức độ  : Cao
+# Mục đích: Sửa registry
+# Chi tiết: Detect change of the user account associated with the FAX service to avoid the escalation problem.
+EventCode=4657 Channel="Security" ObjectName="\\REGISTRY\\MACHINE\\System\\CurrentControlSet\\Services\\Fax\\ObjectName" NOT NewValue="*NetworkService*"
+
+# ── Change the Fax Dll ──
+# Mức độ  : Cao
+# Mục đích: Sửa registry
+# Chi tiết: Detect possible persistence using Fax DLL load when service restart
+EventCode=4657 Channel="Security" ObjectName="*\\Software\\Microsoft\\Fax\\Device Providers\\*" ObjectName="*\\ImageName*" NOT NewValue="%systemroot%\\system32\\fxst30.dll"
+
+# ── New File Association Using Exefile ──
+# Mức độ  : Cao
+# Chi tiết: Detects the abuse of the exefile handler in new file association. Used for bypass of security products.
+EventCode=4657 Channel="Security" ObjectName="*Classes\\.*" NewValue="exefile"
+
+# ── FileFix - Command Evidence in TypedPaths ──
+# Mức độ  : Cao
+# Chi tiết: Detects commonly-used chained commands and strings in the most recent 'url' value of the 'TypedPaths' key, which could be indicative of a user being targeted by the FileFix technique.
+EventCode=4657 Channel="Security" ObjectName="*\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\TypedPaths\\url1" NewValue="*#*" NewValue="*http*" NewValue IN ("*account*", "*anti-bot*", "*botcheck*", "*captcha*", "*challenge*", "*confirmation*", "*fraud*", "*human*", "*identification*", "*identificator*", "*identity*", "*robot*", "*validation*", "*verification*", "*verify*") OR NewValue IN ("*%comspec%*", "*bitsadmin*", "*certutil*", "*cmd*", "*cscript*", "*curl*", "*finger*", "*mshta*", "*powershell*", "*pwsh*", "*regsvr32*", "*rundll32*", "*schtasks*", "*wget*", "*wscript*")
+
+# ── Add Debugger Entry To Hangs Key For Persistence ──
+# Mức độ  : Cao
+# Chi tiết: Detects when an attacker adds a new "Debugger" value to the "Hangs" key in order to achieve persistence which will get invoked when an application crashes
+EventCode=4657 Channel="Security" ObjectName="*\\SOFTWARE\\Microsoft\\Windows\\Windows Error Reporting\\Hangs\\Debugger*"
+
+# ── Persistence Via Hhctrl.ocx ──
+# Mức độ  : Cao
+# Chi tiết: Detects when an attacker modifies the registry value of the "hhctrl" to point to a custom binary
+EventCode=4657 Channel="Security" ObjectName="*\\CLSID\\{52A2AAAE-085D-4187-97EA-8C30DB990436}\\InprocServer32\\(Default)*" NOT NewValue="C:\\Windows\\System32\\hhctrl.ocx"
+
+# ── Registry Modification to Hidden File Extension ──
+# Mức độ  : Trung bình
+# Chi tiết: Hides the file extension through modification of the registry
+EventCode=4657 Channel="Security" (ObjectName="*\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced\\HideFileExt" NewValue="DWORD (0x00000001)") OR (ObjectName="*\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced\\Hidden" NewValue="DWORD (0x00000002)")
+
+# ── Displaying Hidden Files Feature Disabled ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects modifications to the "Hidden" and "ShowSuperHidden" explorer registry values in order to disable showing of hidden files and system files. This technique is abused by several malware families 
+EventCode=4657 Channel="Security" ObjectName IN ("*\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced\\ShowSuperHidden", "*\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced\\Hidden") NewValue="DWORD (0x00000000)"
+
+# ── Registry Hide Function from User ──
+# Mức độ  : Trung bình
+# Mục đích: Sửa registry
+# Chi tiết: Detects registry modifications that hide internal tools or functions from the user (malware like Agent Tesla, Hermetic Wiper uses this technique)
+EventCode=4657 Channel="Security" (ObjectName IN ("*SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\HideClock", "*SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\HideSCAHealth", "*SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\HideSCANetwork", "*SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\HideSCAPower", "*SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\HideSCAVolume") NewValue="DWORD (0x00000001)") OR (ObjectName IN ("*SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced\\ShowInfoTip", "*SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced\\ShowCompColor") NewValue="DWORD (0x00000000)")
+
+# ── Hide Schedule Task Via Index Value Tamper ──
+# Mức độ  : Cao
+# Chi tiết: Detects when the "index" value of a scheduled task is modified from the registry Which effectively hides it from any tooling such as "schtasks /query" (Read the referenced link for more information ab
+EventCode=4657 Channel="Security" ObjectName="*\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Schedule\\TaskCache\\Tree\\*" ObjectName="*Index*" NewValue="DWORD (0x00000000)"
+
+# ── Driver Added To Disallowed Images In HVCI - Registry ──
+# Mức độ  : Cao
+# Chi tiết: Detects changes to the "HVCIDisallowedImages" registry value to potentially add a driver to the list, in order to prevent it from loading.
+EventCode=4657 Channel="Security" ObjectName="*\\Control\\CI\\*" ObjectName="*\\HVCIDisallowedImages*"
+
+# ── IE ZoneMap Setting Downgraded To MyComputer Zone For HTTP Protocols ──
+# Mức độ  : Cao
+# Chi tiết: Detects changes to Internet Explorer's (IE / Windows Internet properties) ZoneMap configuration of the "HTTP" and "HTTPS" protocols to point to the "My Computer" zone. This allows downloaded files fro
+EventCode=4657 Channel="Security" ObjectName="*\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\\ZoneMap\\ProtocolDefaults*" ObjectName IN ("*\\http", "*\\https") NewValue="*DWORD (0x00000000)*"
+
+# ── Uncommon Extension In Keyboard Layout IME File Registry Value ──
+# Mức độ  : Cao
+# Chi tiết: Detects usage of Windows Input Method Editor (IME) keyboard layout feature, which allows an attacker to load a DLL into the process after sending the WM_INPUTLANGCHANGEREQUEST message. Before doing th
+EventCode=4657 Channel="Security" ObjectName="*\\Control\\Keyboard Layouts\\*" ObjectName="*Ime File*" NOT NewValue="*.ime"
+
+# ── Suspicious Path In Keyboard Layout IME File Registry Value ──
+# Mức độ  : Cao
+# Chi tiết: Detects usage of Windows Input Method Editor (IME) keyboard layout feature, which allows an attacker to load a DLL into the process after sending the WM_INPUTLANGCHANGEREQUEST message. Before doing th
+EventCode=4657 Channel="Security" ObjectName="*\\Control\\Keyboard Layouts\\*" ObjectName="*Ime File*" NewValue IN ("*:\\Perflogs\\*", "*:\\Users\\Public\\*", "*:\\Windows\\Temp\\*", "*\\AppData\\Local\\Temp\\*", "*\\AppData\\Roaming\\*", "*\\Temporary Internet*") OR (NewValue="*:\\Users\\*" NewValue="*\\Favorites\\*") OR (NewValue="*:\\Users\\*" NewValue="*\\Favourites\\*") OR (NewValue="*:\\Users\\*" NewValue="*\\Contacts\\*")
+
+# ── New Root or CA or AuthRoot Certificate to Store ──
+# Mức độ  : Trung bình
+# Mục đích: Phá hủy backup/recovery
+# Chi tiết: Detects the addition of new root, CA or AuthRoot certificates to the Windows registry
+EventCode=4657 Channel="Security" ObjectName IN ("*\\SOFTWARE\\Microsoft\\SystemCertificates\\Root\\Certificates\\*", "*\\SOFTWARE\\Policies\\Microsoft\\SystemCertificates\\Root\\Certificates\\*", "*\\SOFTWARE\\Microsoft\\EnterpriseCertificates\\Root\\Certificates\\*", "*\\SOFTWARE\\Microsoft\\SystemCertificates\\CA\\Certificates\\*", "*\\SOFTWARE\\Policies\\Microsoft\\SystemCertificates\\CA\\Certificates\\*", "*\\SOFTWARE\\Microsoft\\EnterpriseCertificates\\CA\\Certificates\\*", "*\\SOFTWARE\\Microsoft\\SystemCertificates\\AuthRoot\\Certificates\\*", "*\\SOFTWARE\\Policies\\Microsoft\\SystemCertificates\\AuthRoot\\Certificates\\*", "*\\SOFTWARE\\Microsoft\\EnterpriseCertificates\\AuthRoot\\Certificates\\*") ObjectName="*\\Blob" NewValue="Binary Data"
+
+# ── Internet Explorer DisableFirstRunCustomize Enabled ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects changes to the Internet Explorer "DisableFirstRunCustomize" value, which prevents Internet Explorer from running the first run wizard the first time a user starts the browser after installing 
+EventCode=4657 Channel="Security" ObjectName="*\\Microsoft\\Internet Explorer\\Main\\DisableFirstRunCustomize" NewValue IN ("DWORD (0x00000001)", "DWORD (0x00000002)") NOT (ProcessName IN ("C:\\Windows\\explorer.exe", "C:\\Windows\\System32\\ie4uinit.exe")) NOT ((ProcessName="*\\Temp\\*" ProcessName="*\\.cr\\avira_*" NewValue="*DWORD (0x00000001)*") OR (ProcessName IN ("C:\\Program Files (x86)\\Foxit Software\\Foxit PDF Reader\\FoxitPDFReader.exe", "C:\\Program Files\\Foxit Software\\Foxit PDF Reader\\FoxitPDFReader.exe") NewValue="*DWORD (0x00000001)*"))
+
+# ── Potential Ransomware Activity Using LegalNotice Message ──
+# Mức độ  : Cao
+# Chi tiết: Detect changes to the "LegalNoticeCaption" or "LegalNoticeText" registry values where the message set contains keywords often used in ransomware ransom messages
+EventCode=4657 Channel="Security" ObjectName IN ("*\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System\\LegalNoticeCaption*", "*\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System\\LegalNoticeText*") NewValue IN ("*encrypted*", "*Unlock-Password*", "*paying*")
+
+# ── Lolbas OneDriveStandaloneUpdater.exe Proxy Download ──
+# Mức độ  : Cao
+# Mục đích: Tải file từ mạng
+# Chi tiết: Detects setting a custom URL for OneDriveStandaloneUpdater.exe to download a file from the Internet without executing any anomalous executables with suspicious arguments. The downloaded file will be i
+EventCode=4657 Channel="Security" ObjectName="*\\SOFTWARE\\Microsoft\\OneDrive\\UpdateOfficeConfig\\UpdateRingSettingURLFromOC*"
+
+# ── RestrictedAdminMode Registry Value Tampering ──
+# Mức độ  : Cao
+# Mục đích: Sửa registry
+# Chi tiết: Detects changes to the "DisableRestrictedAdmin" registry value in order to disable or enable RestrictedAdmin mode. RestrictedAdmin mode prevents the transmission of reusable credentials to the remote 
+EventCode=4657 Channel="Security" ObjectName="*System\\CurrentControlSet\\Control\\Lsa\\DisableRestrictedAdmin"
+
+# ── Lsass Full Dump Request Via DumpType Registry Settings ──
+# Mức độ  : Cao
+# Mục đích: Dump thông tin xác thực
+# Chi tiết: Detects the setting of the "DumpType" registry value to "2" which stands for a "Full Dump". Technique such as LSASS Shtinkering requires this value to be "2" in order to dump LSASS.
+EventCode=4657 Channel="Security" ObjectName IN ("*\\SOFTWARE\\Microsoft\\Windows\\Windows Error Reporting\\LocalDumps\\DumpType*", "*\\SOFTWARE\\Microsoft\\Windows\\Windows Error Reporting\\LocalDumps\\lsass.exe\\DumpType*") NewValue="DWORD (0x00000002)"
+
+# ── NET NGenAssemblyUsageLog Registry Key Tamper ──
+# Mức độ  : Cao
+# Mục đích: Sửa registry
+# Chi tiết: Detects changes to the NGenAssemblyUsageLog registry key. .NET Usage Log output location can be controlled by setting the NGenAssemblyUsageLog CLR configuration knob in the Registry or by configuring 
+EventCode=4657 Channel="Security" ObjectName="*SOFTWARE\\Microsoft\\.NETFramework\\NGenAssemblyUsageLog"
+
+# ── New Netsh Helper DLL Registered From A Suspicious Location ──
+# Mức độ  : Cao
+# Chi tiết: Detects changes to the Netsh registry key to add a new DLL value that is located on a suspicious location. This change might be an indication of a potential persistence attempt by adding a malicious N
+EventCode=4657 Channel="Security" ObjectName="*\\SOFTWARE\\Microsoft\\NetSh*" NewValue IN ("*:\\Perflogs\\*", "*:\\Users\\Public\\*", "*:\\Windows\\Temp\\*", "*\\AppData\\Local\\Temp\\*", "*\\Temporary Internet*") OR (NewValue="*:\\Users\\*" NewValue="*\\Favorites\\*") OR (NewValue="*:\\Users\\*" NewValue="*\\Favourites\\*") OR (NewValue="*:\\Users\\*" NewValue="*\\Contacts\\*") OR (NewValue="*:\\Users\\*" NewValue="*\\Pictures\\*")
+
+# ── Potential Persistence Via Netsh Helper DLL - Registry ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects changes to the Netsh registry key to add a new DLL value. This change might be an indication of a potential persistence attempt by adding a malicious Netsh helper
+EventCode=4657 Channel="Security" ObjectName="*\\SOFTWARE\\Microsoft\\NetSh*" NewValue="*.dll*" NOT (ProcessName="C:\\Windows\\System32\\poqexec.exe" NewValue IN ("ipmontr.dll", "iasmontr.dll", "ippromon.dll"))
+
+# ── New Application in AppCompat ──
+# Mức độ  : Thông tin
+# Chi tiết: A General detection for a new application in AppCompat. This indicates an application executing for the first time on an endpoint.
+EventCode=4657 Channel="Security" ObjectName="*\\AppCompatFlags\\Compatibility Assistant\\Store\\*"
+
+# ── Potential Credential Dumping Attempt Using New NetworkProvider - REG ──
+# Mức độ  : Trung bình
+# Mục đích: Dump thông tin xác thực
+# Chi tiết: Detects when an attacker tries to add a new network provider in order to dump clear text credentials, similar to how the NPPSpy tool does it
+EventCode=4657 Channel="Security" ObjectName="*\\System\\CurrentControlSet\\Services\\*" ObjectName="*\\NetworkProvider*" NOT (ObjectName IN ("*\\System\\CurrentControlSet\\Services\\WebClient\\NetworkProvider*", "*\\System\\CurrentControlSet\\Services\\LanmanWorkstation\\NetworkProvider*", "*\\System\\CurrentControlSet\\Services\\RDPNP\\NetworkProvider*") OR ProcessName="C:\\Windows\\System32\\poqexec.exe")
+
+# ── New ODBC Driver Registered ──
+# Mức độ  : Thấp
+# Chi tiết: Detects the registration of a new ODBC driver.
+EventCode=4657 Channel="Security" ObjectName="*\\SOFTWARE\\ODBC\\ODBCINST.INI\\*" ObjectName="*\\Driver" NOT (ObjectName="*\\SQL Server\\*" NewValue="%WINDIR%\\System32\\SQLSRV32.dll") NOT ((ObjectName="*\\Microsoft Access *" NewValue="C:\\Progra*" NewValue="*\\ACEODBC.DLL") OR (ObjectName="*\\Microsoft Excel Driver*" NewValue="C:\\Progra*" NewValue="*\\ACEODBC.DLL"))
+
+# ── Potentially Suspicious ODBC Driver Registered ──
+# Mức độ  : Cao
+# Mục đích: Dump thông tin xác thực
+# Chi tiết: Detects the registration of a new ODBC driver where the driver is located in a potentially suspicious location
+EventCode=4657 Channel="Security" ObjectName="*\\SOFTWARE\\ODBC\\ODBCINST.INI\\*" ObjectName IN ("*\\Driver", "*\\Setup") NewValue IN ("*:\\PerfLogs\\*", "*:\\ProgramData\\*", "*:\\Temp\\*", "*:\\Users\\Public\\*", "*:\\Windows\\Registration\\CRMLog*", "*:\\Windows\\System32\\com\\dmp\\*", "*:\\Windows\\System32\\FxsTmp\\*", "*:\\Windows\\System32\\Microsoft\\Crypto\\RSA\\MachineKeys\\*", "*:\\Windows\\System32\\spool\\drivers\\color\\*", "*:\\Windows\\System32\\spool\\PRINTERS\\*", "*:\\Windows\\System32\\spool\\SERVERS\\*", "*:\\Windows\\System32\\Tasks_Migrated\\*", "*:\\Windows\\System32\\Tasks\\Microsoft\\Windows\\SyncCenter\\*", "*:\\Windows\\SysWOW64\\com\\dmp\\*", "*:\\Windows\\SysWOW64\\FxsTmp\\*", "*:\\Windows\\SysWOW64\\Tasks\\Microsoft\\Windows\\PLA\\System\\*", "*:\\Windows\\SysWOW64\\Tasks\\Microsoft\\Windows\\SyncCenter\\*", "*:\\Windows\\Tasks\\*", "*:\\Windows\\Temp\\*", "*:\\Windows\\Tracing\\*", "*\\AppData\\Local\\Temp\\*", "*\\AppData\\Roaming\\*")
+
+# ── Trust Access Disable For VBApplications ──
+# Mức độ  : Cao
+# Mục đích: Sửa registry
+# Chi tiết: Detects registry changes to Microsoft Office "AccessVBOM" to a value of "1" which disables trust access for VBA on the victim machine and lets attackers execute malicious macros without any Microsoft 
+EventCode=4657 Channel="Security" ObjectName="*\\Security\\AccessVBOM" NewValue="DWORD (0x00000001)"
+
+# ── Microsoft Office Protected View Disabled ──
+# Mức độ  : Cao
+# Chi tiết: Detects changes to Microsoft Office protected view registry keys with which the attacker disables this feature.
+EventCode=4657 Channel="Security" ObjectName="*\\SOFTWARE\\Microsoft\\Office\\*" ObjectName="*\\Security\\ProtectedView\\*" (NewValue="DWORD (0x00000001)" ObjectName IN ("*\\DisableAttachementsInPV", "*\\DisableInternetFilesInPV", "*\\DisableIntranetCheck", "*\\DisableUnsafeLocationsInPV")) OR (NewValue="DWORD (0x00000000)" ObjectName IN ("*\\enabledatabasefileprotectedview", "*\\enableforeigntextfileprotectedview"))
+
+# ── Python Function Execution Security Warning Disabled In Excel - Registry ──
+# Mức độ  : Cao
+# Chi tiết: Detects changes to the registry value "PythonFunctionWarnings" that would prevent any warnings or alerts from showing when Python functions are about to be executed. Threat actors could run malicious 
+EventCode=4657 Channel="Security" ObjectName="*\\Microsoft\\Office\\*" ObjectName="*\\Excel\\Security\\PythonFunctionWarnings" NewValue="DWORD (0x00000001)"
+
+# ── Enable Microsoft Dynamic Data Exchange ──
+# Mức độ  : Trung bình
+# Chi tiết: Enable Dynamic Data Exchange protocol (DDE) in all supported editions of Microsoft Word or Excel.
+EventCode=4657 Channel="Security" (ObjectName="*\\Word\\Security\\AllowDDE" NewValue IN ("DWORD (0x00000001)", "DWORD (0x00000002)")) OR (ObjectName IN ("*\\Excel\\Security\\DisableDDEServerLaunch", "*\\Excel\\Security\\DisableDDEServerLookup") NewValue="DWORD (0x00000000)")
+
+# ── Potential Persistence Via Outlook LoadMacroProviderOnBoot Setting ──
+# Mức độ  : Cao
+# Chi tiết: Detects the modification of Outlook setting "LoadMacroProviderOnBoot" which if enabled allows the automatic loading of any configured VBA project/module
+EventCode=4657 Channel="Security" ObjectName="*\\Outlook\\LoadMacroProviderOnBoot" NewValue="*0x00000001*"
+
+# ── Outlook Macro Execution Without Warning Setting Enabled ──
+# Mức độ  : Cao
+# Chi tiết: Detects the modification of Outlook security setting to allow unprompted execution of macros.
+EventCode=4657 Channel="Security" ObjectName="*\\Outlook\\Security\\Level" NewValue="*0x00000001*"
+
+# ── Outlook EnableUnsafeClientMailRules Setting Enabled - Registry ──
+# Mức độ  : Cao
+# Mục đích: Sửa registry
+# Chi tiết: Detects an attacker trying to enable the outlook security setting "EnableUnsafeClientMailRules" which allows outlook to run applications or execute macros
+EventCode=4657 Channel="Security" ObjectName="*\\Outlook\\Security\\EnableUnsafeClientMailRules" NewValue="DWORD (0x00000001)"
+
+# ── Outlook Security Settings Updated - Registry ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects changes to the registry values related to outlook security settings
+EventCode=4657 Channel="Security" ObjectName="*\\SOFTWARE\\Microsoft\\Office\\*" ObjectName="*\\Outlook\\Security\\*" NOT (ProcessName IN ("C:\\Program Files\\Microsoft Office\\*", "C:\\Program Files (x86)\\Microsoft Office\\*") ProcessName="*\\OUTLOOK.EXE")
+
+# ── Macro Enabled In A Potentially Suspicious Document ──
+# Mức độ  : Cao
+# Mục đích: Sửa registry
+# Chi tiết: Detects registry changes to Office trust records where the path is located in a potentially suspicious location
+EventCode=4657 Channel="Security" ObjectName="*\\Security\\Trusted Documents\\TrustRecords*" ObjectName IN ("*/AppData/Local/Microsoft/Windows/INetCache/*", "*/AppData/Local/Temp/*", "*/PerfLogs/*", "*C:/Users/Public/*", "*file:///D:/*", "*file:///E:/*")
+
+# ── Uncommon Microsoft Office Trusted Location Added ──
+# Mức độ  : Cao
+# Mục đích: Sửa registry
+# Chi tiết: Detects changes to registry keys related to "Trusted Location" of Microsoft Office where the path is set to something uncommon. Attackers might add additional trusted locations to avoid macro security
+EventCode=4657 Channel="Security" ObjectName="*Security\\Trusted Locations\\Location*" ObjectName="*\\Path" NOT ((ProcessName="*:\\Program Files\\Common Files\\Microsoft Shared\\ClickToRun\\*" ProcessName="*\\OfficeClickToRun.exe") OR ProcessName IN ("*:\\Program Files\\Microsoft Office\\*", "*:\\Program Files (x86)\\Microsoft Office\\*")) NOT (NewValue IN ("*%APPDATA%\\Microsoft\\Templates*", "*%%APPDATA%%\\Microsoft\\Templates*", "*%APPDATA%\\Microsoft\\Word\\Startup*", "*%%APPDATA%%\\Microsoft\\Word\\Startup*", "*:\\Program Files (x86)\\Microsoft Office\\root\\Templates\\*", "*:\\Program Files\\Microsoft Office (x86)\\Templates*", "*:\\Program Files\\Microsoft Office\\root\\Templates\\*", "*:\\Program Files\\Microsoft Office\\Templates\\*"))
+
+# ── Office Macros Warning Disabled ──
+# Mức độ  : Cao
+# Mục đích: Sửa registry
+# Chi tiết: Detects registry changes to Microsoft Office "VBAWarning" to a value of "1" which enables the execution of all macros, whether signed or unsigned.
+EventCode=4657 Channel="Security" ObjectName="*\\Security\\VBAWarnings" NewValue="DWORD (0x00000001)"
+
+# ── MaxMpxCt Registry Value Changed ──
+# Mức độ  : Thấp
+# Mục đích: Xóa dấu vết
+# Chi tiết: Detects changes to the "MaxMpxCt" registry value. MaxMpxCt specifies the maximum outstanding network requests for the server per client, which is used when negotiating a Server Message Block (SMB) con
+EventCode=4657 Channel="Security" ObjectName="*\\Services\\LanmanServer\\Parameters\\MaxMpxCt"
+
+# ── Potential Persistence Via New AMSI Providers - Registry ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects when an attacker adds a new AMSI provider via the Windows Registry to bypass AMSI (Antimalware Scan Interface) protections. Attackers may add custom AMSI providers to persist on the system and
+EventCode=4657 Channel="Security" ObjectName IN ("*\\SOFTWARE\\Microsoft\\AMSI\\Providers\\*", "*\\SOFTWARE\\WOW6432Node\\Microsoft\\AMSI\\Providers\\*") NOT ((ProcessName IN ("C:\\Program Files\\Avast Software\\Avast\\RegSvr.exe", "C:\\Program Files\\Avast Software\\Avast\\x86\\RegSvr.exe") ObjectName="*\\{FB904E4E-D2C7-4C8D-8492-B620BB9896B1}*") OR (ProcessName IN ("C:\\Program Files\\AVG\\Antivirus\\RegSvr.exe", "C:\\Program Files\\AVG\\Antivirus\\x86\\RegSvr.exe") ObjectName="*\\{FB904E4E-D2C7-4C8D-8492-B620BB9896B1}*") OR (ProcessName="C:\\Program Files\\Avira\\Endpoint Protection SDK\\endpointprotection.exe" ObjectName="*\\{00000001-3DCC-4B48-A82E-E2071FE58E05}*"))
+
+# ── Potential Persistence Via AppCompat RegisterAppRestart Layer ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects the setting of the REGISTERAPPRESTART compatibility layer on an application. This compatibility layer allows an application to register for restart using the "RegisterApplicationRestart" API. 
+EventCode=4657 Channel="Security" ObjectName="*\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\AppCompatFlags\\Layers\\*" NewValue="*REGISTERAPPRESTART*"
+
+# ── Potential Persistence Via App Paths Default Property ──
+# Mức độ  : Cao
+# Chi tiết: Detects changes to the "Default" property for keys located in the \Software\Microsoft\Windows\CurrentVersion\App Paths\ registry. Which might be used as a method of persistence The entries found under
+EventCode=4657 Channel="Security" ObjectName="*\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths*" ObjectName IN ("*(Default)", "*Path") NewValue IN ("*\\Users\\Public*", "*\\AppData\\Local\\Temp\\*", "*\\Windows\\Temp\\*", "*\\Desktop\\*", "*\\Downloads\\*", "*%temp%*", "*%tmp%*", "*iex*", "*Invoke-*", "*rundll32*", "*regsvr32*", "*mshta*", "*cscript*", "*wscript*", "*.bat*", "*.hta*", "*.dll*", "*.ps1*")
+
+# ── Potential Persistence Using DebugPath ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects potential persistence using Appx DebugPath
+EventCode=4657 Channel="Security" (ObjectName="*Classes\\ActivatableClasses\\Package\\Microsoft.*" ObjectName="*\\DebugPath") OR (ObjectName="*\\Software\\Microsoft\\Windows\\CurrentVersion\\PackagedAppXDebug\\Microsoft.*" ObjectName="*\\(Default)")
+
+# ── Potential Persistence Via AutodialDLL ──
+# Mức độ  : Cao
+# Chi tiết: Detects change the the "AutodialDLL" key which could be used as a persistence method to load custom DLL via the "ws2_32" library
+EventCode=4657 Channel="Security" ObjectName="*\\Services\\WinSock2\\Parameters\\AutodialDLL*"
+
+# ── Potential Persistence Via CHM Helper DLL ──
+# Mức độ  : Cao
+# Chi tiết: Detects when an attacker modifies the registry key "HtmlHelp Author" to achieve persistence
+EventCode=4657 Channel="Security" ObjectName IN ("*\\Software\\Microsoft\\HtmlHelp Author\\Location*", "*\\Software\\WOW6432Node\\Microsoft\\HtmlHelp Author\\Location*")
+
+# ── COM Object Hijacking Via Modification Of Default System CLSID Default Value ──
+# Mức độ  : Cao
+# Chi tiết: Detects potential COM object hijacking via modification of default system CLSID.
+EventCode=4657 Channel="Security" ObjectName="*\\CLSID\\*" ObjectName IN ("*\\InprocServer32\\(Default)", "*\\LocalServer32\\(Default)") ObjectName IN ("*\\{1f486a52-3cb1-48fd-8f50-b8dc300d9f9d}\\*", "*\\{2155fee3-2419-4373-b102-6843707eb41f}\\*", "*\\{4590f811-1d3a-11d0-891f-00aa004b2e24}\\*", "*\\{4de225bf-cf59-4cfc-85f7-68b90f185355}\\*", "*\\{ddc05a5a-351a-4e06-8eaf-54ec1bc2dcea}\\*", "*\\{F56F6FDD-AA9D-4618-A949-C1B91AF43B1A}\\*", "*\\{F82B4EF1-93A9-4DDE-8015-F7950A1A6E31}\\*", "*\\{7849596a-48ea-486e-8937-a2a3009f31a9}\\*", "*\\{0b91a74b-ad7c-4a9d-b563-29eef9167172}\\*", "*\\{603D3801-BD81-11d0-A3A5-00C04FD706EC}\\*", "*\\{30D49246-D217-465F-B00B-AC9DDD652EB7}\\*", "*\\{A7A63E5C-3877-4840-8727-C1EA9D7A4D50}\\*", "*\\{2227A280-3AEA-1069-A2DE-08002B30309D}\\*", "*\\{2DEA658F-54C1-4227-AF9B-260AB5FC3543}\\*", "*\\{AA509086-5Ca9-4C25-8F95-589D3C07B48A}\\*") NewValue IN ("*:\\Perflogs\\*", "*\\AppData\\Local\\*", "*\\Desktop\\*", "*\\Downloads\\*", "*\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\*", "*\\System32\\spool\\drivers\\color\\*", "*\\Temporary Internet*", "*\\Users\\Public\\*", "*\\Windows\\Temp\\*", "*%appdata%*", "*%temp%*", "*%tmp%*") OR (NewValue="*:\\Users\\*" NewValue="*\\Favorites\\*") OR (NewValue="*:\\Users\\*" NewValue="*\\Favourites\\*") OR (NewValue="*:\\Users\\*" NewValue="*\\Contacts\\*") OR (NewValue="*:\\Users\\*" NewValue="*\\Pictures\\*")
+
+# ── Potential COM Object Hijacking Via TreatAs Subkey - Registry ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects COM object hijacking via TreatAs subkey
+EventCode=4657 Channel="Security" ObjectName="*\\REGISTRY\\USER\\*" ObjectName="*Classes\\CLSID\\*" ObjectName="*\\TreatAs*" NOT ProcessName="C:\\WINDOWS\\system32\\svchost.exe"
+
+# ── Potential PSFactoryBuffer COM Hijacking ──
+# Mức độ  : Cao
+# Chi tiết: Detects changes to the PSFactory COM InProcServer32 registry. This technique was used by RomCom to create persistence storing a malicious DLL.
+EventCode=4657 Channel="Security" ObjectName="*\\CLSID\\{c90250f3-4d7d-4991-9b69-a5c5bc1c2ae6}\\InProcServer32\\(Default)" NOT (NewValue IN ("%windir%\\System32\\ActXPrxy.dll", "C:\\Windows\\System32\\ActXPrxy.dll"))
+
+# ── Potential Persistence Via Custom Protocol Handler ──
+# Mức độ  : Trung bình
+# Mục đích: Sửa registry
+# Chi tiết: Detects potential persistence activity via the registering of a new custom protocole handlers. While legitimate applications register protocole handlers often times during installation. And attacker c
+EventCode=4657 Channel="Security" ObjectName="HKCR\\*" NewValue="URL:*" NOT (NewValue="URL:ms-*" OR ProcessName IN ("C:\\Program Files (x86)*", "C:\\Program Files\\*", "C:\\Windows\\System32\\*", "C:\\Windows\\SysWOW64\\*"))
+
+# ── Potential Persistence Via Event Viewer Events.asp ──
+# Mức độ  : Trung bình
+# Mục đích: Sửa registry
+# Chi tiết: Detects potential registry persistence technique using the Event Viewer "Events.asp" technique
+EventCode=4657 Channel="Security" ObjectName IN ("*\\Microsoft\\Windows NT\\CurrentVersion\\Event Viewer\\MicrosoftRedirectionProgram*", "*\\Microsoft\\Windows NT\\CurrentVersion\\Event Viewer\\MicrosoftRedirectionURL*") NOT ((ProcessName="*C:\\WINDOWS\\system32\\svchost.exe" ObjectName="*\\Microsoft\\Windows NT\\CurrentVersion\\Event Viewer\\MicrosoftRedirectionProgram" NewValue="%%SystemRoot%%\\PCHealth\\HelpCtr\\Binaries\\HelpCtr.exe") OR (ProcessName="*C:\\WINDOWS\\system32\\svchost.exe" ObjectName="*\\Microsoft\\Windows NT\\CurrentVersion\\Event Viewer\\MicrosoftRedirectionProgramCommandLineParameters" NewValue="-url hcp://services/centers/support*topic=%%s") OR NewValue="http://go.microsoft.com/fwlink/events.asp" OR NewValue="(Empty)")
+
+# ── Potential Persistence Via GlobalFlags ──
+# Mức độ  : Cao
+# Chi tiết: Detects registry persistence technique using the GlobalFlags and SilentProcessExit keys
+EventCode=4657 Channel="Security" (ObjectName="*\\Microsoft\\Windows NT\\CurrentVersion\\*" ObjectName="*\\Image File Execution Options\\*" ObjectName="*\\GlobalFlag*") OR (ObjectName="*\\Microsoft\\Windows NT\\CurrentVersion\\*" ObjectName="*\\SilentProcessExit\\*" ObjectName IN ("*\\ReportingMode*", "*\\MonitorProcess*"))
+
+# ── Modification of IE Registry Settings ──
+# Mức độ  : Thấp
+# Mục đích: Sửa registry
+# Chi tiết: Detects modification of the registry settings used for Internet Explorer and other Windows components that use these settings. An attacker can abuse this registry key to add a domain to the trusted si
+EventCode=4657 Channel="Security" ObjectName="*\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings*" NOT (NewValue="DWORD*" OR NOT NewValue=* OR NewValue IN ("Cookie:", "Visited:", "(Empty)") OR ObjectName IN ("*\\Cache*", "*\\ZoneMap*", "*\\WpadDecision*") OR NewValue="Binary Data") NOT ObjectName="*\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\\Accepted Documents*"
+
+# ── Register New IFiltre For Persistence ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects when an attacker registers a new IFilter for an extension. Microsoft Windows Search uses filters to extract the content of items for inclusion in a full-text index. You can extend Windows Sear
+EventCode=4657 Channel="Security" (ObjectName="*\\SOFTWARE\\Classes\\.*" ObjectName="*\\PersistentHandler*") OR (ObjectName="*\\SOFTWARE\\Classes\\CLSID*" ObjectName="*\\PersistentAddinsRegistered\\{89BCB740-6119-101A-BCB7-00DD010655AF}*") NOT (ObjectName IN ("*\\CLSID\\{4F46F75F-199F-4C63-8B7D-86D48FE7970C}\\*", "*\\CLSID\\{4887767F-7ADC-4983-B576-88FB643D6F79}\\*", "*\\CLSID\\{D3B41FA1-01E3-49AF-AA25-1D0D824275AE}\\*", "*\\CLSID\\{72773E1A-B711-4d8d-81FA-B9A43B0650DD}\\*", "*\\CLSID\\{098f2470-bae0-11cd-b579-08002b30bfeb}\\*", "*\\CLSID\\{1AA9BF05-9A97-48c1-BA28-D9DCE795E93C}\\*", "*\\CLSID\\{2e2294a9-50d7-4fe7-a09f-e6492e185884}\\*", "*\\CLSID\\{34CEAC8D-CBC0-4f77-B7B1-8A60CB6DA0F7}\\*", "*\\CLSID\\{3B224B11-9363-407e-850F-C9E1FFACD8FB}\\*", "*\\CLSID\\{3DDEB7A4-8ABF-4D82-B9EE-E1F4552E95BE}\\*", "*\\CLSID\\{5645C8C1-E277-11CF-8FDA-00AA00A14F93}\\*", "*\\CLSID\\{5645C8C4-E277-11CF-8FDA-00AA00A14F93}\\*", "*\\CLSID\\{58A9EBF6-5755-4554-A67E-A2467AD1447B}\\*", "*\\CLSID\\{5e941d80-bf96-11cd-b579-08002b30bfeb}\\*", "*\\CLSID\\{698A4FFC-63A3-4E70-8F00-376AD29363FB}\\*", "*\\CLSID\\{7E9D8D44-6926-426F-AA2B-217A819A5CCE}\\*", "*\\CLSID\\{8CD34779-9F10-4f9b-ADFB-B3FAEABDAB5A}\\*", "*\\CLSID\\{9694E38A-E081-46ac-99A0-8743C909ACB6}\\*", "*\\CLSID\\{98de59a0-d175-11cd-a7bd-00006b827d94}\\*", "*\\CLSID\\{AA10385A-F5AA-4EFF-B3DF-71B701E25E18}\\*", "*\\CLSID\\{B4132098-7A03-423D-9463-163CB07C151F}\\*", "*\\CLSID\\{d044309b-5da6-4633-b085-4ed02522e5a5}\\*", "*\\CLSID\\{D169C14A-5148-4322-92C8-754FC9D018D8}\\*", "*\\CLSID\\{DD75716E-B42E-4978-BB60-1497B92E30C4}\\*", "*\\CLSID\\{E2F83EED-62DE-4A9F-9CD0-A1D40DCD13B6}\\*", "*\\CLSID\\{E772CEB3-E203-4828-ADF1-765713D981B8}\\*", "*\\CLSID\\{eec97550-47a9-11cf-b952-00aa0051fe20}*", "*\\CLSID\\{FB10BD80-A331-4e9e-9EB7-00279903AD99}\\*") OR ProcessName IN ("C:\\Windows\\System32\\*", "C:\\Program Files (x86)\\*", "C:\\Program Files\\*"))
+
+# ── Potential Persistence Via Logon Scripts - Registry ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects creation of "UserInitMprLogonScript" registry value which can be used as a persistence method by malicious actors
+EventCode=4657 Channel="Security" ObjectName="*UserInitMprLogonScript*"
+
+# ── Potential Persistence Via LSA Extensions ──
+# Mức độ  : Cao
+# Chi tiết: Detects when an attacker modifies the "REG_MULTI_SZ" value named "Extensions" to include a custom DLL to achieve persistence via lsass. The "Extensions" list contains filenames of DLLs being automatic
+EventCode=4657 Channel="Security" ObjectName="*\\SYSTEM\\CurrentControlSet\\Control\\LsaExtensionConfig\\LsaSrv\\Extensions*"
+
+# ── Potential Persistence Via Mpnotify ──
+# Mức độ  : Cao
+# Chi tiết: Detects when an attacker register a new SIP provider for persistence and defense evasion
+EventCode=4657 Channel="Security" ObjectName="*\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon\\mpnotify*"
+
+# ── Potential Persistence Via MyComputer Registry Keys ──
+# Mức độ  : Cao
+# Chi tiết: Detects modification to the "Default" value of the "MyComputer" key and subkeys to point to a custom binary that will be launched whenever the associated action is executed (see reference section for 
+EventCode=4657 Channel="Security" ObjectName="*\\Microsoft\\Windows\\CurrentVersion\\Explorer\\MyComputer*" ObjectName="*(Default)"
+
+# ── Potential Persistence Via DLLPathOverride ──
+# Mức độ  : Cao
+# Chi tiết: Detects when an attacker adds a new "DLLPathOverride" value to the "Natural Language" key in order to achieve persistence which will get invoked by "SearchIndexer.exe" process
+EventCode=4657 Channel="Security" ObjectName="*\\SYSTEM\\CurrentControlSet\\Control\\ContentIndex\\Language\\*" ObjectName IN ("*\\StemmerDLLPathOverride*", "*\\WBDLLPathOverride*", "*\\StemmerClass*", "*\\WBreakerClass*")
+
+# ── Potential Persistence Via Visual Studio Tools for Office ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects persistence via Visual Studio Tools for Office (VSTO) add-ins in Office applications.
+EventCode=4657 Channel="Security" ObjectName IN ("*\\Software\\Microsoft\\Office\\Outlook\\Addins\\*", "*\\Software\\Microsoft\\Office\\Word\\Addins\\*", "*\\Software\\Microsoft\\Office\\Excel\\Addins\\*", "*\\Software\\Microsoft\\Office\\Powerpoint\\Addins\\*", "*\\Software\\Microsoft\\VSTO\\Security\\Inclusion\\*") NOT (ProcessName IN ("C:\\Windows\\System32\\msiexec.exe", "C:\\Windows\\SysWOW64\\msiexec.exe", "C:\\Windows\\System32\\regsvr32.exe", "C:\\Windows\\SysWOW64\\regsvr32.exe") OR (ProcessName IN ("C:\\Program Files\\Common Files (x86)\\Microsoft Shared\\ClickToRun\\*", "C:\\Program Files\\Common Files\\Microsoft Shared\\ClickToRun\\*") ProcessName="*\\OfficeClickToRun.exe") OR ProcessName IN ("C:\\Program Files (x86)\\Microsoft Office\\root\\integration\\integrator.exe", "C:\\Program Files\\Microsoft Office\\root\\integration\\integrator.exe") OR (ProcessName IN ("C:\\Program Files\\Microsoft Office\\OFFICE*", "C:\\Program Files (x86)\\Microsoft Office\\OFFICE*", "C:\\Program Files\\Microsoft Office\\Root\\OFFICE*", "C:\\Program Files (x86)\\Microsoft Office\\Root\\OFFICE*", "C:\\PROGRA~2\\MICROS~2\\Office*") ProcessName IN ("*\\excel.exe", "*\\Integrator.exe", "*\\OneNote.exe", "*\\outlook.exe", "*\\powerpnt.exe", "*\\Teams.exe", "*\\visio.exe", "*\\winword.exe")) OR (ProcessName IN ("C:\\Program Files\\Common Files\\Microsoft Shared\\VSTO\\*", "C:\\Program Files (x86)\\Microsoft Shared\\VSTO\\*") ProcessName="*\\VSTOInstaller.exe")) NOT ((ProcessName IN ("C:\\Program Files\\AVG\\Antivirus\\RegSvr.exe", "C:\\Program Files (x86)\\AVG\\Antivirus\\RegSvr.exe") ObjectName="*\\Microsoft\\Office\\Outlook\\Addins\\Antivirus.AsOutExt\\*") OR (ProcessName IN ("C:\\Program Files\\Avast Software\\Avast\\RegSvr.exe", "C:\\Program Files (x86)\\Avast Software\\Avast\\RegSvr.exe") ObjectName="*\\Microsoft\\Office\\Outlook\\Addins\\Avast.AsOutExt\\*"))
+
+# ── Potential Persistence Via Outlook Home Page ──
+# Mức độ  : Cao
+# Mục đích: Sửa registry
+# Chi tiết: Detects potential persistence activity via outlook home page. An attacker can set a home page to achieve code execution and persistence by editing the WebView registry keys.
+EventCode=4657 Channel="Security" ObjectName="*\\Software\\Microsoft\\Office\\*" ObjectName="*\\Outlook\\WebView\\*" ObjectName="*\\URL"
+
+# ── Potential Persistence Via Outlook Today Page ──
+# Mức độ  : Cao
+# Mục đích: Sửa registry
+# Chi tiết: Detects potential persistence activity via outlook today page. An attacker can set a custom page to execute arbitrary code and link to it via the registry values "URL" and "UserDefinedUrl".
+EventCode=4657 Channel="Security" ObjectName="*Software\\Microsoft\\Office\\*" ObjectName="*\\Outlook\\Today\\*" (ObjectName="*\\Stamp" NewValue="DWORD (0x00000001)") OR ObjectName IN ("*\\URL", "*\\UserDefinedUrl") NOT (ProcessName IN ("C:\\Program Files\\Common Files\\Microsoft Shared\\ClickToRun\\*", "C:\\Program Files\\Common Files\\Microsoft Shared\\ClickToRun\\Updates\\*") ProcessName="*\\OfficeClickToRun.exe")
+
+# ── Potential WerFault ReflectDebugger Registry Value Abuse ──
+# Mức độ  : Cao
+# Mục đích: Giả mạo tên tiến trình
+# Chi tiết: Detects potential WerFault "ReflectDebugger" registry value abuse for persistence.
+EventCode=4657 Channel="Security" ObjectName="*\\Microsoft\\Windows\\Windows Error Reporting\\Hangs\\ReflectDebugger"
+
+# ── Potential Persistence Via Scrobj.dll COM Hijacking ──
+# Mức độ  : Trung bình
+# Chi tiết: Detect use of scrobj.dll as this DLL looks for the ScriptletURL key to get the location of the script to execute
+EventCode=4657 Channel="Security" ObjectName="*InprocServer32\\(Default)" NewValue="C:\\WINDOWS\\system32\\scrobj.dll"
+
+# ── Potential Persistence Via Shim Database Modification ──
+# Mức độ  : Trung bình
+# Chi tiết: Adversaries may establish persistence and/or elevate privileges by executing malicious content triggered by application shims. The Microsoft Windows Application Compatibility Infrastructure/Framework 
+EventCode=4657 Channel="Security" ObjectName IN ("*\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\AppCompatFlags\\InstalledSDB\\*", "*\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\AppCompatFlags\\Custom\\*") NOT (NewValue="" OR NewValue="(Empty)" OR NOT NewValue=*)
+
+# ── Suspicious Shim Database Patching Activity ──
+# Mức độ  : Cao
+# Chi tiết: Detects installation of new shim databases that try to patch sections of known processes for potential process injection or persistence.
+EventCode=4657 Channel="Security" ObjectName="*\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\AppCompatFlags\\Custom\\*" ObjectName IN ("*\\csrss.exe", "*\\dllhost.exe", "*\\explorer.exe", "*\\RuntimeBroker.exe", "*\\services.exe", "*\\sihost.exe", "*\\svchost.exe", "*\\taskhostw.exe", "*\\winlogon.exe", "*\\WmiPrvSe.exe")
+
+# ── Potential Persistence Via Shim Database In Uncommon Location ──
+# Mức độ  : Cao
+# Chi tiết: Detects the installation of a new shim database where the file is located in a non-default location
+EventCode=4657 Channel="Security" ObjectName="*\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\AppCompatFlags\\InstalledSDB\\*" ObjectName="*\\DatabasePath*" NOT NewValue="*:\\Windows\\AppPatch\\Custom*"
+
+# ── Potential Persistence Via TypedPaths ──
+# Mức độ  : Cao
+# Chi tiết: Detects modification addition to the 'TypedPaths' key in the user or admin registry from a non standard application. Which might indicate persistence attempt
+EventCode=4657 Channel="Security" ObjectName="*\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\TypedPaths\\*" NOT (ProcessName IN ("C:\\Windows\\explorer.exe", "C:\\Windows\\SysWOW64\\explorer.exe"))
+
+# ── Potential Persistence Via Excel Add-in - Registry ──
+# Mức độ  : Cao
+# Chi tiết: Detect potential persistence via the creation of an excel add-in (XLL) file to make it run automatically when Excel is started.
+EventCode=4657 Channel="Security" ObjectName="*Software\\Microsoft\\Office\\*" ObjectName="*\\Excel\\Options" NewValue="/R *" NewValue="*.xll"
+
+# ── Potential Attachment Manager Settings Associations Tamper ──
+# Mức độ  : Cao
+# Chi tiết: Detects tampering with attachment manager settings policies associations to lower the default file type risks (See reference for more information)
+EventCode=4657 Channel="Security" ObjectName="*\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Associations\\*" (ObjectName="*\\DefaultFileTypeRisk" NewValue="DWORD (0x00006152)") OR (ObjectName="*\\LowRiskFileTypes" NewValue IN ("*.zip;*", "*.rar;*", "*.exe;*", "*.bat;*", "*.com;*", "*.cmd;*", "*.reg;*", "*.msi;*", "*.htm;*", "*.html;*"))
+
+# ── Potential Attachment Manager Settings Attachments Tamper ──
+# Mức độ  : Cao
+# Chi tiết: Detects tampering with attachment manager settings policies attachments (See reference for more information)
+EventCode=4657 Channel="Security" ObjectName="*\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Attachments\\*" (ObjectName="*\\HideZoneInfoOnProperties" NewValue="DWORD (0x00000001)") OR (ObjectName="*\\SaveZoneInformation" NewValue="DWORD (0x00000002)") OR (ObjectName="*\\ScanWithAntiVirus" NewValue="DWORD (0x00000001)")
+
+# ── Potential ClickFix Execution Pattern - Registry ──
+# Mức độ  : Cao
+# Chi tiết: Detects potential ClickFix malware execution patterns by monitoring registry modifications in RunMRU keys containing HTTP/HTTPS links. ClickFix is known to be distributed through phishing campaigns an
+EventCode=4657 Channel="Security" ObjectName="*\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\RunMRU\\*" NewValue IN ("*http://*", "*https://*") NewValue IN ("*account*", "*anti-bot*", "*botcheck*", "*captcha*", "*challenge*", "*confirmation*", "*fraud*", "*human*", "*identification*", "*identificator*", "*identity*", "*robot*", "*validation*", "*verification*", "*verify*") OR NewValue IN ("*%comspec%*", "*bitsadmin*", "*certutil*", "*cmd*", "*cscript*", "*curl*", "*finger*", "*mshta*", "*powershell*", "*pwsh*", "*regsvr32*", "*rundll32*", "*schtasks*", "*wget*", "*wscript*")
+
+# ── Registry Modification for OCI DLL Redirection ──
+# Mức độ  : Cao
+# Mục đích: Sửa registry
+# Chi tiết: Detects registry modifications related to 'OracleOciLib' and 'OracleOciLibPath' under 'MSDTC' settings. Threat actors may modify these registry keys to redirect the loading of 'oci.dll' to a malicious
+EventCode=4657 Channel="Security" (ObjectName="*\\SOFTWARE\\Microsoft\\MSDTC\\MTxOCI\\OracleOciLib" NOT NewValue="*oci.dll*") OR (ObjectName="*\\SOFTWARE\\Microsoft\\MSDTC\\MTxOCI\\OracleOciLibPath" NOT NewValue="*%SystemRoot%\\System32\\*")
+
+# ── PowerShell as a Service in Registry ──
+# Mức độ  : Cao
+# Chi tiết: Detects that a powershell code is written to the registry as a service.
+EventCode=4657 Channel="Security" ObjectName="*\\Services\\*" ObjectName="*\\ImagePath" NewValue IN ("*powershell*", "*pwsh*")
+
+# ── PowerShell Script Execution Policy Enabled ──
+# Mức độ  : Thấp
+# Chi tiết: Detects the enabling of the PowerShell script execution policy. Once enabled, this policy allows scripts to be executed.
+EventCode=4657 Channel="Security" ObjectName="*\\Policies\\Microsoft\\Windows\\PowerShell\\EnableScripts" NewValue="DWORD (0x00000001)"
+
+# ── Potential PowerShell Execution Policy Tampering ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects changes to the PowerShell execution policy in order to bypass signing requirements for script execution
+EventCode=4657 Channel="Security" ObjectName IN ("*\\ShellIds\\Microsoft.PowerShell\\ExecutionPolicy", "*\\Policies\\Microsoft\\Windows\\PowerShell\\ExecutionPolicy") NewValue IN ("*Bypass*", "*Unrestricted*") NOT (ProcessName IN ("*:\\Windows\\System32\\*", "*:\\Windows\\SysWOW64\\*"))
+
+# ── Suspicious PowerShell In Registry Run Keys ──
+# Mức độ  : Trung bình
+# Mục đích: Persistence qua autorun
+# Chi tiết: Detects potential PowerShell commands or code within registry run keys
+EventCode=4657 Channel="Security" ObjectName IN ("*\\Software\\Microsoft\\Windows\\CurrentVersion\\Run*", "*\\Software\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\Run*", "*\\Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\Run*") NewValue IN ("*powershell*", "*pwsh *", "*FromBase64String*", "*.DownloadFile(*", "*.DownloadString(*", "* -w hidden *", "* -w 1 *", "*-windowstyle hidden*", "*-window hidden*", "* -nop *", "* -encodedcommand *", "*-ExecutionPolicy Bypass*", "*Invoke-Expression*", "*IEX (*", "*Invoke-Command*", "*ICM -*", "*Invoke-WebRequest*", "*IWR *", "*Invoke-RestMethod*", "*IRM *", "* -noni *", "* -noninteractive *")
+
+# ── PowerShell Logging Disabled Via Registry Key Tampering ──
+# Mức độ  : Cao
+# Mục đích: Sửa registry
+# Chi tiết: Detects changes to the registry for the currently logged-in user. In order to disable PowerShell module logging, script block logging or transcription and script execution logging
+EventCode=4657 Channel="Security" ObjectName IN ("*\\Microsoft\\Windows\\PowerShell\\*", "*\\Microsoft\\PowerShellCore\\*") ObjectName IN ("*\\ModuleLogging\\EnableModuleLogging", "*\\ScriptBlockLogging\\EnableScriptBlockLogging", "*\\ScriptBlockLogging\\EnableScriptBlockInvocationLogging", "*\\Transcription\\EnableTranscripting", "*\\Transcription\\EnableInvocationHeader", "*\\EnableScripts") NewValue="DWORD (0x00000000)"
+
+# ── Potential Provisioning Registry Key Abuse For Binary Proxy Execution - REG ──
+# Mức độ  : Cao
+# Chi tiết: Detects potential abuse of the provisioning registry key for indirect command execution through "Provlaunch.exe".
+EventCode=4657 Channel="Security" ObjectName="*\\SOFTWARE\\Microsoft\\Provisioning\\Commands\\*"
+
+# ── PUA - Sysinternal Tool Execution - Registry ──
+# Mức độ  : Thấp
+# Chi tiết: Detects the execution of a Sysinternals Tool via the creation of the "accepteula" registry key
+EventCode=4657 Channel="Security" ObjectName="*\\EulaAccepted"
+
+# ── Suspicious Execution Of Renamed Sysinternals Tools - Registry ──
+# Mức độ  : Cao
+# Chi tiết: Detects the creation of the "accepteula" key related to the Sysinternals tools being created from executables with the wrong name (e.g. a renamed Sysinternals tool)
+EventCode=4657 Channel="Security" ObjectName IN ("*\\Active Directory Explorer*", "*\\Handle*", "*\\LiveKd*", "*\\ProcDump*", "*\\Process Explorer*", "*\\PsExec*", "*\\PsLoggedon*", "*\\PsLoglist*", "*\\PsPasswd*", "*\\PsPing*", "*\\PsService*", "*\\SDelete*") ObjectName="*\\EulaAccepted" NOT (ProcessName IN ("*\\ADExplorer.exe", "*\\ADExplorer64.exe", "*\\ADExplorer64a.exe", "*\\handle.exe", "*\\handle64.exe", "*\\handle64a.exe", "*\\livekd.exe", "*\\livekd64.exe", "*\\procdump.exe", "*\\procdump64.exe", "*\\procdump64a.exe", "*\\procexp.exe", "*\\procexp64.exe", "*\\procexp64a.exe", "*\\PsExec.exe", "*\\PsExec64.exe", "*\\PsExec64a.exe", "*\\PsLoggedon.exe", "*\\PsLoggedon64.exe", "*\\psloglist.exe", "*\\psloglist64.exe", "*\\psloglist64a.exe", "*\\pspasswd.exe", "*\\pspasswd64.exe", "*\\pspasswd64a.exe", "*\\PsPing.exe", "*\\PsPing64.exe", "*\\PsPing64a.exe", "*\\PsService.exe", "*\\PsService64.exe", "*\\PsService64a.exe", "*\\sdelete.exe"))
+
+# ── PUA - Sysinternals Tools Execution - Registry ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects the execution of some potentially unwanted tools such as PsExec, Procdump, etc. (part of the Sysinternals suite) via the creation of the "accepteula" registry key.
+EventCode=4657 Channel="Security" ObjectName IN ("*\\Active Directory Explorer*", "*\\Handle*", "*\\LiveKd*", "*\\Process Explorer*", "*\\ProcDump*", "*\\PsExec*", "*\\PsLoglist*", "*\\PsPasswd*", "*\\SDelete*", "*\\Sysinternals*") ObjectName="*\\EulaAccepted"
+
+# ── Usage of Renamed Sysinternals Tools - RegistrySet ──
+# Mức độ  : Cao
+# Chi tiết: Detects non-sysinternals tools setting the "accepteula" key which normally is set on sysinternals tool execution
+EventCode=4657 Channel="Security" ObjectName IN ("*\\PsExec*", "*\\ProcDump*", "*\\Handle*", "*\\LiveKd*", "*\\Process Explorer*", "*\\PsLoglist*", "*\\PsPasswd*", "*\\Active Directory Explorer*") ObjectName="*\\EulaAccepted" NOT (ProcessName IN ("*\\PsExec.exe", "*\\PsExec64.exe", "*\\PsExec64a.exe", "*\\procdump.exe", "*\\procdump64.exe", "*\\procdump64a.exe", "*\\handle.exe", "*\\handle64.exe", "*\\handle64a.exe", "*\\livekd.exe", "*\\livekd64.exe", "*\\procexp.exe", "*\\procexp64.exe", "*\\procexp64a.exe", "*\\psloglist.exe", "*\\psloglist64.exe", "*\\psloglist64a.exe", "*\\pspasswd.exe", "*\\pspasswd64.exe", "*\\pspasswd64a.exe", "*\\ADExplorer.exe", "*\\ADExplorer64.exe", "*\\ADExplorer64a.exe")) NOT NOT ProcessName=*
+
+# ── ETW Logging Disabled For rpcrt4.dll ──
+# Mức độ  : Thấp
+# Mục đích: Sửa registry
+# Chi tiết: Detects changes to the "ExtErrorInformation" key in order to disable ETW logging for rpcrt4.dll
+EventCode=4657 Channel="Security" ObjectName="*\\Microsoft\\Windows NT\\Rpc\\ExtErrorInformation" NewValue IN ("DWORD (0x00000000)", "DWORD (0x00000002)")
+
+# ── Potentially Suspicious Command Executed Via Run Dialog Box - Registry ──
+# Mức độ  : Cao
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects execution of commands via the run dialog box on Windows by checking values of the "RunMRU" registry key. This technique was seen being abused by threat actors to deceive users into pasting and
+EventCode=4657 Channel="Security" ObjectName="*\\Microsoft\\Windows\\CurrentVersion\\Explorer\\RunMRU*" (NewValue IN ("*powershell*", "*pwsh*") NewValue IN ("* -e *", "* -ec *", "* -en *", "* -enc *", "* -enco*", "*ftp*", "*Hidden*", "*http*", "*iex*", "*Invoke-*")) OR (NewValue="*wmic*" NewValue IN ("*shadowcopy*", "*process call create*"))
+
+# ── ScreenSaver Registry Key Set ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects registry key established after masqueraded .scr file execution using Rundll32 through desk.cpl
+EventCode=4657 Channel="Security" ProcessName="*\\rundll32.exe" ObjectName="*\\Control Panel\\Desktop\\SCRNSAVE.EXE*" NewValue="*.scr" NOT (NewValue IN ("*C:\\Windows\\System32\\*", "*C:\\Windows\\SysWOW64\\*"))
+
+# ── Potential SentinelOne Shell Context Menu Scan Command Tampering ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects potentially suspicious changes to the SentinelOne context menu scan command by a process other than SentinelOne.
+EventCode=4657 Channel="Security" ObjectName="*\\shell\\SentinelOneScan\\command\\*" NOT ((NewValue IN ("C:\\Program Files\\SentinelOne\\Sentinel Agent*", "C:\\Program Files (x86)\\SentinelOne\\Sentinel Agent*") NewValue="*\\SentinelScanFromContextMenu.exe*") OR ProcessName IN ("*C:\\Program Files\\SentinelOne\\", "*C:\\Program Files (x86)\\SentinelOne\\"))
+
+# ── ServiceDll Hijack ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects changes to the "ServiceDLL" value related to a service in the registry. This is often used as a method of persistence.
+EventCode=4657 Channel="Security" ObjectName="*\\System\\*" ObjectName="*ControlSet*" ObjectName="*\\Services\\*" ObjectName="*\\Parameters\\ServiceDll" NOT (NewValue="C:\\Windows\\system32\\spool\\drivers\\x64\\3\\PrintConfig.dll" OR (ProcessName="C:\\Windows\\system32\\lsass.exe" ObjectName="*\\Services\\NTDS\\Parameters\\ServiceDll" NewValue="%%systemroot%%\\system32\\ntdsa.dll") OR ProcessName="C:\\Windows\\System32\\poqexec.exe") NOT (ProcessName="*\\regsvr32.exe" NewValue="C:\\Windows\\System32\\STAgent.dll")
+
+# ── ETW Logging Disabled For SCM ──
+# Mức độ  : Thấp
+# Mục đích: Sửa registry
+# Chi tiết: Detects changes to the "TracingDisabled" key in order to disable ETW logging for services.exe (SCM)
+EventCode=4657 Channel="Security" ObjectName="*Software\\Microsoft\\Windows NT\\CurrentVersion\\Tracing\\SCM\\Regular\\TracingDisabled" NewValue="DWORD (0x00000001)"
+
+# ── Registry Explorer Policy Modification ──
+# Mức độ  : Trung bình
+# Mục đích: Sửa registry
+# Chi tiết: Detects registry modifications that disable internal tools or functions in explorer (malware like Agent Tesla uses this technique)
+EventCode=4657 Channel="Security" ObjectName IN ("*SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\NoLogOff", "*SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\NoDesktop", "*SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\NoRun", "*SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\NoFind", "*SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\NoControlPanel", "*SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\NoFileMenu", "*SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\NoClose", "*SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\NoSetTaskbar", "*SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\NoPropertiesMyDocuments", "*SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\NoTrayContextMenu") NewValue="DWORD (0x00000001)"
+
+# ── Persistence Via New SIP Provider ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects when an attacker register a new SIP provider for persistence and defense evasion
+EventCode=4657 Channel="Security" ObjectName IN ("*\\SOFTWARE\\Microsoft\\Cryptography\\Providers\\*", "*\\SOFTWARE\\Microsoft\\Cryptography\\OID\\EncodingType*", "*\\SOFTWARE\\WOW6432Node\\Microsoft\\Cryptography\\Providers\\*", "*\\SOFTWARE\\WOW6432Node\\Microsoft\\Cryptography\\OID\\EncodingType*") ObjectName IN ("*\\Dll*", "*\\$DLL*") NOT (NewValue IN ("WINTRUST.DLL", "mso.dll") OR (ProcessName="C:\\Windows\\System32\\poqexec.exe" ObjectName="*\\CryptSIPDll*" NewValue="C:\\Windows\\System32\\PsfSip.dll"))
+
+# ── Tamper With Sophos AV Registry Keys ──
+# Mức độ  : Cao
+# Chi tiết: Detects tamper attempts to sophos av functionality via registry key modification
+EventCode=4657 Channel="Security" ObjectName IN ("*\\Sophos Endpoint Defense\\TamperProtection\\Config\\SAVEnabled*", "*\\Sophos Endpoint Defense\\TamperProtection\\Config\\SEDEnabled*", "*\\Sophos\\SAVService\\TamperProtection\\Enabled*") NewValue="DWORD (0x00000000)"
+
+# ── Hiding User Account Via SpecialAccounts Registry Key ──
+# Mức độ  : Cao
+# Chi tiết: Detects modifications to the registry key "HKLM\Software\Microsoft\Windows NT\CurrentVersion\Winlogon\SpecialAccounts\Userlist" where the value is set to "0" in order to hide user account from being l
+EventCode=4657 Channel="Security" ObjectName="*\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon\\SpecialAccounts\\UserList*" NewValue="DWORD (0x00000000)"
+
+# ── Activate Suppression of Windows Security Center Notifications ──
+# Mức độ  : Trung bình
+# Mục đích: Sửa registry
+# Chi tiết: Detect set Notification_Suppress to 1 to disable the Windows security center notification
+EventCode=4657 Channel="Security" ObjectName="*SOFTWARE\\Policies\\Microsoft\\Windows Defender\\UX Configuration\\Notification_Suppress" NewValue="DWORD (0x00000001)"
+
+# ── Suspicious Keyboard Layout Load ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects the keyboard preload installation with a suspicious keyboard layout, e.g. Chinese, Iranian or Vietnamese layout load in user session on systems maintained by US staff only
+EventCode=4657 Channel="Security" ObjectName IN ("*\\Keyboard Layout\\Preload\\*", "*\\Keyboard Layout\\Substitutes\\*") NewValue IN ("*00000429*", "*00050429*", "*0000042a*")
+
+# ── Potential PendingFileRenameOperations Tampering ──
+# Mức độ  : Trung bình
+# Mục đích: Giả mạo tên tiến trình
+# Chi tiết: Detect changes to the "PendingFileRenameOperations" registry key from uncommon or suspicious images locations to stage currently used files for rename or deletion after reboot.
+EventCode=4657 Channel="Security" ObjectName="*\\CurrentControlSet\\Control\\Session Manager\\PendingFileRenameOperations*" ProcessName="*\\Users\\Public\\*" OR ProcessName IN ("*\\reg.exe", "*\\regedit.exe")
+
+# ── Suspicious Printer Driver Empty Manufacturer ──
+# Mức độ  : Cao
+# Chi tiết: Detects a suspicious printer driver installation with an empty Manufacturer value
+EventCode=4657 Channel="Security" ObjectName="*\\Control\\Print\\Environments\\Windows x64\\Drivers*" ObjectName="*\\Manufacturer*" NewValue="(Empty)" NOT (ObjectName="*\\CutePDF Writer v4.0\\*" OR ObjectName IN ("*\\VNC Printer (PS)\\*", "*\\VNC Printer (UD)\\*") OR ObjectName="*\\Version-3\\PDF24\\*")
+
+# ── Registry Persistence via Explorer Run Key ──
+# Mức độ  : Cao
+# Mục đích: Persistence qua autorun
+# Chi tiết: Detects a possible persistence mechanism using RUN key for Windows Explorer and pointing to a suspicious folder
+EventCode=4657 Channel="Security" ObjectName="*\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\Run" NewValue IN ("*:\\$Recycle.bin\\*", "*:\\ProgramData\\*", "*:\\Temp\\*", "*:\\Users\\Default\\*", "*:\\Users\\Public\\*", "*:\\Windows\\Temp\\*", "*\\AppData\\Local\\Temp\\*")
+
+# ── New RUN Key Pointing to Suspicious Folder ──
+# Mức độ  : Cao
+# Mục đích: Persistence qua autorun
+# Chi tiết: Detects suspicious new RUN key element pointing to an executable in a suspicious folder
+EventCode=4657 Channel="Security" ObjectName IN ("*\\Software\\Microsoft\\Windows\\CurrentVersion\\Run*", "*\\Software\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\Run*", "*\\Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\Run*") NewValue IN ("*:\\Perflogs*", "*:\\ProgramData'*", "*:\\Windows\\Temp*", "*:\\Temp*", "*\\AppData\\Local\\Temp*", "*\\AppData\\Roaming*", "*:\\$Recycle.bin*", "*:\\Users\\Default*", "*:\\Users\\public*", "*%temp%*", "*%tmp%*", "*%Public%*", "*%AppData%*") OR (NewValue="*:\\Users\\*" NewValue IN ("*\\Favorites*", "*\\Favourites*", "*\\Contacts*", "*\\Music*", "*\\Pictures*", "*\\Documents*", "*\\Photos*")) NOT (ObjectName="*\\Microsoft\\Windows\\CurrentVersion\\RunOnce\\*" ProcessName="C:\\Windows\\SoftwareDistribution\\Download\\*" NewValue="*rundll32.exe *" NewValue="*C:\\WINDOWS\\system32\\advpack.dll,DelNodeRunDLL32*" NewValue IN ("*\\AppData\\Local\\Temp\\*", "*C:\\Windows\\Temp\\*")) NOT (ProcessName IN ("*C:\\Program Files\\Spotify\\Spotify.exe", "*C:\\Program Files (x86)\\Spotify\\Spotify.exe", "*\\AppData\\Roaming\\Spotify\\Spotify.exe") ObjectName="*SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\\Spotify" NewValue="*Spotify.exe --autostart --minimized")
+
+# ── Suspicious Space Characters in RunMRU Registry Path - ClickFix ──
+# Mức độ  : Cao
+# Chi tiết: Detects the occurrence of numerous space characters in RunMRU registry paths, which may indicate execution via phishing lures using clickfix techniques to hide malicious commands in the Windows Run di
+EventCode=4657 Channel="Security" ObjectName="*\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\RunMRU\\*" NewValue="*#*" NewValue IN ("*            *", "*            *", "*            *", "*            *", "*            *", "*            *", "*            *", "*            *", "*            *", "*            *", "*            *", "*            *", "*            *")
+
+# ── Suspicious Service Installed ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects installation of NalDrv or PROCEXP152 services via registry-keys to non-system32 folders. Both services are used in the tool Ghost-In-The-Logs (https://github.com/bats3c/Ghost-In-The-Logs), whi
+EventCode=4657 Channel="Security" ObjectName IN ("\\REGISTRY\\MACHINE\\System\\CurrentControlSet\\Services\\NalDrv\\ImagePath", "\\REGISTRY\\MACHINE\\System\\CurrentControlSet\\Services\\PROCEXP152\\ImagePath") NOT (ProcessName IN ("*\\procexp64.exe", "*\\procexp64a.exe", "*\\procexp.exe", "*\\procmon64.exe", "*\\procmon64a.exe", "*\\procmon.exe", "*\\handle.exe", "*\\handle64.exe", "*\\handle64a.exe") NewValue="*\\WINDOWS\\system32\\Drivers\\PROCEXP152.SYS*")
+
+# ── Suspicious Shell Open Command Registry Modification ──
+# Mức độ  : Trung bình
+# Mục đích: Leo thang đặc quyền
+# Chi tiết: Detects modifications to shell open registry keys that point to suspicious locations typically used by malware for persistence. Generally, modifications to the `*\shell\open\command` registry key can 
+EventCode=4657 Channel="Security" ObjectName="*\\shell\\open\\command\\*" NewValue IN ("*\\$Recycle.Bin\\*", "*\\AppData\\Local\\Temp\\*", "*\\Contacts\\*", "*\\Music\\*", "*\\PerfLogs\\*", "*\\Photos\\*", "*\\Pictures\\*", "*\\Users\\Public\\*", "*\\Videos\\*", "*\\Windows\\Temp\\*", "*%AppData%*", "*%LocalAppData%*", "*%Temp%*", "*%tmp%*")
+
+# ── Suspicious Space Characters in TypedPaths Registry Path - FileFix ──
+# Mức độ  : Cao
+# Chi tiết: Detects the occurrence of numerous space characters in TypedPaths registry paths, which may indicate execution via phishing lures using file-fix techniques to hide malicious commands.
+EventCode=4657 Channel="Security" ObjectName="*\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\TypedPaths\\url1" NewValue="*#*" NewValue IN ("*            *", "*            *", "*            *", "*            *", "*            *", "*            *", "*            *", "*            *", "*            *", "*            *", "*            *", "*            *", "*            *")
+
+# ── Modify User Shell Folders Startup Value ──
+# Mức độ  : Cao
+# Mục đích: Persistence qua autorun
+# Chi tiết: Detect modification of the User Shell Folders registry values for Startup or Common Startup which could indicate persistence attempts. Attackers may modify User Shell Folders registry keys to point to
+EventCode=4657 Channel="Security" ObjectName IN ("*SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\User Shell Folders*", "*SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders*") ObjectName IN ("*\\Common Startup", "*\\Startup") NOT (NOT NewValue=* OR NewValue IN ("*C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Startup*", "*%ProgramData%\\Microsoft\\Windows\\Start Menu\\Programs\\Startup*") OR NewValue IN ("*%USERPROFILE%\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup*", "*%%USERPROFILE%%\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup*") OR (NewValue="*C:\\Users\\*" NewValue="*\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup*"))
+
+# ── WFP Filter Added via Registry ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects registry modifications that add Windows Filtering Platform (WFP) filters, which may be used to block security tools and EDR agents from reporting events.
+EventCode=4657 Channel="Security" ObjectName="*\\BFE\\Parameters\\Policy\\Persistent\\Filter\\*" NOT (ProcessName IN ("C:\\Windows\\System32\\svchost.exe", "C:\\Windows\\SysWOW64\\svchost.exe"))
+
+# ── Suspicious Environment Variable Has Been Registered ──
+# Mức độ  : Cao
+# Chi tiết: Detects the creation of user-specific or system-wide environment variables via the registry. Which contains suspicious commands and strings
+EventCode=4657 Channel="Security" ObjectName="*\\Environment\\*" NewValue IN ("powershell", "pwsh") OR NewValue IN ("*\\AppData\\Local\\Temp\\*", "*C:\\Users\\Public\\*", "*TVqQAAMAAAAEAAAA*", "*TVpQAAIAAAAEAA8A*", "*TVqAAAEAAAAEABAA*", "*TVoAAAAAAAAAAAAA*", "*TVpTAQEAAAAEAAAA*", "*SW52b2tlL*", "*ludm9rZS*", "*JbnZva2Ut*", "*SQBuAHYAbwBrAGUALQ*", "*kAbgB2AG8AawBlAC0A*", "*JAG4AdgBvAGsAZQAtA*") OR NewValue IN ("SUVY*", "SQBFAF*", "SQBuAH*", "cwBhA*", "aWV4*", "aQBlA*", "R2V0*", "dmFy*", "dgBhA*", "dXNpbm*", "H4sIA*", "Y21k*", "cABhAH*", "Qzpc*", "Yzpc*")
+
+# ── Enable LM Hash Storage ──
+# Mức độ  : Cao
+# Mục đích: Sửa registry
+# Chi tiết: Detects changes to the "NoLMHash" registry value in order to allow Windows to store LM Hashes. By setting this registry value to "0" (DWORD), Windows will be allowed to store a LAN manager hash of you
+EventCode=4657 Channel="Security" ObjectName="*System\\CurrentControlSet\\Control\\Lsa\\NoLMHash" NewValue="DWORD (0x00000000)"
+
+# ── Scheduled TaskCache Change by Uncommon Program ──
+# Mức độ  : Cao
+# Mục đích: Lên lịch tác vụ độc hại
+# Chi tiết: Monitor the creation of a new key under 'TaskCache' when a new scheduled task is registered by a process that is not svchost.exe, which is suspicious
+EventCode=4657 Channel="Security" ObjectName="*SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Schedule\\TaskCache\\*" NOT (NewValue="(Empty)" OR NOT NewValue=* OR ObjectName IN ("*Microsoft\\Windows\\UpdateOrchestrator*", "*Microsoft\\Windows\\SoftwareProtectionPlatform\\SvcRestartTask\\Index*", "*Microsoft\\Windows\\Flighting\\OneSettings\\RefreshCache\\Index*") OR ProcessName="*C:\\Windows\\System32\\MoUsoCoreWorker.exe" OR ProcessName="*C:\\Windows\\System32\\services.exe" OR (ProcessName="C:\\Windows\\*" ProcessName="*\\TiWorker.exe") OR ProcessName="C:\\WINDOWS\\system32\\svchost.exe" OR (ProcessName="C:\\Windows\\Microsoft.NET\\Framework*" ProcessName="*\\ngen.exe" ObjectName IN ("*\\Microsoft\\Windows NT\\CurrentVersion\\Schedule\\TaskCache\\Tasks\\{B66B135D-DA06-4FC4-95F8-7458E1D10129}*", "*\\Microsoft\\Windows NT\\CurrentVersion\\Schedule\\TaskCache\\Tree\\Microsoft\\Windows\\.NET Framework\\.NET Framework NGEN*")) OR ProcessName IN ("C:\\Program Files\\Microsoft Office\\root\\Integration\\Integrator.exe", "C:\\Program Files (x86)\\Microsoft Office\\root\\Integration\\Integrator.exe", "C:\\Program Files\\Common Files\\microsoft shared\\ClickToRun\\OfficeC2RClient.exe", "C:\\Program Files (x86)\\Common Files\\microsoft shared\\ClickToRun\\OfficeC2RClient.exe") OR ProcessName="C:\\Windows\\System32\\msiexec.exe" OR (ProcessName="C:\\Windows\\explorer.exe" ObjectName="*\\Microsoft\\Windows NT\\CurrentVersion\\Schedule\\TaskCache\\Tree\\Microsoft\\Windows\\PLA\\Server Manager Performance Monitor\\*") OR ProcessName="System" OR ProcessName="C:\\Windows\\System32\\RuntimeBroker.exe") NOT (ProcessName IN ("C:\\Program Files (x86)\\Dropbox\\Update\\DropboxUpdate.exe", "C:\\Program Files\\Dropbox\\Update\\DropboxUpdate.exe") OR ProcessName IN ("*C:\\Program Files (x86)\\Microsoft\\EdgeUpdate\\MicrosoftEdgeUpdate.exe", "*C:\\Program Files\\Microsoft\\EdgeUpdate\\MicrosoftEdgeUpdate.exe") OR ProcessName IN ("*C:\\Program Files (x86)\\Microsoft OneDrive\\OneDrive.exe", "*C:\\Program Files\\Microsoft OneDrive\\OneDrive.exe"))
+
+# ── Potential Registry Persistence Attempt Via Windows Telemetry ──
+# Mức độ  : Cao
+# Mục đích: Lên lịch tác vụ độc hại
+# Chi tiết: Detects potential persistence behavior using the windows telemetry registry key. Windows telemetry makes use of the binary CompatTelRunner.exe to run a variety of commands and perform the actual telem
+EventCode=4657 Channel="Security" ObjectName="*\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\AppCompatFlags\\TelemetryController\\*" ObjectName="*\\Command" NewValue IN ("*.bat*", "*.bin*", "*.cmd*", "*.dat*", "*.dll*", "*.exe*", "*.hta*", "*.jar*", "*.js*", "*.msi*", "*.ps*", "*.sh*", "*.vb*") NOT (NewValue IN ("*\\system32\\CompatTelRunner.exe*", "*\\system32\\DeviceCensus.exe*"))
+
+# ── RDP Sensitive Settings Changed to Zero ──
+# Mức độ  : Trung bình
+# Mục đích: Sửa registry
+# Chi tiết: Detects tampering of RDP Terminal Service/Server sensitive settings. Such as allowing unauthorized users access to a system via the 'fAllowUnsolicited' or enabling RDP via 'fDenyTSConnections', etc.
+EventCode=4657 Channel="Security" ObjectName IN ("*\\fDenyTSConnections", "*\\fSingleSessionPerUser", "*\\UserAuthentication") NewValue="DWORD (0x00000000)"
+
+# ── RDP Sensitive Settings Changed ──
+# Mức độ  : Cao
+# Mục đích: Sửa registry
+# Chi tiết: Detects tampering of RDP Terminal Service/Server sensitive settings. Such as allowing unauthorized users access to a system via the 'fAllowUnsolicited' or enabling RDP via 'fDenyTSConnections', etc.  
+EventCode=4657 Channel="Security" (ObjectName IN ("*\\Control\\Terminal Server\\*", "*\\Windows NT\\Terminal Services\\*") ObjectName="*\\Shadow" NewValue IN ("DWORD (0x00000001)", "DWORD (0x00000002)", "DWORD (0x00000003)", "DWORD (0x00000004)")) OR (ObjectName IN ("*\\Control\\Terminal Server\\*", "*\\Windows NT\\Terminal Services\\*") ObjectName IN ("*\\DisableRemoteDesktopAntiAlias", "*\\DisableSecuritySettings", "*\\fAllowUnsolicited", "*\\fAllowUnsolicitedFullControl") NewValue="DWORD (0x00000001)") OR ObjectName IN ("*\\Control\\Terminal Server\\InitialProgram*", "*\\Control\\Terminal Server\\WinStations\\RDP-Tcp\\InitialProgram*", "*\\services\\TermService\\Parameters\\ServiceDll*", "*\\Terminal Server\\WinStations\\RDP-Tcp\\SecurityLayer*", "*\\Windows NT\\Terminal Services\\InitialProgram*") NOT (ObjectName="*\\SecurityLayer" NewValue="DWORD (0x00000002)")
+
+# ── New TimeProviders Registered With Uncommon DLL Name ──
+# Mức độ  : Cao
+# Mục đích: Persistence qua autorun
+# Chi tiết: Detects processes setting a new DLL in DllName in under HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\W32Time\TimeProvider. Adversaries may abuse time providers to execute DLLs when the system 
+EventCode=4657 Channel="Security" ObjectName="*\\Services\\W32Time\\TimeProviders*" ObjectName="*\\DllName" NOT (NewValue IN ("%SystemRoot%\\System32\\vmictimeprovider.dll", "%systemroot%\\system32\\w32time.dll", "C:\\Windows\\SYSTEM32\\w32time.DLL"))
+
+# ── Old TLS1.0/TLS1.1 Protocol Version Enabled ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects applications or users re-enabling old TLS versions by setting the "Enabled" value to "1" for the "Protocols" registry key.
+EventCode=4657 Channel="Security" ObjectName IN ("*\\Control\\SecurityProviders\\SCHANNEL\\Protocols\\TLS 1.0\\*", "*\\Control\\SecurityProviders\\SCHANNEL\\Protocols\\TLS 1.1\\*") ObjectName="*\\Enabled" NewValue="DWORD (0x00000001)"
+
+# ── COM Hijacking via TreatAs ──
+# Mức độ  : Trung bình
+# Chi tiết: Detect modification of TreatAs key to enable "rundll32.exe -sta" command
+EventCode=4657 Channel="Security" ObjectName="*TreatAs\\(Default)" NOT ((ProcessName="C:\\Program Files\\Common Files\\Microsoft Shared\\ClickToRun\\*" ProcessName="*\\OfficeClickToRun.exe") OR ProcessName IN ("C:\\Program Files\\Microsoft Office\\root\\integration\\integrator.exe", "C:\\Program Files (x86)\\Microsoft Office\\root\\integration\\integrator.exe") OR ProcessName="C:\\Windows\\system32\\svchost.exe" OR ProcessName IN ("C:\\Windows\\system32\\msiexec.exe", "C:\\Windows\\SysWOW64\\msiexec.exe"))
+
+# ── Potential Signing Bypass Via Windows Developer Features - Registry ──
+# Mức độ  : Cao
+# Chi tiết: Detects when the enablement of developer features such as "Developer Mode" or "Application Sideloading". Which allows the user to install untrusted packages.
+EventCode=4657 Channel="Security" ObjectName IN ("*\\Microsoft\\Windows\\CurrentVersion\\AppModelUnlock*", "*\\Policies\\Microsoft\\Windows\\Appx\\*") ObjectName IN ("*\\AllowAllTrustedApps", "*\\AllowDevelopmentWithoutDevLicense") NewValue="DWORD (0x00000001)"
+
+# ── UAC Bypass via Event Viewer ──
+# Mức độ  : Cao
+# Mục đích: Leo thang đặc quyền
+# Chi tiết: Detects UAC bypass method using Windows event viewer
+EventCode=4657 Channel="Security" ObjectName="*\\mscfile\\shell\\open\\command"
+
+# ── UAC Bypass via Sdclt ──
+# Mức độ  : Cao
+# Mục đích: Leo thang đặc quyền
+# Chi tiết: Detects the pattern of UAC Bypass using registry key manipulation of sdclt.exe (e.g. UACMe 53)
+EventCode=4657 Channel="Security" ObjectName="*Software\\Classes\\exefile\\shell\\runas\\command\\isolatedCommand"
+| rex field=NewValue "(?<NewValueMatch>-1[0-9]{3}\\\\Software\\\\Classes\\\\)"
+| eval NewValueCondition=if(isnotnull(NewValueMatch), "true", "false")
+| search OR (ObjectName="*Software\\Classes\\Folder\\shell\\open\\command\\SymbolicLinkValue" NewValueCondition="true")
+
+# ── UAC Bypass Abusing Winsat Path Parsing - Registry ──
+# Mức độ  : Cao
+# Mục đích: Leo thang đặc quyền
+# Chi tiết: Detects the pattern of UAC Bypass using a path parsing issue in winsat.exe (UACMe 52)
+EventCode=4657 Channel="Security" ObjectName="*\\Root\\InventoryApplicationFile\\winsat.exe|*" ObjectName="*\\LowerCaseLongPath" NewValue="c:\\users\\*" NewValue="*\\appdata\\local\\temp\\system32\\winsat.exe"
+
+# ── UAC Bypass Using Windows Media Player - Registry ──
+# Mức độ  : Cao
+# Mục đích: Leo thang đặc quyền
+# Chi tiết: Detects the pattern of UAC Bypass using Windows Media Player osksupport.dll (UACMe 32)
+EventCode=4657 Channel="Security" ObjectName="*\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\AppCompatFlags\\Compatibility Assistant\\Store\\C:\\Program Files\\Windows Media Player\\osk.exe" NewValue="Binary Data"
+
+# ── UAC Disabled ──
+# Mức độ  : Trung bình
+# Mục đích: Leo thang đặc quyền
+# Chi tiết: Detects when an attacker tries to disable User Account Control (UAC) by setting the registry value "EnableLUA" to 0.
+EventCode=4657 Channel="Security" ObjectName="*\\Microsoft\\Windows\\CurrentVersion\\Policies\\System\\EnableLUA*" NewValue="DWORD (0x00000000)"
+
+# ── UAC Notification Disabled ──
+# Mức độ  : Trung bình
+# Mục đích: Leo thang đặc quyền
+# Chi tiết: Detects when an attacker tries to disable User Account Control (UAC) notification by tampering with the "UACDisableNotify" value. UAC is a critical security feature in Windows that prevents unauthoriz
+EventCode=4657 Channel="Security" ObjectName="*\\Microsoft\\Security Center\\UACDisableNotify*" NewValue="DWORD (0x00000001)"
+
+# ── UAC Secure Desktop Prompt Disabled ──
+# Mức độ  : Trung bình
+# Mục đích: Leo thang đặc quyền
+# Chi tiết: Detects when an attacker tries to change User Account Control (UAC) elevation request destination via the "PromptOnSecureDesktop" value. The "PromptOnSecureDesktop" setting specifically determines whe
+EventCode=4657 Channel="Security" ObjectName="*\\Microsoft\\Windows\\CurrentVersion\\Policies\\System\\PromptOnSecureDesktop*" NewValue="DWORD (0x00000000)"
+
+# ── VBScript Payload Stored in Registry ──
+# Mức độ  : Cao
+# Mục đích: Persistence qua autorun
+# Chi tiết: Detects VBScript content stored into registry keys as seen being used by UNC2452 group
+EventCode=4657 Channel="Security" ObjectName="*Software\\Microsoft\\Windows\\CurrentVersion*" NewValue IN ("*vbscript:*", "*jscript:*", "*mshtml,*", "*RunHTMLApplication*", "*Execute(*", "*CreateObject*", "*window.close*") NOT (ObjectName="*Software\\Microsoft\\Windows\\CurrentVersion\\Run*" OR (ProcessName="*\\msiexec.exe" ObjectName="*\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Installer\\UserData\\*" NewValue IN ("*\\Microsoft.NET\\Primary Interop Assemblies\\Microsoft.mshtml.dll*", "*<\\Microsoft.mshtml,fileVersion=*", "*_mshtml_dll_*", "*<\\Microsoft.mshtml,culture=*")))
+
+# ── Windows Vulnerable Driver Blocklist Disabled ──
+# Mức độ  : Cao
+# Chi tiết: Detects when the Windows Vulnerable Driver Blocklist is set to disabled. This setting is crucial for preventing the loading of known vulnerable drivers, and its modification may indicate an attempt to
+EventCode=4657 Channel="Security" ObjectName="*\\Control\\CI\\Config\\VulnerableDriverBlocklistEnable" NewValue="DWORD (0x00000000)"
+
+# ── Execution DLL of Choice Using WAB.EXE ──
+# Mức độ  : Cao
+# Chi tiết: This rule detects that the path to the DLL written in the registry is different from the default one. Launched WAB.exe tries to load the DLL from Registry.
+EventCode=4657 Channel="Security" ObjectName="*\\Software\\Microsoft\\WAB\\DLLPath" NOT NewValue="%CommonProgramFiles%\\System\\wab32.dll"
+
+# ── Wdigest Enable UseLogonCredential ──
+# Mức độ  : Cao
+# Mục đích: Sửa registry
+# Chi tiết: Detects potential malicious modification of the property value of UseLogonCredential from HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest to enable clear-text credentials
+EventCode=4657 Channel="Security" ObjectName="*WDigest\\UseLogonCredential" NewValue="DWORD (0x00000001)"
+
+# ── Disable Windows Defender Functionalities Via Registry Keys ──
+# Mức độ  : Cao
+# Chi tiết: Detects when attackers or tools disable Windows Defender functionalities via the Windows registry
+EventCode=4657 Channel="Security" ObjectName IN ("*\\SOFTWARE\\Microsoft\\Windows Defender\\*", "*\\SOFTWARE\\Policies\\Microsoft\\Windows Defender Security Center\\*", "*\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\*") (ObjectName IN ("*\\DisableAntiSpyware", "*\\DisableAntiVirus", "*\\DisableBehaviorMonitoring", "*\\DisableBlockAtFirstSeen", "*\\DisableEnhancedNotifications", "*\\DisableIntrusionPreventionSystem", "*\\DisableIOAVProtection", "*\\DisableOnAccessProtection", "*\\DisableRealtimeMonitoring", "*\\DisableScanOnRealtimeEnable", "*\\DisableScriptScanning") NewValue="DWORD (0x00000001)") OR (ObjectName IN ("*\\DisallowExploitProtectionOverride", "*\\Features\\TamperProtection", "*\\MpEngine\\MpEnablePus", "*\\PUAProtection", "*\\Signature Update\\ForceUpdateFromMU", "*\\SpyNet\\SpynetReporting", "*\\SpyNet\\SubmitSamplesConsent", "*\\Windows Defender Exploit Guard\\Controlled Folder Access\\EnableControlledFolderAccess") NewValue="DWORD (0x00000000)") NOT (ProcessName="C:\\Program Files\\Symantec\\Symantec Endpoint Protection\\*" ProcessName="*\\sepWscSvc64.exe")
+
+# ── Winget Admin Settings Modification ──
+# Mức độ  : Thấp
+# Chi tiết: Detects changes to the AppInstaller (winget) admin settings. Such as enabling local manifest installations or disabling installer hash checks
+EventCode=4657 Channel="Security" ProcessName="*\\winget.exe" ObjectName="\\REGISTRY\\A\\*" ObjectName="*\\LocalState\\admin_settings"
+
+# ── Enable Local Manifest Installation With Winget ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects changes to the AppInstaller (winget) policy. Specifically the activation of the local manifest installation, which allows a user to install new packages via custom manifests.
+EventCode=4657 Channel="Security" ObjectName="*\\AppInstaller\\EnableLocalManifestFiles" NewValue="DWORD (0x00000001)"
+
+# ── Winlogon AllowMultipleTSSessions Enable ──
+# Mức độ  : Trung bình
+# Mục đích: Sửa registry
+# Chi tiết: Detects when the 'AllowMultipleTSSessions' value is enabled. Which allows for multiple Remote Desktop connection sessions to be opened at once. This is often used by attacker as a way to connect to an
+EventCode=4657 Channel="Security" ObjectName="*\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon\\AllowMultipleTSSessions" NewValue="*DWORD (0x00000001)"
+
+# ── Winlogon Notify Key Logon Persistence ──
+# Mức độ  : Cao
+# Mục đích: Persistence qua autorun
+# Chi tiết: Adversaries may abuse features of Winlogon to execute DLLs and/or executables when a user logs in. Winlogon.exe is a Windows component responsible for actions at logon/logoff as well as the secure att
+EventCode=4657 Channel="Security" ObjectName="*\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon\\Notify\\logon" NewValue="*.dll"

@@ -1,0 +1,82 @@
+# ── Windows Defender Grace Period Expired ──
+# Mức độ  : Cao
+# Chi tiết: Detects the expiration of the grace period of Windows Defender. This means protection against viruses, spyware, and other potentially unwanted software is disabled.
+source="WinEventLog:Microsoft-Windows-Windows Defender/Operational" Channel="Microsoft-Windows-Windows Defender/Operational" Channel="Microsoft-Windows-Windows Defender/Operational" EventCode=5101
+
+# ── LSASS Access Detected via Attack Surface Reduction ──
+# Mức độ  : Cao
+# Mục đích: Dump thông tin xác thực
+# Chi tiết: Detects Access to LSASS Process
+source="WinEventLog:Microsoft-Windows-Windows Defender/Operational" Channel="Microsoft-Windows-Windows Defender/Operational" Channel="Microsoft-Windows-Windows Defender/Operational" EventCode=1121 Path="*\\lsass.exe" NOT ((ProcessName="C:\\Windows\\Temp\\asgard2-agent\\*" ProcessName IN ("*\\thor64.exe", "*\\thor.exe")) OR ProcessName IN ("C:\\Windows\\System32\\atiesrxx.exe", "C:\\Windows\\System32\\CompatTelRunner.exe", "C:\\Windows\\System32\\msiexec.exe", "C:\\Windows\\System32\\nvwmi64.exe", "C:\\Windows\\System32\\svchost.exe", "C:\\Windows\\System32\\Taskmgr.exe", "C:\\Windows\\System32\\wbem\\WmiPrvSE.exe", "C:\\Windows\\SysWOW64\\msiexec.exe") OR ProcessName IN ("C:\\Windows\\System32\\DriverStore\\*", "C:\\WINDOWS\\Installer\\*", "C:\\Program Files\\*", "C:\\Program Files (x86)\\*"))
+
+# ── PSExec and WMI Process Creations Block ──
+# Mức độ  : Cao
+# Chi tiết: Detects blocking of process creations originating from PSExec and WMI commands
+source="WinEventLog:Microsoft-Windows-Windows Defender/Operational" Channel="Microsoft-Windows-Windows Defender/Operational" Channel="Microsoft-Windows-Windows Defender/Operational" EventCode=1121 ProcessName IN ("*\\wmiprvse.exe", "*\\psexesvc.exe")
+
+# ── Windows Defender Exclusions Added ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects the Setting of Windows Defender Exclusions
+source="WinEventLog:Microsoft-Windows-Windows Defender/Operational" Channel="Microsoft-Windows-Windows Defender/Operational" Channel="Microsoft-Windows-Windows Defender/Operational" EventCode=5007 NewValue="*\\Microsoft\\Windows Defender\\Exclusions*"
+
+# ── Windows Defender Exploit Guard Tamper ──
+# Mức độ  : Cao
+# Chi tiết: Detects when someone is adding or removing applications or folders from exploit guard "ProtectedFolders" or "AllowedApplications"
+source="WinEventLog:Microsoft-Windows-Windows Defender/Operational" Channel="Microsoft-Windows-Windows Defender/Operational" Channel="Microsoft-Windows-Windows Defender/Operational" (EventCode=5007 NewValue="*\\Windows Defender\\Windows Defender Exploit Guard\\Controlled Folder Access\\AllowedApplications\\*" NewValue IN ("*\\Users\\Public\\*", "*\\AppData\\Local\\Temp\\*", "*\\Desktop\\*", "*\\PerfLogs\\*", "*\\Windows\\Temp\\*")) OR (EventCode=5007 OldValue="*\\Windows Defender\\Windows Defender Exploit Guard\\Controlled Folder Access\\ProtectedFolders\\*")
+
+# ── Windows Defender Submit Sample Feature Disabled ──
+# Mức độ  : Thấp
+# Chi tiết: Detects disabling of the "Automatic Sample Submission" feature of Windows Defender.
+source="WinEventLog:Microsoft-Windows-Windows Defender/Operational" Channel="Microsoft-Windows-Windows Defender/Operational" Channel="Microsoft-Windows-Windows Defender/Operational" EventCode=5007 NewValue="*\\Real-Time Protection\\SubmitSamplesConsent = 0x0*"
+
+# ── Windows Defender Malware Detection History Deletion ──
+# Mức độ  : Thông tin
+# Chi tiết: Windows Defender logs when the history of detected infections is deleted.
+source="WinEventLog:Microsoft-Windows-Windows Defender/Operational" Channel="Microsoft-Windows-Windows Defender/Operational" Channel="Microsoft-Windows-Windows Defender/Operational" EventCode=1013
+
+# ── Windows Defender Malware And PUA Scanning Disabled ──
+# Mức độ  : Cao
+# Chi tiết: Detects disabling of the Windows Defender feature of scanning for malware and other potentially unwanted software
+source="WinEventLog:Microsoft-Windows-Windows Defender/Operational" Channel="Microsoft-Windows-Windows Defender/Operational" Channel="Microsoft-Windows-Windows Defender/Operational" EventCode=5010
+
+# ── Windows Defender AMSI Trigger Detected ──
+# Mức độ  : Cao
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects triggering of AMSI by Windows Defender.
+source="WinEventLog:Microsoft-Windows-Windows Defender/Operational" Channel="Microsoft-Windows-Windows Defender/Operational" Channel="Microsoft-Windows-Windows Defender/Operational" EventCode=1116 SourceName="AMSI"
+
+# ── Windows Defender Real-time Protection Disabled ──
+# Mức độ  : Cao
+# Chi tiết: Detects disabling of Windows Defender Real-time Protection. As this event doesn't contain a lot of information on who initiated this action you might want to reduce it to a "medium" level if this occu
+source="WinEventLog:Microsoft-Windows-Windows Defender/Operational" Channel="Microsoft-Windows-Windows Defender/Operational" Channel="Microsoft-Windows-Windows Defender/Operational" EventCode=5001
+
+# ── Windows Defender Real-Time Protection Failure/Restart ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects issues with Windows Defender Real-Time Protection features
+source="WinEventLog:Microsoft-Windows-Windows Defender/Operational" Channel="Microsoft-Windows-Windows Defender/Operational" Channel="Microsoft-Windows-Windows Defender/Operational" EventCode IN (3002, 3007) NOT (Feature_Name="%%886" Reason IN ("%%892", "%%858"))
+
+# ── Win Defender Restored Quarantine File ──
+# Mức độ  : Cao
+# Chi tiết: Detects the restoration of files from the defender quarantine
+source="WinEventLog:Microsoft-Windows-Windows Defender/Operational" Channel="Microsoft-Windows-Windows Defender/Operational" Channel="Microsoft-Windows-Windows Defender/Operational" EventCode=1009
+
+# ── Windows Defender Configuration Changes ──
+# Mức độ  : Cao
+# Chi tiết: Detects suspicious changes to the Windows Defender configuration
+source="WinEventLog:Microsoft-Windows-Windows Defender/Operational" Channel="Microsoft-Windows-Windows Defender/Operational" Channel="Microsoft-Windows-Windows Defender/Operational" EventCode=5007 NewValue IN ("*\\Windows Defender\\DisableAntiSpyware *", "*\\Windows Defender\\Scan\\DisableRemovableDriveScanning *", "*\\Windows Defender\\Scan\\DisableScanningMappedNetworkDrivesForFullScan *", "*\\Windows Defender\\SpyNet\\DisableBlockAtFirstSeen *", "*\\Real-Time Protection\\SpyNetReporting *")
+
+# ── Microsoft Defender Tamper Protection Trigger ──
+# Mức độ  : Cao
+# Chi tiết: Detects blocked attempts to change any of Defender's settings such as "Real Time Monitoring" and "Behavior Monitoring"
+source="WinEventLog:Microsoft-Windows-Windows Defender/Operational" Channel="Microsoft-Windows-Windows Defender/Operational" Channel="Microsoft-Windows-Windows Defender/Operational" EventCode=5013 Value IN ("*\\Windows Defender\\DisableAntiSpyware", "*\\Windows Defender\\DisableAntiVirus", "*\\Windows Defender\\Scan\\DisableArchiveScanning", "*\\Windows Defender\\Scan\\DisableScanningNetworkFiles", "*\\Real-Time Protection\\DisableRealtimeMonitoring", "*\\Real-Time Protection\\DisableBehaviorMonitoring", "*\\Real-Time Protection\\DisableIOAVProtection", "*\\Real-Time Protection\\DisableScriptScanning")
+
+# ── Windows Defender Threat Detected ──
+# Mức độ  : Cao
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects actions taken by Windows Defender malware detection engines
+source="WinEventLog:Microsoft-Windows-Windows Defender/Operational" Channel="Microsoft-Windows-Windows Defender/Operational" Channel="Microsoft-Windows-Windows Defender/Operational" EventCode IN (1006, 1015, 1116, 1117)
+
+# ── Windows Defender Virus Scanning Feature Disabled ──
+# Mức độ  : Cao
+# Chi tiết: Detects disabling of the Windows Defender virus scanning feature
+source="WinEventLog:Microsoft-Windows-Windows Defender/Operational" Channel="Microsoft-Windows-Windows Defender/Operational" Channel="Microsoft-Windows-Windows Defender/Operational" EventCode=5012

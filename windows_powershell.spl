@@ -1,0 +1,1186 @@
+# ── Nslookup PowerShell Download Cradle ──
+# Mức độ  : Trung bình
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects a powershell download cradle using nslookup. This cradle uses nslookup to extract payloads from DNS records.
+source="WinEventLog:Windows PowerShell" Channel="Windows PowerShell" EventCode=400 EventCode=400 Channel="Windows PowerShell" Data="*powershell*" Data="*nslookup*" Data="*[1]*" Data IN ("*-q=txt http*", "*-querytype=txt http*", "*-type=txt http*")
+
+# ── Delete Volume Shadow Copies Via WMI With PowerShell ──
+# Mức độ  : Cao
+# Mục đích: Phá hủy backup/recovery
+# Chi tiết: Shadow Copies deletion using operating systems utilities via PowerShell
+source="WinEventLog:Windows PowerShell" Channel="Windows PowerShell" EventCode=400 EventCode=400 Channel="Windows PowerShell" Data="*Get-WmiObject*" Data="*Win32_ShadowCopy*" Data IN ("*Delete()*", "*Remove-WmiObject*")
+
+# ── PowerShell Downgrade Attack - PowerShell ──
+# Mức độ  : Trung bình
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects PowerShell downgrade attack by comparing the host versions with the actually used engine version 2.0
+source="WinEventLog:Windows PowerShell" Channel="Windows PowerShell" EventCode=400 EventCode=400 Channel="Windows PowerShell" Data="*EngineVersion=2.*" NOT Data="*HostVersion=2.*"
+
+# ── PowerShell Download Via Net.WebClient - PowerShell Classic ──
+# Mức độ  : Thấp
+# Mục đích: Thực thi lệnh/script; Tải file từ mạng
+# Chi tiết: Detects PowerShell download activity, via the .DownloadFile() or .DownloadString() methods of the Net.WebClient class. This technique is often abused by attackers to download additional payloads.
+source="WinEventLog:Windows PowerShell" Channel="Windows PowerShell" EventCode=400 EventCode=400 Channel="Windows PowerShell" Data="*Net.WebClient*" Data IN ("*.DownloadFile(*", "*.DownloadString(*")
+
+# ── PowerShell Called from an Executable Version Mismatch ──
+# Mức độ  : Cao
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects PowerShell called from an executable by the version mismatch method
+source="WinEventLog:Windows PowerShell" Channel="Windows PowerShell" EventCode=400 EventCode=400 Channel="Windows PowerShell" Data IN ("*EngineVersion=2.*", "*EngineVersion=4.*", "*EngineVersion=5.*") Data="*HostVersion=3.*"
+
+# ── Netcat The Powershell Version ──
+# Mức độ  : Trung bình
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Adversaries may use a non-application layer protocol for communication between host and C2 server or among infected hosts within a network
+source="WinEventLog:Windows PowerShell" Channel="Windows PowerShell" EventCode=400 EventCode=400 Channel="Windows PowerShell" Data IN ("*powercat *", "*powercat.ps1*")
+
+# ── Remote PowerShell Session (PS Classic) ──
+# Mức độ  : Thấp
+# Mục đích: Thực thi lệnh/script; Di chuyển ngang mạng
+# Chi tiết: Detects remote PowerShell sessions
+source="WinEventLog:Windows PowerShell" Channel="Windows PowerShell" EventCode=400 EventCode=400 Channel="Windows PowerShell" Data="*HostName=ServerRemoteHost*" Data="*wsmprovhost.exe*"
+
+# ── Potential RemoteFXvGPUDisablement.EXE Abuse ──
+# Mức độ  : Cao
+# Chi tiết: Detects PowerShell module creation where the module Contents are set to "function Get-VMRemoteFXPhysicalVideoAdapter". This could be a sign of potential abuse of  the "RemoteFXvGPUDisablement.exe" bin
+source="WinEventLog:Windows PowerShell" Channel="Windows PowerShell" Channel="Windows PowerShell" Data="*ModuleContents=function Get-VMRemoteFXPhysicalVideoAdapter {*"
+
+# ── Renamed Powershell Under Powershell Channel ──
+# Mức độ  : Thấp
+# Mục đích: Thực thi lệnh/script; Giả mạo tên tiến trình
+# Chi tiết: Detects a renamed Powershell execution, which is a common technique used to circumvent security controls and bypass detection logic that's dependent on process names and process paths.
+source="WinEventLog:Windows PowerShell" Channel="Windows PowerShell" EventCode=400 EventCode=400 Channel="Windows PowerShell" Data="*HostName=ConsoleHost*"
+| rex field=Data "(?<DataMatch>HostId=[a-zA-Z0-9-]{36}\\s+EngineVersion=)"
+| eval DataCondition=if(isnotnull(DataMatch), "true", "false")
+| search NOT (Data IN ("*HostApplication=powershell*", "*HostApplication=C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell*", "*HostApplication=C:\\Windows\\SysWOW64\\WindowsPowerShell\\v1.0\\powershell*", "*HostApplication=C:/Windows/System32/WindowsPowerShell/v1.0/powershell*", "*HostApplication=C:/Windows/SysWOW64/WindowsPowerShell/v1.0/powershell*", "*HostApplication=C:\\\\WINDOWS\\\\system32\\\\WindowsPowerShell\\\\v1.0\\\\powershell.exe*", "*HostApplication=C:\\\\WINDOWS\\\\SysWOW64\\\\WindowsPowerShell\\\\v1.0\\\\powershell.exe*") OR DataCondition="true")
+
+# ── Use Get-NetTCPConnection ──
+# Mức độ  : Thấp
+# Chi tiết: Adversaries may attempt to get a listing of network connections to or from the compromised system they are currently accessing or from remote systems by querying for information over the network.
+source="WinEventLog:Windows PowerShell" Channel="Windows PowerShell" EventCode=400 EventCode=400 Channel="Windows PowerShell" Data="*Get-NetTCPConnection*"
+
+# ── Zip A Folder With PowerShell For Staging In Temp - PowerShell ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects PowerShell scripts that make use of the "Compress-Archive" Cmdlet in order to compress folders and files where the output is stored in a potentially suspicious location that is used often by m
+source="WinEventLog:Windows PowerShell" Channel="Windows PowerShell" Channel="Windows PowerShell" Data IN ("*Compress-Archive -Path*-DestinationPath $env:TEMP*", "*Compress-Archive -Path*-DestinationPath*\\AppData\\Local\\Temp\\*", "*Compress-Archive -Path*-DestinationPath*:\\Windows\\Temp\\*")
+
+# ── Tamper Windows Defender - PSClassic ──
+# Mức độ  : Cao
+# Chi tiết: Attempting to disable scheduled scanning and other parts of Windows Defender ATP or set default actions to allow.
+source="WinEventLog:Windows PowerShell" Channel="Windows PowerShell" EventCode=600 EventCode=600 Channel="Windows PowerShell" Data="*Set-MpPreference*" Data IN ("*-dbaf $true*", "*-dbaf 1*", "*-dbm $true*", "*-dbm 1*", "*-dips $true*", "*-dips 1*", "*-DisableArchiveScanning $true*", "*-DisableArchiveScanning 1*", "*-DisableBehaviorMonitoring $true*", "*-DisableBehaviorMonitoring 1*", "*-DisableBlockAtFirstSeen $true*", "*-DisableBlockAtFirstSeen 1*", "*-DisableCatchupFullScan $true*", "*-DisableCatchupFullScan 1*", "*-DisableCatchupQuickScan $true*", "*-DisableCatchupQuickScan 1*", "*-DisableIntrusionPreventionSystem $true*", "*-DisableIntrusionPreventionSystem 1*", "*-DisableIOAVProtection $true*", "*-DisableIOAVProtection 1*", "*-DisableRealtimeMonitoring $true*", "*-DisableRealtimeMonitoring 1*", "*-DisableRemovableDriveScanning $true*", "*-DisableRemovableDriveScanning 1*", "*-DisableScanningMappedNetworkDrivesForFullScan $true*", "*-DisableScanningMappedNetworkDrivesForFullScan 1*", "*-DisableScanningNetworkFiles $true*", "*-DisableScanningNetworkFiles 1*", "*-DisableScriptScanning $true*", "*-DisableScriptScanning 1*", "*-MAPSReporting $false*", "*-MAPSReporting 0*", "*-drdsc $true*", "*-drdsc 1*", "*-drtm $true*", "*-drtm 1*", "*-dscrptsc $true*", "*-dscrptsc 1*", "*-dsmndf $true*", "*-dsmndf 1*", "*-dsnf $true*", "*-dsnf 1*", "*-dss $true*", "*-dss 1*") OR Data IN ("*HighThreatDefaultAction Allow*", "*htdefac Allow*", "*LowThreatDefaultAction Allow*", "*ltdefac Allow*", "*ModerateThreatDefaultAction Allow*", "*mtdefac Allow*", "*SevereThreatDefaultAction Allow*", "*stdefac Allow*")
+
+# ── Suspicious Non PowerShell WSMAN COM Provider ──
+# Mức độ  : Trung bình
+# Mục đích: Thực thi lệnh/script; Di chuyển ngang mạng
+# Chi tiết: Detects suspicious use of the WSMAN provider without PowerShell.exe as the host application.
+source="WinEventLog:Windows PowerShell" Channel="Windows PowerShell" Channel="Windows PowerShell" Data="*ProviderName=WSMan*"
+| rex field=Data "(?<DataMatch>HostId=[a-zA-Z0-9-]{36}\\s+EngineVersion=)"
+| eval DataCondition=if(isnotnull(DataMatch), "true", "false")
+| search NOT (Data IN ("*HostApplication=powershell*", "*HostApplication=C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell*", "*HostApplication=C:\\Windows\\SysWOW64\\WindowsPowerShell\\v1.0\\powershell*", "*HostApplication=C:/Windows/System32/WindowsPowerShell/v1.0/powershell*", "*HostApplication=C:/Windows/SysWOW64/WindowsPowerShell/v1.0/powershell*") OR DataCondition="true") NOT Data="*HostApplication=C:\\Hexnode\\Hexnode Agent\\Current\\HexnodeAgent.exe*"
+
+# ── Potential Active Directory Enumeration Using AD Module - PsModule ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects usage of the "Import-Module" cmdlet to load the "Microsoft.ActiveDirectory.Management.dl" DLL. Which is often used by attackers to perform AD enumeration.
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4103 EventCode=4103 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") Payload IN ("*Import-Module *", "*ipmo *") Payload="*Microsoft.ActiveDirectory.Management.dll*"
+
+# ── Alternate PowerShell Hosts - PowerShell Module ──
+# Mức độ  : Trung bình
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects alternate PowerShell hosts potentially bypassing detections looking for powershell.exe
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4103 EventCode=4103 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ContextInfo="*" NOT (ContextInfo IN ("*= powershell*", "*= C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell*", "*= C:\\Windows\\SysWOW64\\WindowsPowerShell\\v1.0\\powershell*", "*= C:/Windows/System32/WindowsPowerShell/v1.0/powershell*", "*= C:/Windows/SysWOW64/WindowsPowerShell/v1.0/powershell*", "*= \\??\\C:Windows\\System32\\WindowsPowerShell\\v1.0\\powershell*", "*= \\??\\C:Windows\\SysWOW64\\WindowsPowerShell\\v1.0\\powershell*") OR ContextInfo="*= C:\\WINDOWS\\System32\\sdiagnhost.exe -Embedding*" OR ContextInfo="*ConfigSyncRun.exe*" OR ContextInfo="*C:\\Windows\\system32\\dsac.exe*" OR ContextInfo="*C:\\Windows\\system32\\wsmprovhost.exe -Embedding*" OR Payload IN ("*Update-Help*", "*Failed to update Help for the module*"))
+
+# ── Bad Opsec Powershell Code Artifacts ──
+# Mức độ  : Nghiêm trọng
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: focuses on trivial artifacts observed in variants of prevalent offensive ps1 payloads, including Cobalt Strike Beacon, PoshC2, Powerview, Letmein, Empire, Powersploit, and other attack payloads that o
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4103 EventCode=4103 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") Payload IN ("*$DoIt*", "*harmj0y*", "*mattifestation*", "*_RastaMouse*", "*tifkin_*", "*0xdeadbeef*")
+
+# ── Clear PowerShell History - PowerShell Module ──
+# Mức độ  : Trung bình
+# Mục đích: Xóa dấu vết
+# Chi tiết: Detects keywords that could indicate clearing PowerShell history
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4103 EventCode=4103 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") (Payload="*Set-PSReadlineOption*" Payload="*–HistorySaveStyle*" Payload="*SaveNothing*") OR (Payload="*Set-PSReadlineOption*" Payload="*-HistorySaveStyle*" Payload="*SaveNothing*") OR (Payload IN ("*del*", "*Remove-Item*", "*rm*") Payload="*(Get-PSReadlineOption).HistorySavePath*")
+
+# ── PowerShell Decompress Commands ──
+# Mức độ  : Thông tin
+# Chi tiết: A General detection for specific decompress commands in PowerShell logs. This could be an adversary decompressing files.
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4103 EventCode=4103 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") Payload="*Expand-Archive*"
+
+# ── Malicious PowerShell Scripts - PoshModule ──
+# Mức độ  : Cao
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects the execution of known offensive powershell scripts used for exploitation or reconnaissance
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4103 EventCode=4103 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ContextInfo IN ("*Add-ConstrainedDelegationBackdoor.ps1*", "*Add-Exfiltration.ps1*", "*Add-Persistence.ps1*", "*Add-RegBackdoor.ps1*", "*Add-RemoteRegBackdoor.ps1*", "*Add-ScrnSaveBackdoor.ps1*", "*BadSuccessor.ps1*", "*Check-VM.ps1*", "*ConvertTo-ROT13.ps1*", "*Copy-VSS.ps1*", "*Create-MultipleSessions.ps1*", "*DNS_TXT_Pwnage.ps1*", "*dnscat2.ps1*", "*Do-Exfiltration.ps1*", "*DomainPasswordSpray.ps1*", "*Download_Execute.ps1*", "*Download-Execute-PS.ps1*", "*Enabled-DuplicateToken.ps1*", "*Enable-DuplicateToken.ps1*", "*Execute-Command-MSSQL.ps1*", "*Execute-DNSTXT-Code.ps1*", "*Execute-OnTime.ps1*", "*ExetoText.ps1*", "*Exploit-Jboss.ps1*", "*Find-AVSignature.ps1*", "*Find-Fruit.ps1*", "*Find-GPOLocation.ps1*", "*Find-TrustedDocuments.ps1*", "*FireBuster.ps1*", "*FireListener.ps1*", "*Get-ApplicationHost.ps1*", "*Get-ChromeDump.ps1*", "*Get-ClipboardContents.ps1*", "*Get-ComputerDetail.ps1*", "*Get-FoxDump.ps1*", "*Get-GPPAutologon.ps1*", "*Get-GPPPassword.ps1*", "*Get-IndexedItem.ps1*", "*Get-Keystrokes.ps1*", "*Get-LSASecret.ps1*", "*Get-MicrophoneAudio.ps1*", "*Get-PassHashes.ps1*", "*Get-PassHints.ps1*", "*Get-RegAlwaysInstallElevated.ps1*", "*Get-RegAutoLogon.ps1*", "*Get-RickAstley.ps1*", "*Get-Screenshot.ps1*", "*Get-SecurityPackages.ps1*", "*Get-ServiceFilePermission.ps1*", "*Get-ServicePermission.ps1*", "*Get-ServiceUnquoted.ps1*", "*Get-SiteListPassword.ps1*", "*Get-System.ps1*", "*Get-TimedScreenshot.ps1*", "*Get-UnattendedInstallFile.ps1*", "*Get-Unconstrained.ps1*", "*Get-USBKeystrokes.ps1*", "*Get-VaultCredential.ps1*", "*Get-VulnAutoRun.ps1*", "*Get-VulnSchTask.ps1*", "*Get-WebConfig.ps1*", "*Get-WebCredentials.ps1*", "*Get-WLAN-Keys.ps1*", "*Gupt-Backdoor.ps1*", "*HTTP-Backdoor.ps1*", "*HTTP-Login.ps1*", "*Install-ServiceBinary.ps1*", "*Install-SSP.ps1*", "*Invoke-ACLScanner.ps1*", "*Invoke-ADSBackdoor.ps1*", "*Invoke-AmsiBypass.ps1*", "*Invoke-ARPScan.ps1*", "*Invoke-BackdoorLNK.ps1*", "*Invoke-BadPotato.ps1*", "*Invoke-BetterSafetyKatz.ps1*", "*Invoke-BruteForce.ps1*", "*Invoke-BypassUAC.ps1*", "*Invoke-Carbuncle.ps1*", "*Invoke-Certify.ps1*", "*Invoke-ConPtyShell.ps1*", "*Invoke-CredentialInjection.ps1*", "*Invoke-CredentialsPhish.ps1*", "*Invoke-DAFT.ps1*", "*Invoke-DCSync.ps1*", "*Invoke-Decode.ps1*", "*Invoke-DinvokeKatz.ps1*", "*Invoke-DllInjection.ps1*", "*Invoke-DNSExfiltrator.ps1*", "*Invoke-DowngradeAccount.ps1*", "*Invoke-EgressCheck.ps1*", "*Invoke-Encode.ps1*", "*Invoke-EventViewer.ps1*", "*Invoke-Eyewitness.ps1*", "*Invoke-FakeLogonScreen.ps1*", "*Invoke-Farmer.ps1*", "*Invoke-Get-RBCD-Threaded.ps1*", "*Invoke-Gopher.ps1*", "*Invoke-Grouper2.ps1*", "*Invoke-Grouper3.ps1*", "*Invoke-HandleKatz.ps1*", "*Invoke-Interceptor.ps1*", "*Invoke-Internalmonologue.ps1*", "*Invoke-Inveigh.ps1*", "*Invoke-InveighRelay.ps1*", "*Invoke-JSRatRegsvr.ps1*", "*Invoke-JSRatRundll.ps1*", "*Invoke-KrbRelay.ps1*", "*Invoke-KrbRelayUp.ps1*", "*Invoke-LdapSignCheck.ps1*", "*Invoke-Lockless.ps1*", "*Invoke-MalSCCM.ps1*", "*Invoke-Mimikatz.ps1*", "*Invoke-MimikatzWDigestDowngrade.ps1*", "*Invoke-Mimikittenz.ps1*", "*Invoke-MITM6.ps1*", "*Invoke-NanoDump.ps1*", "*Invoke-NetRipper.ps1*", "*Invoke-NetworkRelay.ps1*", "*Invoke-NinjaCopy.ps1*", "*Invoke-OxidResolver.ps1*", "*Invoke-P0wnedshell.ps1*", "*Invoke-P0wnedshellx86.ps1*", "*Invoke-Paranoia.ps1*", "*Invoke-PortScan.ps1*", "*Invoke-PoshRatHttp.ps1*", "*Invoke-PoshRatHttps.ps1*", "*Invoke-PostExfil.ps1*", "*Invoke-PowerDump.ps1*", "*Invoke-PowerDPAPI.ps1*", "*Invoke-PowerShellIcmp.ps1*", "*Invoke-PowerShellTCP.ps1*", "*Invoke-PowerShellTcpOneLine.ps1*", "*Invoke-PowerShellTcpOneLineBind.ps1*", "*Invoke-PowerShellUdp.ps1*", "*Invoke-PowerShellUdpOneLine.ps1*", "*Invoke-PowerShellWMI.ps1*", "*Invoke-PowerThIEf.ps1*", "*Invoke-PPLDump.ps1*", "*Invoke-Prasadhak.ps1*", "*Invoke-PsExec.ps1*", "*Invoke-PsGcat.ps1*", "*Invoke-PsGcatAgent.ps1*", "*Invoke-PSInject.ps1*", "*Invoke-PsUaCme.ps1*", "*Invoke-ReflectivePEInjection.ps1*", "*Invoke-ReverseDNSLookup.ps1*", "*Invoke-Rubeus.ps1*", "*Invoke-RunAs.ps1*", "*Invoke-SafetyKatz.ps1*", "*Invoke-SauronEye.ps1*", "*Invoke-SCShell.ps1*", "*Invoke-Seatbelt.ps1*", "*Invoke-ServiceAbuse.ps1*", "*Invoke-SessionGopher.ps1*", "*Invoke-ShellCode.ps1*", "*Invoke-SMBScanner.ps1*", "*Invoke-Snaffler.ps1*", "*Invoke-Spoolsample.ps1*", "*Invoke-SSHCommand.ps1*", "*Invoke-SSIDExfil.ps1*", "*Invoke-StandIn.ps1*", "*Invoke-StickyNotesExtract.ps1*", "*Invoke-Tater.ps1*", "*Invoke-Thunderfox.ps1*", "*Invoke-ThunderStruck.ps1*", "*Invoke-TokenManipulation.ps1*", "*Invoke-Tokenvator.ps1*", "*Invoke-TotalExec.ps1*", "*Invoke-UrbanBishop.ps1*", "*Invoke-UserHunter.ps1*", "*Invoke-VoiceTroll.ps1*", "*Invoke-Whisker.ps1*", "*Invoke-WinEnum.ps1*", "*Invoke-winPEAS.ps1*", "*Invoke-WireTap.ps1*", "*Invoke-WmiCommand.ps1*", "*Invoke-WScriptBypassUAC.ps1*", "*Invoke-Zerologon.ps1*", "*Keylogger.ps1*", "*MailRaider.ps1*", "*New-HoneyHash.ps1*", "*OfficeMemScraper.ps1*", "*Offline_Winpwn.ps1*", "*Out-CHM.ps1*", "*Out-DnsTxt.ps1*", "*Out-Excel.ps1*", "*Out-HTA.ps1*", "*Out-Java.ps1*", "*Out-JS.ps1*", "*Out-Minidump.ps1*", "*Out-RundllCommand.ps1*", "*Out-SCF.ps1*", "*Out-SCT.ps1*", "*Out-Shortcut.ps1*", "*Out-WebQuery.ps1*", "*Out-Word.ps1*", "*Parse_Keys.ps1*", "*Port-Scan.ps1*", "*PowerBreach.ps1*", "*powercat.ps1*", "*PowerRunAsSystem.psm1*", "*PowerSharpPack.ps1*", "*PowerUp.ps1*", "*PowerUpSQL.ps1*", "*PowerView.ps1*", "*PSAsyncShell.ps1*", "*RemoteHashRetrieval.ps1*", "*Remove-Persistence.ps1*", "*Remove-PoshRat.ps1*", "*Remove-Update.ps1*", "*Run-EXEonRemote.ps1*", "*Schtasks-Backdoor.ps1*", "*Set-DCShadowPermissions.ps1*", "*Set-MacAttribute.ps1*", "*Set-RemotePSRemoting.ps1*", "*Set-RemoteWMI.ps1*", "*Set-Wallpaper.ps1*", "*Show-TargetScreen.ps1*", "*Speak.ps1*", "*Start-CaptureServer.ps1*", "*Start-WebcamRecorder.ps1*", "*StringToBase64.ps1*", "*TexttoExe.ps1*", "*Veeam-Get-Creds.ps1*", "*VolumeShadowCopyTools.ps1*", "*WinPwn.ps1*", "*WSUSpendu.ps1*") OR (ContextInfo="*Invoke-Sharp*" ContextInfo="*.ps1*")
+
+# ── Suspicious Get-ADDBAccount Usage ──
+# Mức độ  : Cao
+# Mục đích: Dump thông tin xác thực
+# Chi tiết: Detects suspicious invocation of the Get-ADDBAccount script that reads from a ntds.dit file and may be used to get access to credentials without using any credential dumpers
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4103 EventCode=4103 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") Payload="*Get-ADDBAccount*" Payload="*BootKey *" Payload="*DatabasePath *"
+
+# ── PowerShell Get Clipboard ──
+# Mức độ  : Trung bình
+# Chi tiết: A General detection for the Get-Clipboard commands in PowerShell logs. This could be an adversary capturing clipboard contents.
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4103 EventCode=4103 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") Payload="*Get-Clipboard*"
+
+# ── HackTool - Evil-WinRm Execution - PowerShell Module ──
+# Mức độ  : Cao
+# Chi tiết: Detects the execution of Evil-WinRM via PowerShell Module logs by leveraging the hardcoded strings inside the utility.
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4103 EventCode=4103 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ContextInfo IN ("*:\\Windows\\System32\\wsmprovhost.exe*", "*:\\Windows\\SysWOW64\\wsmprovhost.exe*") Payload IN ("*value=\"(get-location).path*", "*value=\"(get-item*).length*", "*Invoke-Binary *", "*Donut-Loader -process_id*-donutfile*", "*Bypass-4MSI*", "*IEX ([System.Text.Encoding]::ASCII.GetString([System.Convert]::FromBase64String($a))).replace('***','')*") OR (Payload="*$servicios = Get-ItemProperty \"registry::HKLM\\System\\CurrentControlSet\\Services\\\"*" Payload="*Where-Object {$_.imagepath -notmatch \"system\" -and $_.imagepath -ne $null } | Select-Object pschildname,imagepath*") OR (Payload="*$a +=  \\\"$($_.FullName.Replace('\\','/'))/\\\"}else{  $a += \\\"$($_.FullName.Replace('\\', '/'))\\\" }*" Payload="*$a=@();$*")
+
+# ── Invoke-Obfuscation CLIP+ Launcher - PowerShell Module ──
+# Mức độ  : Cao
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects Obfuscated use of Clip.exe to execute PowerShell
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4103 EventCode=4103 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational")
+| regex Payload="cmd.{0,5}(?:/c|/r).+clip(?:\\.exe)?.{0,4}&&.+clipboard]::\\(\\s\\\\\"\\{\\d\\}.+-f.+\""
+
+# ── Invoke-Obfuscation Obfuscated IEX Invocation - PowerShell Module ──
+# Mức độ  : Cao
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects all variations of obfuscated powershell IEX invocation code generated by Invoke-Obfuscation framework from the code block cited in the reference section below
+| rex field=Payload "(?<PayloadMatch>\\$PSHome\\[\\s*\\d{1,3}\\s*\\]\\s*\\+\\s*\\$PSHome\\[)"
+| eval PayloadCondition=if(isnotnull(PayloadMatch), "true", "false")
+| rex field=Payload "(?<PayloadMatch2>\\$ShellId\\[\\s*\\d{1,3}\\s*\\]\\s*\\+\\s*\\$ShellId\\[)"
+| eval PayloadCondition2=if(isnotnull(PayloadMatch2), "true", "false")
+| rex field=Payload "(?<PayloadMatch3>\\$env:Public\\[\\s*\\d{1,3}\\s*\\]\\s*\\+\\s*\\$env:Public\\[)"
+| eval PayloadCondition3=if(isnotnull(PayloadMatch3), "true", "false")
+| rex field=Payload "(?<PayloadMatch4>\\$env:ComSpec\\[(\\s*\\d{1,3}\\s*,){2})"
+| eval PayloadCondition4=if(isnotnull(PayloadMatch4), "true", "false")
+| rex field=Payload "(?<PayloadMatch5>\\*mdr\\*\\W\\s*\\)\\.Name)"
+| eval PayloadCondition5=if(isnotnull(PayloadMatch5), "true", "false")
+| rex field=Payload "(?<PayloadMatch6>\\$VerbosePreference\\.ToString\\()"
+| eval PayloadCondition6=if(isnotnull(PayloadMatch6), "true", "false")
+| rex field=Payload "(?<PayloadMatch7>\\[String\\]\\s*\\$VerbosePreference)"
+| eval PayloadCondition7=if(isnotnull(PayloadMatch7), "true", "false")
+| search source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4103 EventCode=4103 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") PayloadCondition="true" OR PayloadCondition2="true" OR PayloadCondition3="true" OR PayloadCondition4="true" OR PayloadCondition5="true" OR PayloadCondition6="true" OR PayloadCondition7="true"
+
+# ── Invoke-Obfuscation STDIN+ Launcher - PowerShell Module ──
+# Mức độ  : Cao
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects Obfuscated use of stdin to execute PowerShell
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4103 EventCode=4103 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational")
+| regex Payload="cmd.{0,5}(?:/c|/r).+powershell.+(?:\\$\\{?input\\}?|noexit).+\""
+
+# ── Invoke-Obfuscation VAR+ Launcher - PowerShell Module ──
+# Mức độ  : Cao
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects Obfuscated use of Environment Variables to execute PowerShell
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4103 EventCode=4103 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational")
+| regex Payload="cmd.{0,5}(?:/c|/r)(?:\\s|)\"set\\s[a-zA-Z]{3,6}.*(?:\\{\\d\\}){1,}\\\\\"\\s+?-f(?:.*\\)){1,}.*\""
+
+# ── Invoke-Obfuscation COMPRESS OBFUSCATION - PowerShell Module ──
+# Mức độ  : Trung bình
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects Obfuscated Powershell via COMPRESS OBFUSCATION
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4103 EventCode=4103 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") Payload="*new-object*" Payload="*text.encoding]::ascii*" Payload IN ("*system.io.compression.deflatestream*", "*system.io.streamreader*") Payload="*readtoend"
+
+# ── Invoke-Obfuscation RUNDLL LAUNCHER - PowerShell Module ──
+# Mức độ  : Trung bình
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects Obfuscated Powershell via RUNDLL LAUNCHER
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4103 EventCode=4103 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") Payload="*rundll32.exe*" Payload="*shell32.dll*" Payload="*shellexec_rundll*" Payload="*powershell*"
+
+# ── Invoke-Obfuscation Via Stdin - PowerShell Module ──
+# Mức độ  : Cao
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects Obfuscated Powershell via Stdin in Scripts
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4103 EventCode=4103 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational")
+| regex Payload="(?i)(set).*&&\\s?set.*(environment|invoke|\\$?\\{?input).*&&.*\""
+
+# ── Invoke-Obfuscation Via Use Clip - PowerShell Module ──
+# Mức độ  : Cao
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects Obfuscated Powershell via use Clip.exe in Scripts
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4103 EventCode=4103 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational")
+| regex Payload="(?i)echo.*clip.*&&.*(Clipboard|i`?n`?v`?o`?k`?e`?)"
+
+# ── Invoke-Obfuscation Via Use MSHTA - PowerShell Module ──
+# Mức độ  : Cao
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects Obfuscated Powershell via use MSHTA in Scripts
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4103 EventCode=4103 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") Payload="*set*" Payload="*&&*" Payload="*mshta*" Payload="*vbscript:createobject*" Payload="*.run*" Payload="*(window.close)*"
+
+# ── Invoke-Obfuscation Via Use Rundll32 - PowerShell Module ──
+# Mức độ  : Cao
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects Obfuscated Powershell via use Rundll32 in Scripts
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4103 EventCode=4103 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") Payload="*&&*" Payload="*rundll32*" Payload="*shell32.dll*" Payload="*shellexec_rundll*" Payload IN ("*value*", "*invoke*", "*comspec*", "*iex*")
+
+# ── Invoke-Obfuscation VAR++ LAUNCHER OBFUSCATION - PowerShell Module ──
+# Mức độ  : Cao
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects Obfuscated Powershell via VAR++ LAUNCHER
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4103 EventCode=4103 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational")
+| regex Payload="(?i)&&set.*(\\{\\d\\}){2,}\\\\\"\\s+?-f.*&&.*cmd.*/c"
+
+# ── Malicious PowerShell Commandlets - PoshModule ──
+# Mức độ  : Cao
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects Commandlet names from well-known PowerShell exploitation frameworks
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4103 EventCode=4103 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") Payload IN ("*Add-Exfiltration*", "*Add-Persistence*", "*Add-RegBackdoor*", "*Add-RemoteRegBackdoor*", "*Add-ScrnSaveBackdoor*", "*BadSuccessor*", "*Check-VM*", "*ConvertTo-Rc4ByteStream*", "*Decrypt-Hash*", "*Disable-ADIDNSNode*", "*Disable-MachineAccount*", "*Do-Exfiltration*", "*Enable-ADIDNSNode*", "*Enable-MachineAccount*", "*Enabled-DuplicateToken*", "*Exploit-Jboss*", "*Export-ADR*", "*Export-ADRCSV*", "*Export-ADRExcel*", "*Export-ADRHTML*", "*Export-ADRJSON*", "*Export-ADRXML*", "*Find-Fruit*", "*Find-GPOLocation*", "*Find-TrustedDocuments*", "*Get-ADIDNS*", "*Get-ApplicationHost*", "*Get-ChromeDump*", "*Get-ClipboardContents*", "*Get-FoxDump*", "*Get-GPPPassword*", "*Get-IndexedItem*", "*Get-KerberosAESKey*", "*Get-Keystrokes*", "*Get-LSASecret*", "*Get-MachineAccountAttribute*", "*Get-MachineAccountCreator*", "*Get-PassHashes*", "*Get-RegAlwaysInstallElevated*", "*Get-RegAutoLogon*", "*Get-RemoteBootKey*", "*Get-RemoteCachedCredential*", "*Get-RemoteLocalAccountHash*", "*Get-RemoteLSAKey*", "*Get-RemoteMachineAccountHash*", "*Get-RemoteNLKMKey*", "*Get-RickAstley*", "*Get-Screenshot*", "*Get-SecurityPackages*", "*Get-ServiceFilePermission*", "*Get-ServicePermission*", "*Get-ServiceUnquoted*", "*Get-SiteListPassword*", "*Get-System*", "*Get-TimedScreenshot*", "*Get-UnattendedInstallFile*", "*Get-Unconstrained*", "*Get-USBKeystrokes*", "*Get-VaultCredential*", "*Get-VulnAutoRun*", "*Get-VulnSchTask*", "*Grant-ADIDNSPermission*", "*Gupt-Backdoor*", "*HTTP-Login*", "*Install-ServiceBinary*", "*Install-SSP*", "*Invoke-ACLScanner*", "*Invoke-ADRecon*", "*Invoke-ADSBackdoor*", "*Invoke-AgentSmith*", "*Invoke-AllChecks*", "*Invoke-ARPScan*", "*Invoke-AzureHound*", "*Invoke-BackdoorLNK*", "*Invoke-BadPotato*", "*Invoke-BetterSafetyKatz*", "*Invoke-BypassUAC*", "*Invoke-Carbuncle*", "*Invoke-Certify*", "*Invoke-ConPtyShell*", "*Invoke-CredentialInjection*", "*Invoke-DAFT*", "*Invoke-DCSync*", "*Invoke-DinvokeKatz*", "*Invoke-DllInjection*", "*Invoke-DNSUpdate*", "*Invoke-DNSExfiltrator*", "*Invoke-DomainPasswordSpray*", "*Invoke-DowngradeAccount*", "*Invoke-EgressCheck*", "*Invoke-Eyewitness*", "*Invoke-FakeLogonScreen*", "*Invoke-Farmer*", "*Invoke-Get-RBCD-Threaded*", "*Invoke-Gopher*", "*Invoke-Grouper*", "*Invoke-HandleKatz*", "*Invoke-ImpersonatedProcess*", "*Invoke-ImpersonateSystem*", "*Invoke-InteractiveSystemPowerShell*", "*Invoke-Internalmonologue*", "*Invoke-Inveigh*", "*Invoke-InveighRelay*", "*Invoke-KrbRelay*", "*Invoke-LdapSignCheck*", "*Invoke-Lockless*", "*Invoke-MalSCCM*", "*Invoke-Mimikatz*", "*Invoke-Mimikittenz*", "*Invoke-MITM6*", "*Invoke-NanoDump*", "*Invoke-NetRipper*", "*Invoke-Nightmare*", "*Invoke-NinjaCopy*", "*Invoke-OfficeScrape*", "*Invoke-OxidResolver*", "*Invoke-P0wnedshell*", "*Invoke-Paranoia*", "*Invoke-PortScan*", "*Invoke-PoshRatHttp*", "*Invoke-PostExfil*", "*Invoke-PowerDump*", "*Invoke-PowerDPAPI*", "*Invoke-PowerShellTCP*", "*Invoke-PowerShellWMI*", "*Invoke-PPLDump*", "*Invoke-PsExec*", "*Invoke-PSInject*", "*Invoke-PsUaCme*", "*Invoke-ReflectivePEInjection*", "*Invoke-ReverseDNSLookup*", "*Invoke-Rubeus*", "*Invoke-RunAs*", "*Invoke-SafetyKatz*", "*Invoke-SauronEye*", "*Invoke-SCShell*", "*Invoke-Seatbelt*", "*Invoke-ServiceAbuse*", "*Invoke-ShadowSpray*", "*Invoke-Sharp*", "*Invoke-Shellcode*", "*Invoke-SMBScanner*", "*Invoke-Snaffler*", "*Invoke-Spoolsample*", "*Invoke-SpraySinglePassword*", "*Invoke-SSHCommand*", "*Invoke-StandIn*", "*Invoke-StickyNotesExtract*", "*Invoke-SystemCommand*", "*Invoke-Tasksbackdoor*", "*Invoke-Tater*", "*Invoke-Thunderfox*", "*Invoke-ThunderStruck*", "*Invoke-TokenManipulation*", "*Invoke-Tokenvator*", "*Invoke-TotalExec*", "*Invoke-UrbanBishop*", "*Invoke-UserHunter*", "*Invoke-VoiceTroll*", "*Invoke-Whisker*", "*Invoke-WinEnum*", "*Invoke-winPEAS*", "*Invoke-WireTap*", "*Invoke-WmiCommand*", "*Invoke-WMIExec*", "*Invoke-WScriptBypassUAC*", "*Invoke-Zerologon*", "*MailRaider*", "*New-ADIDNSNode*", "*New-DNSRecordArray*", "*New-HoneyHash*", "*New-InMemoryModule*", "*New-MachineAccount*", "*New-SOASerialNumberArray*", "*Out-Minidump*", "*Port-Scan*", "*PowerBreach*", "*powercat *", "*PowerUp*", "*PowerView*", "*Remove-ADIDNSNode*", "*Remove-MachineAccount*", "*Remove-Update*", "*Rename-ADIDNSNode*", "*Revoke-ADIDNSPermission*", "*Set-ADIDNSNode*", "*Set-MacAttribute*", "*Set-MachineAccountAttribute*", "*Set-Wallpaper*", "*Show-TargetScreen*", "*Start-CaptureServer*", "*Start-Dnscat2*", "*Start-WebcamRecorder*", "*Veeam-Get-Creds*", "*VolumeShadowCopyTools*")
+
+# ── Remote PowerShell Session (PS Module) ──
+# Mức độ  : Cao
+# Mục đích: Thực thi lệnh/script; Di chuyển ngang mạng
+# Chi tiết: Detects remote PowerShell sessions
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4103 EventCode=4103 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ContextInfo="* = ServerRemoteHost *" ContextInfo="*wsmprovhost.exe*" NOT ContextInfo="*\\Windows\\system32\\WindowsPowerShell\\v1.0\\Modules\\Microsoft.PowerShell.Archive\\Microsoft.PowerShell.Archive.psm1*"
+
+# ── Potential RemoteFXvGPUDisablement.EXE Abuse - PowerShell Module ──
+# Mức độ  : Cao
+# Chi tiết: Detects PowerShell module creation where the module Contents are set to "function Get-VMRemoteFXPhysicalVideoAdapter". This could be a sign of potential abuse of the "RemoteFXvGPUDisablement.exe" bina
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4103 EventCode=4103 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") Payload="*ModuleContents=function Get-VMRemoteFXPhysicalVideoAdapter {*"
+
+# ── AD Groups Or Users Enumeration Using PowerShell - PoshModule ──
+# Mức độ  : Thấp
+# Chi tiết: Adversaries may attempt to find domain-level groups and permission settings. The knowledge of domain-level permission groups can help adversaries determine which groups exist and which users belong to
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4103 EventCode=4103 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") Payload="*get-ADPrincipalGroupMembership*" OR ContextInfo="*get-ADPrincipalGroupMembership*" OR (Payload="*get-aduser*" Payload="*-f *" Payload="*-pr *" Payload="*DoesNotRequirePreAuth*") OR (ContextInfo="*get-aduser*" ContextInfo="*-f *" ContextInfo="*-pr *" ContextInfo="*DoesNotRequirePreAuth*")
+
+# ── Suspicious PowerShell Download - PoshModule ──
+# Mức độ  : Trung bình
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects suspicious PowerShell download command
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4103 EventCode=4103 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ContextInfo="*System.Net.WebClient*" ContextInfo IN ("*.DownloadFile(*", "*.DownloadString(*")
+
+# ── Use Get-NetTCPConnection - PowerShell Module ──
+# Mức độ  : Thấp
+# Chi tiết: Adversaries may attempt to get a listing of network connections to or from the compromised system they are currently accessing or from remote systems by querying for information over the network.
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4103 EventCode=4103 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ContextInfo="*Get-NetTCPConnection*"
+
+# ── Suspicious PowerShell Invocations - Generic - PowerShell Module ──
+# Mức độ  : Cao
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects suspicious PowerShell invocation command parameters
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4103 EventCode=4103 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ContextInfo IN ("* -enc *", "* -EncodedCommand *", "* -ec *") ContextInfo IN ("* -w hidden *", "* -window hidden *", "* -windowstyle hidden *", "* -w 1 *") ContextInfo IN ("* -noni *", "* -noninteractive *")
+
+# ── Suspicious PowerShell Invocations - Specific - PowerShell Module ──
+# Mức độ  : Cao
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects suspicious PowerShell invocation command parameters
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4103 EventCode=4103 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") (ContextInfo="*-nop*" ContextInfo="* -w *" ContextInfo="*hidden*" ContextInfo="* -c *" ContextInfo="*[Convert]::FromBase64String*") OR (ContextInfo="* -w *" ContextInfo="*hidden*" ContextInfo="*-noni*" ContextInfo="*-nop*" ContextInfo="* -c *" ContextInfo="*iex*" ContextInfo="*New-Object*") OR (ContextInfo="* -w *" ContextInfo="*hidden*" ContextInfo="*-ep*" ContextInfo="*bypass*" ContextInfo="*-Enc*") OR (ContextInfo="*powershell*" ContextInfo="*reg*" ContextInfo="*add*" ContextInfo IN ("*\\software\\microsoft\\windows\\currentversion\\run*", "*\\software\\wow6432node\\microsoft\\windows\\currentversion\\run*", "*\\software\\microsoft\\windows\\currentversion\\policies\\explorer\\run*")) OR (ContextInfo="*bypass*" ContextInfo="*-noprofile*" ContextInfo="*-windowstyle*" ContextInfo="*hidden*" ContextInfo="*new-object*" ContextInfo="*system.net.webclient*" ContextInfo="*.download*") OR (ContextInfo="*iex*" ContextInfo="*New-Object*" ContextInfo="*Net.WebClient*" ContextInfo="*.Download*") NOT (ContextInfo IN ("*(New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1*", "*Write-ChocolateyWarning*"))
+
+# ── Suspicious Get Local Groups Information ──
+# Mức độ  : Thấp
+# Chi tiết: Detects the use of PowerShell modules and cmdlets to gather local group information. Adversaries may use local system permission groups to determine which groups exist and which users belong to a part
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4103 EventCode=4103 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") Payload IN ("*get-localgroup *", "*get-localgroupmember *") OR ContextInfo IN ("*get-localgroup *", "*get-localgroupmember *") OR (Payload IN ("*get-wmiobject *", "*gwmi *", "*get-ciminstance *", "*gcim *") OR (ContextInfo="*get-wmiobject *" ContextInfo="*gwmi *" ContextInfo="*get-ciminstance *" ContextInfo="*gcim *") Payload="*win32_group*" OR ContextInfo="*win32_group*")
+
+# ── Suspicious Computer Machine Password by PowerShell ──
+# Mức độ  : Trung bình
+# Mục đích: Dùng tài khoản hợp lệ
+# Chi tiết: The Reset-ComputerMachinePassword cmdlet changes the computer account password that the computers use to authenticate to the domain controllers in the domain. You can use it to reset the password of t
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4103 EventCode=4103 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ContextInfo="*Reset-ComputerMachinePassword*"
+
+# ── Suspicious Get Information for SMB Share - PowerShell Module ──
+# Mức độ  : Thấp
+# Chi tiết: Adversaries may look for folders and drives shared on remote systems as a means of identifying sources of information to gather as a precursor for Collection and to identify potential systems of inter
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4103 EventCode=4103 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") Payload="*get-smbshare*" OR ContextInfo="*get-smbshare*"
+
+# ── Zip A Folder With PowerShell For Staging In Temp  - PowerShell Module ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects PowerShell scripts that make use of the "Compress-Archive" Cmdlet in order to compress folders and files where the output is stored in a potentially suspicious location that is used often by m
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4103 EventCode=4103 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ContextInfo="*Compress-Archive -Path*-DestinationPath $env:TEMP*" ContextInfo="*Compress-Archive -Path*-DestinationPath*\\AppData\\Local\\Temp\\*" ContextInfo="*Compress-Archive -Path*-DestinationPath*:\\Windows\\Temp\\*"
+
+# ── SyncAppvPublishingServer Bypass Powershell Restriction - PS Module ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects SyncAppvPublishingServer process execution which usually utilized by adversaries to bypass PowerShell execution restrictions.
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4103 EventCode=4103 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ContextInfo="*SyncAppvPublishingServer.exe*"
+
+# ── AADInternals PowerShell Cmdlets Execution - PsScript ──
+# Mức độ  : Cao
+# Chi tiết: Detects ADDInternals Cmdlet execution. A tool for administering Azure AD and Office 365. Which can be abused by threat actors to attack Azure AD or Office 365.
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText IN ("*Add-AADInt*", "*ConvertTo-AADInt*", "*Disable-AADInt*", "*Enable-AADInt*", "*Export-AADInt*", "*Find-AADInt*", "*Get-AADInt*", "*Grant-AADInt*", "*Initialize-AADInt*", "*Install-AADInt*", "*Invoke-AADInt*", "*Join-AADInt*", "*New-AADInt*", "*Open-AADInt*", "*Read-AADInt*", "*Register-AADInt*", "*Remove-AADInt*", "*Reset-AADInt*", "*Resolve-AADInt*", "*Restore-AADInt*", "*Save-AADInt*", "*Search-AADInt*", "*Send-AADInt*", "*Set-AADInt*", "*Start-AADInt*", "*Unprotect-AADInt*", "*Update-AADInt*")
+
+# ── Access to Browser Login Data ──
+# Mức độ  : Trung bình
+# Chi tiết: Adversaries may acquire credentials from web browsers by reading files specific to the target browser. Web browsers commonly save credentials such as website usernames and passwords so that they do no
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*Copy-Item*" ScriptBlockText="*-Destination*" ScriptBlockText IN ("*\\Opera Software\\Opera Stable\\Login Data*", "*\\Mozilla\\Firefox\\Profiles*", "*\\Microsoft\\Edge\\User Data\\Default*", "*\\Google\\Chrome\\User Data\\Default\\Login Data*", "*\\Google\\Chrome\\User Data\\Default\\Login Data For Account*")
+
+# ── Potential Active Directory Enumeration Using AD Module - PsScript ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects usage of the "Import-Module" cmdlet to load the "Microsoft.ActiveDirectory.Management.dl" DLL. Which is often used by attackers to perform AD enumeration.
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") (ScriptBlockText="*Import-Module *" ScriptBlockText="*Microsoft.ActiveDirectory.Management.dll*") OR ScriptBlockText="*ipmo Microsoft.ActiveDirectory.Management.dll*"
+
+# ── Powershell Add Name Resolution Policy Table Rule ──
+# Mức độ  : Cao
+# Chi tiết: Detects powershell scripts that adds a Name Resolution Policy Table (NRPT) rule for the specified namespace. This will bypass the default DNS server and uses a specified server for answering the query
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*Add-DnsClientNrptRule*" ScriptBlockText="*-Namesp*" ScriptBlockText="*-NameSe*"
+
+# ── Add Windows Capability Via PowerShell Script ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects usage of the "Add-WindowsCapability" cmdlet to add Windows capabilities. Notable capabilities could be "OpenSSH" and others.
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*Add-WindowsCapability *" ScriptBlockText="*-Name OpenSSH.*"
+
+# ── PowerShell ADRecon Execution ──
+# Mức độ  : Cao
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects execution of ADRecon.ps1 for AD reconnaissance which has been reported to be actively used by FIN7
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText IN ("*Function Get-ADRExcelComOb*", "*Get-ADRGPO*", "*Get-ADRDomainController*", "*ADRecon-Report.xlsx*")
+
+# ── AMSI Bypass Pattern Assembly GetType ──
+# Mức độ  : Cao
+# Chi tiết: Detects code fragments found in small and obfuscated AMSI bypass PowerShell scripts
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*[Ref].Assembly.GetType*" ScriptBlockText="*SetValue($null,$true)*" ScriptBlockText="*NonPublic,Static*"
+
+# ── Potential AMSI Bypass Script Using NULL Bits ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects usage of special strings/null bits in order to potentially bypass AMSI functionalities
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText IN ("*if(0){{{0}}}' -f $(0 -as [char]) +*", "*#<NULL>*")
+
+# ── Silence.EDA Detection ──
+# Mức độ  : Nghiêm trọng
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects Silence EmpireDNSAgent as described in the Group-IP report
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*System.Diagnostics.Process*" ScriptBlockText="*Stop-Computer*" ScriptBlockText="*Restart-Computer*" ScriptBlockText="*Exception in execution*" ScriptBlockText="*$cmdargs*" ScriptBlockText="*Close-Dnscat2Tunnel*" ScriptBlockText="*set type=$LookupType`nserver*" ScriptBlockText="*$Command | nslookup 2>&1 | Out-String*" ScriptBlockText="*New-RandomDNSField*" ScriptBlockText="*[Convert]::ToString($SYNOptions, 16)*" ScriptBlockText="*$Session.Dead = $True*" ScriptBlockText="*$Session[\"Driver\"] -eq*"
+
+# ── Get-ADUser Enumeration Using UserAccountControl Flags ──
+# Mức độ  : Trung bình
+# Mục đích: Thu thập thông tin user
+# Chi tiết: Detects AS-REP roasting is an attack that is often-overlooked. It is not very common as you have to explicitly set accounts that do not require pre-authentication.
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*Get-ADUser*" ScriptBlockText="*-Filter*" ScriptBlockText="*useraccountcontrol*" ScriptBlockText="*-band*" ScriptBlockText="*4194304*"
+
+# ── Potential Data Exfiltration Via Audio File ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects potential exfiltration attempt via audio file using PowerShell
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*[System.Math]::*" ScriptBlockText="*[IO.FileMode]::*" ScriptBlockText="*BinaryWriter*" ScriptBlockText="*0x52*" ScriptBlockText="*0x49*" ScriptBlockText="*0x46*" ScriptBlockText="*0x57*" ScriptBlockText="*0x41*" ScriptBlockText="*0x56*" ScriptBlockText="*0x45*" ScriptBlockText="*0xAC*"
+
+# ── Automated Collection Command PowerShell ──
+# Mức độ  : Trung bình
+# Chi tiết: Once established within a system or network, an adversary may use automated techniques for collecting internal data.
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText IN ("*.doc*", "*.docx*", "*.xls*", "*.xlsx*", "*.ppt*", "*.pptx*", "*.rtf*", "*.pdf*", "*.txt*") ScriptBlockText="*Get-ChildItem*" ScriptBlockText="* -Recurse *" ScriptBlockText="* -Include *"
+
+# ── Windows Screen Capture with CopyFromScreen ──
+# Mức độ  : Trung bình
+# Chi tiết: Adversaries may attempt to take screen captures of the desktop to gather information over the course of an operation. Screen capturing functionality may be included as a feature of a remote access too
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*.CopyFromScreen*"
+
+# ── Clear PowerShell History - PowerShell ──
+# Mức độ  : Trung bình
+# Mục đích: Xóa dấu vết
+# Chi tiết: Detects keywords that could indicate clearing PowerShell history
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") (ScriptBlockText="*Set-PSReadlineOption*" ScriptBlockText="*–HistorySaveStyle*" ScriptBlockText="*SaveNothing*") OR (ScriptBlockText="*Set-PSReadlineOption*" ScriptBlockText="*-HistorySaveStyle*" ScriptBlockText="*SaveNothing*") OR (ScriptBlockText IN ("*del*", "*Remove-Item*", "*rm*") ScriptBlockText="*(Get-PSReadlineOption).HistorySavePath*")
+
+# ── Clearing Windows Console History ──
+# Mức độ  : Cao
+# Mục đích: Xóa dấu vết
+# Chi tiết: Identifies when a user attempts to clear console history. An adversary may clear the command history of a compromised account to conceal the actions undertaken during an intrusion.
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*Clear-History*" OR (ScriptBlockText IN ("*Remove-Item*", "*rm*") ScriptBlockText IN ("*ConsoleHost_history.txt*", "*(Get-PSReadlineOption).HistorySavePath*"))
+
+# ── Powershell Create Scheduled Task ──
+# Mức độ  : Trung bình
+# Mục đích: Lên lịch tác vụ độc hại
+# Chi tiết: Adversaries may abuse the Windows Task Scheduler to perform task scheduling for initial or recurring execution of malicious code
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText IN ("*New-ScheduledTaskAction*", "*New-ScheduledTaskTrigger*", "*New-ScheduledTaskPrincipal*", "*New-ScheduledTaskSettingsSet*", "*New-ScheduledTask*", "*Register-ScheduledTask*") OR (ScriptBlockText="*Invoke-CimMethod*" ScriptBlockText="*-ClassName*" ScriptBlockText="*PS_ScheduledTask*" ScriptBlockText="*-NameSpace*" ScriptBlockText="*Root\\Microsoft\\Windows\\TaskScheduler*") NOT (ScriptBlockText="*Microsoft.PowerShell.Core\\Export-ModuleMember*" ScriptBlockText="*Microsoft.Management.Infrastructure.CimInstance*" ScriptBlockText="*__cmdletization_methodParameter*")
+
+# ── Computer Discovery And Export Via Get-ADComputer Cmdlet - PowerShell ──
+# Mức độ  : Trung bình
+# Mục đích: Thu thập thông tin user
+# Chi tiết: Detects usage of the Get-ADComputer cmdlet to collect computer information and output it to a file
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*Get-ADComputer *" ScriptBlockText="* -Filter \**" ScriptBlockText IN ("* | Select *", "*Out-File*", "*Set-Content*", "*Add-Content*")
+
+# ── Powershell Install a DLL in System Directory ──
+# Mức độ  : Cao
+# Chi tiết: Uses PowerShell to install/copy a file into a system directory such as "System32" or "SysWOW64"
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational")
+| regex ScriptBlockText="(Copy-Item|cpi) .{2,128} -Destination .{1,32}\\\\Windows\\\\(System32|SysWOW64)"
+
+# ── Registry-Free Process Scope COR_PROFILER ──
+# Mức độ  : Trung bình
+# Chi tiết: Adversaries may leverage the COR_PROFILER environment variable to hijack the execution flow of programs that load the .NET CLR. The COR_PROFILER is a .NET Framework feature which allows developers to 
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*$env:COR_ENABLE_PROFILING*" ScriptBlockText="*$env:COR_PROFILER*" ScriptBlockText="*$env:COR_PROFILER_PATH*"
+
+# ── PowerShell Create Local User ──
+# Mức độ  : Trung bình
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects creation of a local user via PowerShell
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*New-LocalUser*"
+
+# ── DMSA Service Account Created in Specific OUs - PowerShell ──
+# Mức độ  : Trung bình
+# Mục đích: Dùng tài khoản hợp lệ
+# Chi tiết: Detects the creation of a dMSA service account using the New-ADServiceAccount cmdlet in certain OUs. The fact that the cmdlet is used to create a dMSASvc account in a specific OU is highly suspicious.
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*New-ADServiceAccount*" ScriptBlockText="*-CreateDelegatedServiceAccount*" ScriptBlockText="*-path*"
+
+# ── Create Volume Shadow Copy with Powershell ──
+# Mức độ  : Cao
+# Mục đích: Dump thông tin xác thực
+# Chi tiết: Adversaries may attempt to access or create a copy of the Active Directory domain database in order to steal credential information
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*Win32_ShadowCopy*" ScriptBlockText="*).Create(*" ScriptBlockText="*ClientAccessible*"
+
+# ── Powershell Detect Virtualization Environment ──
+# Mức độ  : Trung bình
+# Chi tiết: Adversaries may employ various system checks to detect and avoid virtualization and analysis environments. This may include changing behaviors based on the results of checks for the presence of artifa
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText IN ("*Get-WmiObject*", "*gwmi*") ScriptBlockText IN ("*MSAcpi_ThermalZoneTemperature*", "*Win32_ComputerSystem*")
+
+# ── DirectorySearcher Powershell Exploitation ──
+# Mức độ  : Trung bình
+# Chi tiết: Enumerates Active Directory to determine computers that are joined to the domain
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*New-Object *" ScriptBlockText="*System.DirectoryServices.DirectorySearcher*" ScriptBlockText="*.PropertiesToLoad.Add*" ScriptBlockText="*.findall()*" ScriptBlockText="*Properties.name*"
+
+# ── Manipulation of User Computer or Group Security Principals Across AD ──
+# Mức độ  : Trung bình
+# Chi tiết: Adversaries may create a domain account to maintain access to victim systems. Domain accounts are those managed by Active Directory Domain Services where access and permissions are configured across s
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*System.DirectoryServices.AccountManagement*"
+
+# ── Disable Powershell Command History ──
+# Mức độ  : Cao
+# Mục đích: Xóa dấu vết
+# Chi tiết: Detects scripts or commands that disabled the Powershell command history by removing psreadline module
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*Remove-Module*" ScriptBlockText="*psreadline*"
+
+# ── Disable-WindowsOptionalFeature Command PowerShell ──
+# Mức độ  : Cao
+# Chi tiết: Detect built in PowerShell cmdlet Disable-WindowsOptionalFeature, Deployment Image Servicing and Management tool. Similar to DISM.exe, this cmdlet is used to enumerate, install, uninstall, configure, 
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*Disable-WindowsOptionalFeature*" ScriptBlockText="*-Online*" ScriptBlockText="*-FeatureName*" ScriptBlockText IN ("*Windows-Defender-Gui*", "*Windows-Defender-Features*", "*Windows-Defender*", "*Windows-Defender-ApplicationGuard*")
+
+# ── Potential In-Memory Execution Using Reflection.Assembly ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects usage of "Reflection.Assembly" load functions to dynamically load assemblies in memory
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*[Reflection.Assembly]::load*"
+
+# ── Potential COM Objects Download Cradles Usage - PS Script ──
+# Mức độ  : Trung bình
+# Mục đích: Tải file từ mạng
+# Chi tiết: Detects usage of COM objects that can be abused to download files in PowerShell by CLSID
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*[Type]::GetTypeFromCLSID(*" ScriptBlockText IN ("*0002DF01-0000-0000-C000-000000000046*", "*F6D90F16-9C73-11D3-B32E-00C04F990BB4*", "*F5078F35-C551-11D3-89B9-0000F81FE221*", "*88d96a0a-f192-11d4-a65f-0040963251e5*", "*AFBA6B42-5692-48EA-8141-DC517DCF0EF1*", "*AFB40FFD-B609-40A3-9828-F88BBE11E4E3*", "*88d96a0b-f192-11d4-a65f-0040963251e5*", "*2087c2f4-2cef-4953-a8ab-66779b670495*", "*000209FF-0000-0000-C000-000000000046*", "*00024500-0000-0000-C000-000000000046*")
+
+# ── DSInternals Suspicious PowerShell Cmdlets - ScriptBlock ──
+# Mức độ  : Cao
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects execution and usage of the DSInternals PowerShell module. Which can be used to perform what might be considered as suspicious activity such as dumping DPAPI backup keys or manipulating NTDS.DI
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText IN ("*Add-ADDBSidHistory*", "*Add-ADNgcKey*", "*Add-ADReplNgcKey*", "*ConvertFrom-ADManagedPasswordBlob*", "*ConvertFrom-GPPrefPassword*", "*ConvertFrom-ManagedPasswordBlob*", "*ConvertFrom-UnattendXmlPassword*", "*ConvertFrom-UnicodePassword*", "*ConvertTo-AADHash*", "*ConvertTo-GPPrefPassword*", "*ConvertTo-KerberosKey*", "*ConvertTo-LMHash*", "*ConvertTo-MsoPasswordHash*", "*ConvertTo-NTHash*", "*ConvertTo-OrgIdHash*", "*ConvertTo-UnicodePassword*", "*Disable-ADDBAccount*", "*Enable-ADDBAccount*", "*Get-ADDBAccount*", "*Get-ADDBBackupKey*", "*Get-ADDBDomainController*", "*Get-ADDBGroupManagedServiceAccount*", "*Get-ADDBKdsRootKey*", "*Get-ADDBSchemaAttribute*", "*Get-ADDBServiceAccount*", "*Get-ADDefaultPasswordPolicy*", "*Get-ADKeyCredential*", "*Get-ADPasswordPolicy*", "*Get-ADReplAccount*", "*Get-ADReplBackupKey*", "*Get-ADReplicationAccount*", "*Get-ADSIAccount*", "*Get-AzureADUserEx*", "*Get-BootKey*", "*Get-KeyCredential*", "*Get-LsaBackupKey*", "*Get-LsaPolicy*", "*Get-SamPasswordPolicy*", "*Get-SysKey*", "*Get-SystemKey*", "*New-ADDBRestoreFromMediaScript*", "*New-ADKeyCredential*", "*New-ADNgcKey*", "*New-NTHashSet*", "*Remove-ADDBObject*", "*Save-DPAPIBlob*", "*Set-ADAccountPasswordHash*", "*Set-ADDBAccountPassword*", "*Set-ADDBBootKey*", "*Set-ADDBDomainController*", "*Set-ADDBPrimaryGroup*", "*Set-ADDBSysKey*", "*Set-AzureADUserEx*", "*Set-LsaPolicy*", "*Set-SamAccountPasswordHash*", "*Set-WinUserPasswordHash*", "*Test-ADDBPasswordQuality*", "*Test-ADPasswordQuality*", "*Test-ADReplPasswordQuality*", "*Test-PasswordQuality*", "*Unlock-ADDBAccount*", "*Write-ADNgcKey*", "*Write-ADReplNgcKey*")
+
+# ── Dump Credentials from Windows Credential Manager With PowerShell ──
+# Mức độ  : Trung bình
+# Chi tiết: Adversaries may search for common password storage locations to obtain user credentials. Passwords are stored in several places on a system, depending on the operating system or application holding th
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText IN ("*Get-PasswordVaultCredentials*", "*Get-CredManCreds*") OR (ScriptBlockText="*New-Object*" ScriptBlockText="*Windows.Security.Credentials.PasswordVault*") OR (ScriptBlockText="*New-Object*" ScriptBlockText="*Microsoft.CSharp.CSharpCodeProvider*" ScriptBlockText="*[System.Runtime.InteropServices.RuntimeEnvironment]::GetRuntimeDirectory())*" ScriptBlockText="*Collections.ArrayList*" ScriptBlockText="*System.CodeDom.Compiler.CompilerParameters*")
+
+# ── Enable Windows Remote Management ──
+# Mức độ  : Trung bình
+# Mục đích: Di chuyển ngang mạng
+# Chi tiết: Adversaries may use Valid Accounts to interact with remote systems using Windows Remote Management (WinRM). The adversary may then perform actions as the logged-on user.
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*Enable-PSRemoting *"
+
+# ── Potential Suspicious Windows Feature Enabled ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects usage of the built-in PowerShell cmdlet "Enable-WindowsOptionalFeature" used as a Deployment Image Servicing and Management tool. Similar to DISM.exe, this cmdlet is used to enumerate, install
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*Enable-WindowsOptionalFeature*" ScriptBlockText="*-Online*" ScriptBlockText="*-FeatureName*" ScriptBlockText IN ("*TelnetServer*", "*Internet-Explorer-Optional-amd64*", "*TFTP*", "*SMB1Protocol*", "*Client-ProjFS*", "*Microsoft-Windows-Subsystem-Linux*")
+
+# ── Enumerate Credentials from Windows Credential Manager With PowerShell ──
+# Mức độ  : Trung bình
+# Chi tiết: Adversaries may search for common password storage locations to obtain user credentials. Passwords are stored in several places on a system, depending on the operating system or application holding th
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*vaultcmd*" ScriptBlockText="*/listcreds:*" ScriptBlockText IN ("*Windows Credentials*", "*Web Credentials*")
+
+# ── Disable of ETW Trace - Powershell ──
+# Mức độ  : Cao
+# Mục đích: Xóa dấu vết
+# Chi tiết: Detects usage of powershell cmdlets to disable or remove ETW trace sessions
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*Remove-EtwTraceProvider *" OR (ScriptBlockText="*Set-EtwTraceProvider *" ScriptBlockText="*0x11*")
+
+# ── Certificate Exported Via PowerShell - ScriptBlock ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects calls to cmdlets inside of PowerShell scripts that are used to export certificates from the local certificate store. Threat actors were seen abusing this to steal private keys from compromised
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText IN ("*Export-PfxCertificate*", "*Export-Certificate*") NOT ScriptBlockText="*CmdletsToExport = @(*"
+
+# ── Suspicious FromBase64String Usage On Gzip Archive - Ps Script ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects attempts of decoding a base64 Gzip archive in a PowerShell script. This technique is often used as a method to load malicious content into memory afterward.
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*FromBase64String*" ScriptBlockText="*MemoryStream*" ScriptBlockText="*H4sI*"
+
+# ── Service Registry Permissions Weakness Check ──
+# Mức độ  : Trung bình
+# Chi tiết: Adversaries may execute their own malicious payloads by hijacking the Registry entries used by services. Adversaries may use flaws in the permissions for registry to redirect from the originally speci
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*get-acl*" ScriptBlockText="*REGISTRY::HKLM\\SYSTEM\\CurrentControlSet\\Services\\*"
+
+# ── Active Directory Computers Enumeration With Get-AdComputer ──
+# Mức độ  : Thấp
+# Chi tiết: Detects usage of the "Get-AdComputer" to enumerate Computers or properties within Active Directory.
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*Get-AdComputer *" ScriptBlockText IN ("*-Filter *", "*-LDAPFilter *", "*-Properties *")
+
+# ── Active Directory Group Enumeration With Get-AdGroup ──
+# Mức độ  : Thấp
+# Chi tiết: Detects usage of the "Get-AdGroup" cmdlet to enumerate Groups within Active Directory
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*Get-AdGroup *" ScriptBlockText="*-Filter*"
+
+# ── Suspicious Get-ADReplAccount ──
+# Mức độ  : Trung bình
+# Mục đích: Dump thông tin xác thực
+# Chi tiết: The DSInternals PowerShell Module exposes several internal features of Active Directory and Azure Active Directory. These include FIDO2 and NGC key auditing, offline ntds.dit file manipulation, passwo
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*Get-ADReplAccount*" ScriptBlockText="*-All *" ScriptBlockText="*-Server *"
+
+# ── Automated Collection Bookmarks Using Get-ChildItem PowerShell ──
+# Mức độ  : Thấp
+# Chi tiết: Adversaries may enumerate browser bookmarks to learn more about compromised hosts. Browser bookmarks may reveal personal information about users (ex: banking sites, interests, social media, etc.) as w
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*Get-ChildItem*" ScriptBlockText="* -Recurse *" ScriptBlockText="* -Path *" ScriptBlockText="* -Filter Bookmarks*" ScriptBlockText="* -ErrorAction SilentlyContinue*" ScriptBlockText="* -Force*"
+
+# ── Security Software Discovery Via Powershell Script ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects calls to "get-process" where the output is piped to a "where-object" filter to search for security solution processes. Adversaries may attempt to get a listing of security software, configurat
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText IN ("*get-process | ?*", "*get-process | where*", "*gps | ?*", "*gps | where*") ScriptBlockText IN ("*Company -like*", "*Description -like*", "*Name -like*", "*Path -like*", "*Product -like*") ScriptBlockText IN ("*\*avira\**", "*\*carbonblack\**", "*\*cylance\**", "*\*defender\**", "*\*kaspersky\**", "*\*malware\**", "*\*sentinel\**", "*\*symantec\**", "*\*virus\**")
+
+# ── HackTool - Rubeus Execution - ScriptBlock ──
+# Mức độ  : Cao
+# Mục đích: Dump thông tin xác thực
+# Chi tiết: Detects the execution of the hacktool Rubeus using specific command line flags
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText IN ("*asreproast *", "*dump /service:krbtgt *", "*dump /luid:0x*", "*kerberoast *", "*createnetonly /program:*", "*ptt /ticket:*", "*/impersonateuser:*", "*renew /ticket:*", "*asktgt /user:*", "*harvest /interval:*", "*s4u /user:*", "*s4u /ticket:*", "*hash /password:*", "*golden /aes256:*", "*silver /user:*")
+
+# ── HackTool - WinPwn Execution - ScriptBlock ──
+# Mức độ  : Cao
+# Mục đích: Thu thập thông tin hệ thống; Leo thang đặc quyền
+# Chi tiết: Detects scriptblock text keywords indicative of potential usge of the tool WinPwn. A tool for Windows and Active Directory reconnaissance and exploitation.
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText IN ("*Offline_Winpwn*", "*WinPwn *", "*WinPwn.exe*", "*WinPwn.ps1*")
+
+# ── PowerShell Hotfix Enumeration ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects call to "Win32_QuickFixEngineering" in order to enumerate installed hotfixes often used in "enum" scripts by attackers
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*Win32_QuickFixEngineering*" ScriptBlockText="*HotFixID*"
+
+# ── PowerShell ICMP Exfiltration ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects Exfiltration Over Alternative Protocol - ICMP. Adversaries may steal data by exfiltrating it over an un-encrypted network protocol other than that of the existing command and control channel.
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*New-Object*" ScriptBlockText="*System.Net.NetworkInformation.Ping*" ScriptBlockText="*.Send(*"
+
+# ── Import PowerShell Modules From Suspicious Directories ──
+# Mức độ  : Trung bình
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects powershell scripts that import modules from suspicious directories
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText IN ("*Import-Module \"$Env:Temp\\*", "*Import-Module '$Env:Temp\\*", "*Import-Module $Env:Temp\\*", "*Import-Module \"$Env:Appdata\\*", "*Import-Module '$Env:Appdata\\*", "*Import-Module $Env:Appdata\\*", "*Import-Module C:\\Users\\Public\\*", "*ipmo \"$Env:Temp\\*", "*ipmo '$Env:Temp\\*", "*ipmo $Env:Temp\\*", "*ipmo \"$Env:Appdata\\*", "*ipmo '$Env:Appdata\\*", "*ipmo $Env:Appdata\\*", "*ipmo C:\\Users\\Public\\*")
+
+# ── Unsigned AppX Installation Attempt Using Add-AppxPackage - PsScript ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects usage of the "Add-AppxPackage" or it's alias "Add-AppPackage" to install unsigned AppX packages
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText IN ("*Add-AppPackage *", "*Add-AppxPackage *") ScriptBlockText="* -AllowUnsigned*"
+
+# ── Execute Invoke-command on Remote Host ──
+# Mức độ  : Trung bình
+# Mục đích: Di chuyển ngang mạng
+# Chi tiết: Adversaries may use Valid Accounts to interact with remote systems using Windows Remote Management (WinRM). The adversary may then perform actions as the logged-on user.
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*invoke-command *" ScriptBlockText="* -ComputerName *"
+
+# ── Powershell DNSExfiltration ──
+# Mức độ  : Cao
+# Chi tiết: DNSExfiltrator allows for transferring (exfiltrate) a file over a DNS request covert channel
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*Invoke-DNSExfiltrator*" OR (ScriptBlockText="* -i *" ScriptBlockText="* -d *" ScriptBlockText="* -p *" ScriptBlockText="* -doh *" ScriptBlockText="* -t *")
+
+# ── Invoke-Obfuscation CLIP+ Launcher - PowerShell ──
+# Mức độ  : Cao
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects Obfuscated use of Clip.exe to execute PowerShell
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational")
+| regex ScriptBlockText="cmd.{0,5}(?:/c|/r).+clip(?:\\.exe)?.{0,4}&&.+clipboard]::\\(\\s\\\\\"\\{\\d\\}.+-f.+\""
+
+# ── Invoke-Obfuscation Obfuscated IEX Invocation - PowerShell ──
+# Mức độ  : Cao
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects all variations of obfuscated powershell IEX invocation code generated by Invoke-Obfuscation framework from the following code block \u2014
+| rex field=ScriptBlockText "(?<ScriptBlockTextMatch>\\$PSHome\\[\\s*\\d{1,3}\\s*\\]\\s*\\+\\s*\\$PSHome\\[)"
+| eval ScriptBlockTextCondition=if(isnotnull(ScriptBlockTextMatch), "true", "false")
+| rex field=ScriptBlockText "(?<ScriptBlockTextMatch2>\\$ShellId\\[\\s*\\d{1,3}\\s*\\]\\s*\\+\\s*\\$ShellId\\[)"
+| eval ScriptBlockTextCondition2=if(isnotnull(ScriptBlockTextMatch2), "true", "false")
+| rex field=ScriptBlockText "(?<ScriptBlockTextMatch3>\\$env:Public\\[\\s*\\d{1,3}\\s*\\]\\s*\\+\\s*\\$env:Public\\[)"
+| eval ScriptBlockTextCondition3=if(isnotnull(ScriptBlockTextMatch3), "true", "false")
+| rex field=ScriptBlockText "(?<ScriptBlockTextMatch4>\\$env:ComSpec\\[(\\s*\\d{1,3}\\s*,){2})"
+| eval ScriptBlockTextCondition4=if(isnotnull(ScriptBlockTextMatch4), "true", "false")
+| rex field=ScriptBlockText "(?<ScriptBlockTextMatch5>\\*mdr\\*\\W\\s*\\)\\.Name)"
+| eval ScriptBlockTextCondition5=if(isnotnull(ScriptBlockTextMatch5), "true", "false")
+| rex field=ScriptBlockText "(?<ScriptBlockTextMatch6>\\$VerbosePreference\\.ToString\\()"
+| eval ScriptBlockTextCondition6=if(isnotnull(ScriptBlockTextMatch6), "true", "false")
+| search source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockTextCondition="true" OR ScriptBlockTextCondition2="true" OR ScriptBlockTextCondition3="true" OR ScriptBlockTextCondition4="true" OR ScriptBlockTextCondition5="true" OR ScriptBlockTextCondition6="true"
+
+# ── Invoke-Obfuscation STDIN+ Launcher - Powershell ──
+# Mức độ  : Cao
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects Obfuscated use of stdin to execute PowerShell
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational")
+| regex ScriptBlockText="cmd.{0,5}(?:/c|/r).+powershell.+(?:\\$?\\{?input\\}?|noexit).+\""
+
+# ── Invoke-Obfuscation VAR+ Launcher - PowerShell ──
+# Mức độ  : Cao
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects Obfuscated use of Environment Variables to execute PowerShell
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational")
+| regex ScriptBlockText="cmd.{0,5}(?:/c|/r)(?:\\s|)\"set\\s[a-zA-Z]{3,6}.*(?:\\{\\d\\}){1,}\\\\\"\\s+?-f(?:.*\\)){1,}.*\""
+
+# ── Invoke-Obfuscation COMPRESS OBFUSCATION - PowerShell ──
+# Mức độ  : Trung bình
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects Obfuscated Powershell via COMPRESS OBFUSCATION
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*new-object*" ScriptBlockText="*text.encoding]::ascii*" ScriptBlockText IN ("*system.io.compression.deflatestream*", "*system.io.streamreader*") ScriptBlockText="*readtoend"
+
+# ── Invoke-Obfuscation RUNDLL LAUNCHER - PowerShell ──
+# Mức độ  : Trung bình
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects Obfuscated Powershell via RUNDLL LAUNCHER
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*rundll32.exe*" ScriptBlockText="*shell32.dll*" ScriptBlockText="*shellexec_rundll*" ScriptBlockText="*powershell*"
+
+# ── Invoke-Obfuscation Via Stdin - Powershell ──
+# Mức độ  : Cao
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects Obfuscated Powershell via Stdin in Scripts
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational")
+| regex ScriptBlockText="(?i)(set).*&&\\s?set.*(environment|invoke|\\$\\{?input).*&&.*\""
+
+# ── Invoke-Obfuscation Via Use Clip - Powershell ──
+# Mức độ  : Cao
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects Obfuscated Powershell via use Clip.exe in Scripts
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational")
+| regex ScriptBlockText="(?i)echo.*clip.*&&.*(Clipboard|i`?n`?v`?o`?k`?e`?)"
+
+# ── Invoke-Obfuscation Via Use MSHTA - PowerShell ──
+# Mức độ  : Cao
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects Obfuscated Powershell via use MSHTA in Scripts
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*set*" ScriptBlockText="*&&*" ScriptBlockText="*mshta*" ScriptBlockText="*vbscript:createobject*" ScriptBlockText="*.run*" ScriptBlockText="*(window.close)*"
+
+# ── Invoke-Obfuscation Via Use Rundll32 - PowerShell ──
+# Mức độ  : Cao
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects Obfuscated Powershell via use Rundll32 in Scripts
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*&&*" ScriptBlockText="*rundll32*" ScriptBlockText="*shell32.dll*" ScriptBlockText="*shellexec_rundll*" ScriptBlockText IN ("*value*", "*invoke*", "*comspec*", "*iex*")
+
+# ── Invoke-Obfuscation VAR++ LAUNCHER OBFUSCATION - PowerShell ──
+# Mức độ  : Cao
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects Obfuscated Powershell via VAR++ LAUNCHER
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational")
+| regex ScriptBlockText="(?i)&&set.*(\\{\\d\\}){2,}\\\\\"\\s+?-f.*&&.*cmd.*/c"
+
+# ── Powershell Keylogging ──
+# Mức độ  : Trung bình
+# Chi tiết: Adversaries may log user keystrokes to intercept credentials as the user types them.
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*Get-Keystrokes*" OR (ScriptBlockText="*Get-ProcAddress user32.dll GetAsyncKeyState*" ScriptBlockText="*Get-ProcAddress user32.dll GetForegroundWindow*")
+
+# ── Powershell LocalAccount Manipulation ──
+# Mức độ  : Trung bình
+# Chi tiết: Adversaries may manipulate accounts to maintain access to victim systems. Account manipulation may consist of any action that preserves adversary access to a compromised account, such as modifying cre
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText IN ("*Disable-LocalUser*", "*Enable-LocalUser*", "*Get-LocalUser*", "*Set-LocalUser*", "*New-LocalUser*", "*Rename-LocalUser*", "*Remove-LocalUser*")
+
+# ── Suspicious PowerShell Mailbox Export to Share - PS ──
+# Mức độ  : Nghiêm trọng
+# Chi tiết: Detects usage of the powerShell New-MailboxExportRequest Cmdlet to exports a mailbox to a remote or local share, as used in ProxyShell exploitations
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*New-MailboxExportRequest*" ScriptBlockText="* -Mailbox *" ScriptBlockText="* -FilePath \\\\*"
+
+# ── Malicious PowerShell Commandlets - ScriptBlock ──
+# Mức độ  : Cao
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects Commandlet names from well-known PowerShell exploitation frameworks
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText IN ("*Add-Exfiltration*", "*Add-Persistence*", "*Add-RegBackdoor*", "*Add-RemoteRegBackdoor*", "*Add-ScrnSaveBackdoor*", "*ConvertTo-Rc4ByteStream*", "*Decrypt-Hash*", "*Disable-ADIDNSNode*", "*Do-Exfiltration*", "*Enable-ADIDNSNode*", "*Enabled-DuplicateToken*", "*Exploit-Jboss*", "*Export-ADRCSV*", "*Export-ADRExcel*", "*Export-ADRHTML*", "*Export-ADRJSON*", "*Export-ADRXML*", "*Find-Fruit*", "*Find-GPOLocation*", "*Find-TrustedDocuments*", "*Get-ADIDNSNodeAttribute*", "*Get-ADIDNSNodeOwner*", "*Get-ADIDNSNodeTombstoned*", "*Get-ADIDNSPermission*", "*Get-ADIDNSZone*", "*Get-ChromeDump*", "*Get-ClipboardContents*", "*Get-FoxDump*", "*Get-GPPPassword*", "*Get-IndexedItem*", "*Get-KerberosAESKey*", "*Get-Keystrokes*", "*Get-LSASecret*", "*Get-PassHashes*", "*Get-RegAlwaysInstallElevated*", "*Get-RegAutoLogon*", "*Get-RemoteBootKey*", "*Get-RemoteCachedCredential*", "*Get-RemoteLocalAccountHash*", "*Get-RemoteLSAKey*", "*Get-RemoteMachineAccountHash*", "*Get-RemoteNLKMKey*", "*Get-RickAstley*", "*Get-SecurityPackages*", "*Get-ServiceFilePermission*", "*Get-ServicePermission*", "*Get-ServiceUnquoted*", "*Get-SiteListPassword*", "*Get-System*", "*Get-TimedScreenshot*", "*Get-UnattendedInstallFile*", "*Get-Unconstrained*", "*Get-USBKeystrokes*", "*Get-VaultCredential*", "*Get-VulnAutoRun*", "*Get-VulnSchTask*", "*Grant-ADIDNSPermission*", "*Gupt-Backdoor*", "*Invoke-ACLScanner*", "*Invoke-ADRecon*", "*Invoke-ADSBackdoor*", "*Invoke-AgentSmith*", "*Invoke-AllChecks*", "*Invoke-ARPScan*", "*Invoke-AzureHound*", "*Invoke-BackdoorLNK*", "*Invoke-BadPotato*", "*Invoke-BetterSafetyKatz*", "*Invoke-BypassUAC*", "*Invoke-Carbuncle*", "*Invoke-Certify*", "*Invoke-ConPtyShell*", "*Invoke-CredentialInjection*", "*Invoke-DAFT*", "*Invoke-DCSync*", "*Invoke-DinvokeKatz*", "*Invoke-DllInjection*", "*Invoke-DNSUpdate*", "*Invoke-DNSExfiltrator*", "*Invoke-DomainPasswordSpray*", "*Invoke-DowngradeAccount*", "*Invoke-EgressCheck*", "*Invoke-Eyewitness*", "*Invoke-FakeLogonScreen*", "*Invoke-Farmer*", "*Invoke-Get-RBCD-Threaded*", "*Invoke-Gopher*", "*Invoke-Grouper*", "*Invoke-HandleKatz*", "*Invoke-ImpersonatedProcess*", "*Invoke-ImpersonateSystem*", "*Invoke-InteractiveSystemPowerShell*", "*Invoke-Internalmonologue*", "*Invoke-Inveigh*", "*Invoke-InveighRelay*", "*Invoke-KrbRelay*", "*Invoke-LdapSignCheck*", "*Invoke-Lockless*", "*Invoke-MalSCCM*", "*Invoke-Mimikatz*", "*Invoke-Mimikittenz*", "*Invoke-MITM6*", "*Invoke-NanoDump*", "*Invoke-NetRipper*", "*Invoke-Nightmare*", "*Invoke-NinjaCopy*", "*Invoke-OfficeScrape*", "*Invoke-OxidResolver*", "*Invoke-P0wnedshell*", "*Invoke-Paranoia*", "*Invoke-PortScan*", "*Invoke-PoshRatHttp*", "*Invoke-PostExfil*", "*Invoke-PowerDump*", "*Invoke-PowerDPAPI*", "*Invoke-PowerShellTCP*", "*Invoke-PowerShellWMI*", "*Invoke-PPLDump*", "*Invoke-PsExec*", "*Invoke-PSInject*", "*Invoke-PsUaCme*", "*Invoke-ReflectivePEInjection*", "*Invoke-ReverseDNSLookup*", "*Invoke-Rubeus*", "*Invoke-RunAs*", "*Invoke-SafetyKatz*", "*Invoke-SauronEye*", "*Invoke-SCShell*", "*Invoke-Seatbelt*", "*Invoke-ServiceAbuse*", "*Invoke-ShadowSpray*", "*Invoke-Sharp*", "*Invoke-Shellcode*", "*Invoke-SMBScanner*", "*Invoke-Snaffler*", "*Invoke-Spoolsample*", "*Invoke-SpraySinglePassword*", "*Invoke-SSHCommand*", "*Invoke-StandIn*", "*Invoke-StickyNotesExtract*", "*Invoke-SystemCommand*", "*Invoke-Tasksbackdoor*", "*Invoke-Tater*", "*Invoke-Thunderfox*", "*Invoke-ThunderStruck*", "*Invoke-TokenManipulation*", "*Invoke-Tokenvator*", "*Invoke-TotalExec*", "*Invoke-UrbanBishop*", "*Invoke-UserHunter*", "*Invoke-VoiceTroll*", "*Invoke-Whisker*", "*Invoke-WinEnum*", "*Invoke-winPEAS*", "*Invoke-WireTap*", "*Invoke-WmiCommand*", "*Invoke-WMIExec*", "*Invoke-WScriptBypassUAC*", "*Invoke-Zerologon*", "*MailRaider*", "*New-ADIDNSNode*", "*New-HoneyHash*", "*New-InMemoryModule*", "*New-SOASerialNumberArray*", "*Out-Minidump*", "*PowerBreach*", "*powercat *", "*PowerUp*", "*PowerView*", "*Remove-ADIDNSNode*", "*Remove-Update*", "*Rename-ADIDNSNode*", "*Revoke-ADIDNSPermission*", "*Set-ADIDNSNode*", "*Show-TargetScreen*", "*Start-CaptureServer*", "*Start-Dnscat2*", "*Start-WebcamRecorder*", "*VolumeShadowCopyTools*") NOT (ScriptBlockText IN ("*Get-SystemDriveInfo*", "*C:\\ProgramData\\Amazon\\EC2-Windows\\Launch\\Module\\*"))
+
+# ── Malicious PowerShell Keywords ──
+# Mức độ  : Trung bình
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects keywords from well-known PowerShell exploitation frameworks
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText IN ("*AdjustTokenPrivileges*", "*IMAGE_NT_OPTIONAL_HDR64_MAGIC*", "*Metasploit*", "*Microsoft.Win32.UnsafeNativeMethods*", "*Mimikatz*", "*MiniDumpWriteDump*", "*PAGE_EXECUTE_READ*", "*ReadProcessMemory.Invoke*", "*SE_PRIVILEGE_ENABLED*", "*SECURITY_DELEGATION*", "*TOKEN_ADJUST_PRIVILEGES*", "*TOKEN_ALL_ACCESS*", "*TOKEN_ASSIGN_PRIMARY*", "*TOKEN_DUPLICATE*", "*TOKEN_ELEVATION*", "*TOKEN_IMPERSONATE*", "*TOKEN_INFORMATION_CLASS*", "*TOKEN_PRIVILEGES*", "*TOKEN_QUERY*")
+
+# ── Live Memory Dump Using Powershell ──
+# Mức độ  : Cao
+# Mục đích: Dump thông tin xác thực
+# Chi tiết: Detects usage of a PowerShell command to dump the live memory of a Windows machine
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*Get-StorageDiagnosticInfo*" ScriptBlockText="*-IncludeLiveDump*"
+
+# ── DMSA Link Attributes Modified ──
+# Mức độ  : Thấp
+# Mục đích: Dùng tài khoản hợp lệ
+# Chi tiết: Detects modification of dMSA link attributes (msDS-ManagedAccountPrecededByLink) via PowerShell scripts. This command line pattern could be an indicator an attempt to exploit the BadSuccessor privileg
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*.Put(\"msDS-ManagedAccountPrecededByLink*" ScriptBlockText="*CN=*"
+
+# ── Modify Group Policy Settings - ScriptBlockLogging ──
+# Mức độ  : Trung bình
+# Chi tiết: Detect malicious GPO modifications can be used to implement many other malicious behaviors.
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*\\SOFTWARE\\Policies\\Microsoft\\Windows\\System*" ScriptBlockText IN ("*GroupPolicyRefreshTimeDC*", "*GroupPolicyRefreshTimeOffsetDC*", "*GroupPolicyRefreshTime*", "*GroupPolicyRefreshTimeOffset*", "*EnableSmartScreen*", "*ShellSmartScreenLevel*")
+
+# ── Powershell MsXml COM Object ──
+# Mức độ  : Trung bình
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Adversaries may abuse PowerShell commands and scripts for execution. PowerShell is a powerful interactive command-line interface and scripting environment included in the Windows operating system. (Ci
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*New-Object*" ScriptBlockText="*-ComObject*" ScriptBlockText="*MsXml2.*" ScriptBlockText="*XmlHttp*"
+
+# ── Malicious Nishang PowerShell Commandlets ──
+# Mức độ  : Cao
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects Commandlet names and arguments from the Nishang exploitation framework
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText IN ("*Add-ConstrainedDelegationBackdoor*", "*Copy-VSS*", "*Create-MultipleSessions*", "*DataToEncode*", "*DNS_TXT_Pwnage*", "*Do-Exfiltration-Dns*", "*Download_Execute*", "*Download-Execute-PS*", "*DownloadAndExtractFromRemoteRegistry*", "*DumpCerts*", "*DumpCreds*", "*DumpHashes*", "*Enable-DuplicateToken*", "*Enable-Duplication*", "*Execute-Command-MSSQL*", "*Execute-DNSTXT-Code*", "*Execute-OnTime*", "*ExetoText*", "*exfill*", "*ExfilOption*", "*FakeDC*", "*FireBuster*", "*FireListener*", "*Get-Information *", "*Get-PassHints*", "*Get-Web-Credentials*", "*Get-WebCredentials*", "*Get-WLAN-Keys*", "*HTTP-Backdoor*", "*Invoke-AmsiBypass*", "*Invoke-BruteForce*", "*Invoke-CredentialsPhish*", "*Invoke-Decode*", "*Invoke-Encode*", "*Invoke-Interceptor*", "*Invoke-JSRatRegsvr*", "*Invoke-JSRatRundll*", "*Invoke-MimikatzWDigestDowngrade*", "*Invoke-NetworkRelay*", "*Invoke-PowerShellIcmp*", "*Invoke-PowerShellUdp*", "*Invoke-Prasadhak*", "*Invoke-PSGcat*", "*Invoke-PsGcatAgent*", "*Invoke-SessionGopher*", "*Invoke-SSIDExfil*", "*LoggedKeys*", "*Nishang*", "*NotAllNameSpaces*", "*Out-CHM*", "*OUT-DNSTXT*", "*Out-HTA*", "*Out-RundllCommand*", "*Out-SCF*", "*Out-SCT*", "*Out-Shortcut*", "*Out-WebQuery*", "*Out-Word*", "*Parse_Keys*", "*Password-List*", "*Powerpreter*", "*Remove-Persistence*", "*Remove-PoshRat*", "*Remove-Update*", "*Run-EXEonRemote*", "*Set-DCShadowPermissions*", "*Set-RemotePSRemoting*", "*Set-RemoteWMI*", "*Shellcode32*", "*Shellcode64*", "*StringtoBase64*", "*TexttoExe*")
+
+# ── NTFS Alternate Data Stream ──
+# Mức độ  : Cao
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects writing data into NTFS alternate data streams from powershell. Needs Script Block Logging.
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText IN ("*set-content*", "*add-content*") ScriptBlockText="*-stream*"
+
+# ── Code Executed Via Office Add-in XLL File ──
+# Mức độ  : Cao
+# Chi tiết: Adversaries may abuse Microsoft Office add-ins to obtain persistence on a compromised system. Office add-ins can be used to add functionality to Office programs
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*new-object *" ScriptBlockText="*-ComObject *" ScriptBlockText="*.application*" ScriptBlockText="*.RegisterXLL*"
+
+# ── Potential Packet Capture Activity Via Start-NetEventSession - ScriptBlock ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects the execution of powershell scripts with calls to the "Start-NetEventSession" cmdlet. Which allows an attacker to start event and packet capture for a network event session. Adversaries may at
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*Start-NetEventSession*"
+
+# ── Potential Invoke-Mimikatz PowerShell Script ──
+# Mức độ  : Cao
+# Mục đích: Dump thông tin xác thực
+# Chi tiết: Detects Invoke-Mimikatz PowerShell script and alike. Mimikatz is a credential dumper capable of obtaining plaintext Windows account logins and passwords.
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") (ScriptBlockText="*DumpCreds*" ScriptBlockText="*DumpCerts*") OR ScriptBlockText="*sekurlsa::logonpasswords*" OR (ScriptBlockText="*crypto::certificates*" ScriptBlockText="*CERT_SYSTEM_STORE_LOCAL_MACHINE*")
+
+# ── Potential Unconstrained Delegation Discovery Via Get-ADComputer - ScriptBlock ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects the use of the "Get-ADComputer" cmdlet in order to identify systems which are configured for unconstrained delegation.
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText IN ("*-Properties*TrustedForDelegation*", "*-Properties*TrustedToAuthForDelegation*", "*-Properties*msDS-AllowedToDelegateTo*", "*-Properties*PrincipalsAllowedToDelegateToAccount*", "*-LDAPFilter*(userAccountControl:1.2.840.113556.1.4.803:=524288)*")
+
+# ── PowerShell Web Access Installation - PsScript ──
+# Mức độ  : Cao
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects the installation and configuration of PowerShell Web Access, which could be used for remote access and potential abuse
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*Install-WindowsFeature WindowsPowerShellWebAccess*" OR ScriptBlockText="*Install-PswaWebApplication*" OR (ScriptBlockText="*Add-PswaAuthorizationRule*" ScriptBlockText="*-UserName *" ScriptBlockText="*-ComputerName *")
+
+# ── PowerView PowerShell Cmdlets - ScriptBlock ──
+# Mức độ  : Cao
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects Cmdlet names from PowerView of the PowerSploit exploitation framework.
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText IN ("*Export-PowerViewCSV*", "*Find-DomainLocalGroupMember*", "*Find-DomainObjectPropertyOutlier*", "*Find-DomainProcess*", "*Find-DomainShare*", "*Find-DomainUserEvent*", "*Find-DomainUserLocation*", "*Find-ForeignGroup*", "*Find-ForeignUser*", "*Find-GPOComputerAdmin*", "*Find-GPOLocation*", "*Find-InterestingDomain*", "*Find-InterestingFile*", "*Find-LocalAdminAccess*", "*Find-ManagedSecurityGroups*", "*Get-CachedRDPConnection*", "*Get-DFSshare*", "*Get-DomainDFSShare*", "*Get-DomainDNSRecord*", "*Get-DomainDNSZone*", "*Get-DomainFileServer*", "*Get-DomainGPOComputerLocalGroupMapping*", "*Get-DomainGPOLocalGroup*", "*Get-DomainGPOUserLocalGroupMapping*", "*Get-LastLoggedOn*", "*Get-LoggedOnLocal*", "*Get-NetFileServer*", "*Get-NetForest*", "*Get-NetGPOGroup*", "*Get-NetProcess*", "*Get-NetRDPSession*", "*Get-RegistryMountedDrive*", "*Get-RegLoggedOn*", "*Get-WMIRegCachedRDPConnection*", "*Get-WMIRegLastLoggedOn*", "*Get-WMIRegMountedDrive*", "*Get-WMIRegProxy*", "*Invoke-ACLScanner*", "*Invoke-CheckLocalAdminAccess*", "*Invoke-EnumerateLocalAdmin*", "*Invoke-EventHunter*", "*Invoke-FileFinder*", "*Invoke-Kerberoast*", "*Invoke-MapDomainTrust*", "*Invoke-ProcessHunter*", "*Invoke-RevertToSelf*", "*Invoke-ShareFinder*", "*Invoke-UserHunter*", "*Invoke-UserImpersonation*", "*Remove-RemoteConnection*", "*Request-SPNTicket*", "*Resolve-IPAddress*")
+
+# ── PowerShell Credential Prompt ──
+# Mức độ  : Cao
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects PowerShell calling a credential prompt
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*PromptForCredential*"
+
+# ── PSAsyncShell - Asynchronous TCP Reverse Shell ──
+# Mức độ  : Cao
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects the use of PSAsyncShell an Asynchronous TCP Reverse Shell written in powershell
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*PSAsyncShell*"
+
+# ── PowerShell PSAttack ──
+# Mức độ  : Cao
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects the use of PSAttack PowerShell hack tool
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*PS ATTACK!!!*"
+
+# ── PowerShell Remote Session Creation ──
+# Mức độ  : Trung bình
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Adversaries may abuse PowerShell commands and scripts for execution. PowerShell is a powerful interactive command-line interface and scripting environment included in the Windows operating system
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*New-PSSession*" ScriptBlockText="*-ComputerName *"
+
+# ── Potential RemoteFXvGPUDisablement.EXE Abuse - PowerShell ScriptBlock ──
+# Mức độ  : Cao
+# Chi tiết: Detects PowerShell module creation where the module Contents are set to "function Get-VMRemoteFXPhysicalVideoAdapter". This could be a sign of potential abuse of the "RemoteFXvGPUDisablement.exe" bina
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="function Get-VMRemoteFXPhysicalVideoAdapter {*"
+
+# ── Suspicious Kerberos Ticket Request via PowerShell Script - ScriptBlock ──
+# Mức độ  : Cao
+# Chi tiết: Detects PowerShell scripts that utilize native PowerShell Identity modules to request Kerberos tickets. This behavior is typically seen during a Kerberos or silver ticket attack. A successful executio
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*System.IdentityModel.Tokens.KerberosRequestorSecurityToken*" ScriptBlockText="*.GetRequest()*"
+
+# ── PowerShell Script With File Hostname Resolving Capabilities ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects PowerShell scripts that have capabilities to read files, loop through them and resolve DNS host entries.
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*Get-content *" ScriptBlockText="*foreach*" ScriptBlockText="*[System.Net.Dns]::GetHostEntry*" ScriptBlockText="*Out-File*"
+
+# ── Root Certificate Installed - PowerShell ──
+# Mức độ  : Trung bình
+# Chi tiết: Adversaries may install a root certificate on a compromised system to avoid warnings when connecting to adversary controlled web servers.
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") (ScriptBlockText="*Move-Item*" ScriptBlockText="*Cert:\\LocalMachine\\Root*") OR (ScriptBlockText="*Import-Certificate*" ScriptBlockText="*Cert:\\LocalMachine\\Root*")
+
+# ── Suspicious Invoke-Item From Mount-DiskImage ──
+# Mức độ  : Trung bình
+# Chi tiết: Adversaries may abuse container files such as disk image (.iso, .vhd) file formats to deliver malicious payloads that may not be tagged with MOTW.
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*Mount-DiskImage *" ScriptBlockText="*-ImagePath *" ScriptBlockText="*Get-Volume*" ScriptBlockText="*.DriveLetter*" ScriptBlockText="*invoke-item *" ScriptBlockText="*):\\*"
+
+# ── PowerShell Script With File Upload Capabilities ──
+# Mức độ  : Thấp
+# Chi tiết: Detects PowerShell scripts leveraging the "Invoke-WebRequest" cmdlet to send data via either "PUT" or "POST" method.
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText IN ("*Invoke-RestMethod*", "*Invoke-WebRequest*", "*irm *", "*iwr *") ScriptBlockText IN ("*-Method \"POST\"*", "*-Method \"PUT\"*", "*-Method POST*", "*-Method PUT*", "*-Method 'POST'*", "*-Method 'PUT'*")
+
+# ── Powershell Sensitive File Discovery ──
+# Mức độ  : Trung bình
+# Chi tiết: Detect adversaries enumerate sensitive files
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText IN ("*ls*", "*get-childitem*", "*gci*") ScriptBlockText="*-recurse*" ScriptBlockText IN ("*.pass*", "*.kdbx*", "*.kdb*")
+
+# ── PowerShell Script Change Permission Via Set-Acl - PsScript ──
+# Mức độ  : Thấp
+# Chi tiết: Detects PowerShell scripts set ACL to of a file or a folder
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*Set-Acl *" ScriptBlockText="*-AclObject *" ScriptBlockText="*-Path *"
+
+# ── PowerShell Set-Acl On Windows Folder - PsScript ──
+# Mức độ  : Cao
+# Chi tiết: Detects PowerShell scripts to set the ACL to a file in the Windows folder
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*Set-Acl *" ScriptBlockText="*-AclObject *" ScriptBlockText IN ("*-Path \"C:\\Windows*", "*-Path \"C:/Windows*", "*-Path 'C:\\Windows*", "*-Path 'C:/Windows*", "*-Path C:\\Windows*", "*-Path C:/Windows*", "*-Path $env:windir*", "*-Path \"$env:windir*", "*-Path '$env:windir*") ScriptBlockText IN ("*FullControl*", "*Allow*")
+
+# ── Change PowerShell Policies to an Insecure Level - PowerShell ──
+# Mức độ  : Trung bình
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects changing the PowerShell script execution policy to a potentially insecure level using the "Set-ExecutionPolicy" cmdlet.
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*Set-ExecutionPolicy*" ScriptBlockText IN ("*Unrestricted*", "*bypass*") NOT (ScriptBlockText IN ("*(New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1')*", "*(New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1')*"))
+
+# ── PowerShell ShellCode ──
+# Mức độ  : Cao
+# Mục đích: Chèn mã vào tiến trình; Thực thi lệnh/script
+# Chi tiết: Detects Base64 encoded Shellcode
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText IN ("*OiCAAAAYInlM*", "*OiJAAAAYInlM*")
+
+# ── Malicious ShellIntel PowerShell Commandlets ──
+# Mức độ  : Cao
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects Commandlet names from ShellIntel exploitation scripts.
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText IN ("*Invoke-SMBAutoBrute*", "*Invoke-GPOLinks*", "*Invoke-Potato*")
+
+# ── Detected Windows Software Discovery - PowerShell ──
+# Mức độ  : Trung bình
+# Chi tiết: Adversaries may attempt to enumerate software for a variety of reasons, such as figuring out what security measures are present or if the compromised system has a version of software that is vulnerabl
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*get-itemProperty*" ScriptBlockText="*\\software\\*" ScriptBlockText="*select-object*" ScriptBlockText="*format-table*"
+
+# ── Powershell Store File In Alternate Data Stream ──
+# Mức độ  : Trung bình
+# Chi tiết: Storing files in Alternate Data Stream (ADS) similar to Astaroth malware.
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*Start-Process*" ScriptBlockText="*-FilePath \"$env:comspec\" *" ScriptBlockText="*-ArgumentList *" ScriptBlockText="*>*"
+
+# ── Potential Persistence Via Security Descriptors - ScriptBlock ──
+# Mức độ  : Cao
+# Chi tiết: Detects usage of certain functions and keywords that are used to manipulate security descriptors in order to potentially set a backdoor. As seen used in the DAMP project.
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*win32_Trustee*" ScriptBlockText="*win32_Ace*" ScriptBlockText="*.AccessMask*" ScriptBlockText="*.AceType*" ScriptBlockText="*.SetSecurityDescriptor*" ScriptBlockText IN ("*\\Lsa\\JD*", "*\\Lsa\\Skew1*", "*\\Lsa\\Data*", "*\\Lsa\\GBG*")
+
+# ── AD Groups Or Users Enumeration Using PowerShell - ScriptBlock ──
+# Mức độ  : Thấp
+# Chi tiết: Adversaries may attempt to find domain-level groups and permission settings. The knowledge of domain-level permission groups can help adversaries determine which groups exist and which users belong to
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*get-ADPrincipalGroupMembership*" OR (ScriptBlockText="*get-aduser*" ScriptBlockText="*-f *" ScriptBlockText="*-pr *" ScriptBlockText="*DoesNotRequirePreAuth*")
+
+# ── Potential PowerShell Obfuscation Using Character Join ──
+# Mức độ  : Thấp
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects specific techniques often seen used inside of PowerShell scripts to obfscuate Alias creation
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*-Alias*" ScriptBlockText="* -Value (-join(*"
+
+# ── Suspicious Eventlog Clear ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects usage of known powershell cmdlets such as "Clear-EventLog" to clear the Windows event logs
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText IN ("*Clear-EventLog *", "*Remove-EventLog *", "*Limit-EventLog *", "*Clear-WinEvent *") OR (ScriptBlockText="*Eventing.Reader.EventLogSession*" ScriptBlockText="*ClearLog*") OR (ScriptBlockText="*Diagnostics.EventLog*" ScriptBlockText="*Clear*")
+
+# ── Powershell Directory Enumeration ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects technique used by MAZE ransomware to enumerate directories using Powershell
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*foreach*" ScriptBlockText="*Get-ChildItem*" ScriptBlockText="*-Path *" ScriptBlockText="*-ErrorAction *" ScriptBlockText="*SilentlyContinue*" ScriptBlockText="*Out-File *" ScriptBlockText="*-append*"
+
+# ── Suspicious PowerShell Download - Powershell Script ──
+# Mức độ  : Trung bình
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects suspicious PowerShell download command
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*System.Net.WebClient*" ScriptBlockText IN ("*.DownloadFile(*", "*.DownloadFileAsync(*", "*.DownloadString(*", "*.DownloadStringAsync(*")
+
+# ── Powershell Execute Batch Script ──
+# Mức độ  : Trung bình
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Adversaries may abuse the Windows command shell for execution. The Windows command shell ([cmd](https://attack.mitre.org/software/S0106)) is the primary command prompt on Windows systems. The Windows 
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*Start-Process*" ScriptBlockText IN ("*.cmd*", "*.bat*")
+
+# ── Extracting Information with PowerShell ──
+# Mức độ  : Trung bình
+# Chi tiết: Adversaries may search local file systems and remote file shares for files containing insecurely stored credentials. These can be files created by users to store their own credentials, shared credenti
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*ls*" ScriptBlockText="* -R*" ScriptBlockText="*select-string *" ScriptBlockText="*-Pattern *"
+
+# ── Troubleshooting Pack Cmdlet Execution ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects execution of "TroubleshootingPack" cmdlets to leverage CVE-2022-30190 or action similar to "msdt" lolbin (as described in LOLBAS)
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*Invoke-TroubleshootingPack*" ScriptBlockText="*C:\\Windows\\Diagnostics\\System\\PCW*" ScriptBlockText="*-AnswerFile*" ScriptBlockText="*-Unattended*"
+
+# ── Password Policy Discovery With Get-AdDefaultDomainPasswordPolicy ──
+# Mức độ  : Thấp
+# Chi tiết: Detetcts PowerShell activity in which Get-Addefaultdomainpasswordpolicy is used to get the default password policy for an Active Directory domain.
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*Get-AdDefaultDomainPasswordPolicy*"
+
+# ── Suspicious PowerShell Get Current User ──
+# Mức độ  : Thấp
+# Mục đích: Thu thập thông tin user
+# Chi tiết: Detects the use of PowerShell to identify the current logged user.
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText IN ("*[System.Environment]::UserName*", "*$env:UserName*", "*[System.Security.Principal.WindowsIdentity]::GetCurrent()*")
+
+# ── Suspicious GPO Discovery With Get-GPO ──
+# Mức độ  : Thấp
+# Chi tiết: Detect use of Get-GPO to get one GPO or all the GPOs in a domain.
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*Get-GPO*"
+
+# ── Suspicious Process Discovery With Get-Process ──
+# Mức độ  : Thấp
+# Chi tiết: Get the processes that are running on the local computer.
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*Get-Process*"
+
+# ── PowerShell Get-Process LSASS in ScriptBlock ──
+# Mức độ  : Cao
+# Mục đích: Dump thông tin xác thực
+# Chi tiết: Detects a Get-Process command on lsass process, which is in almost all cases a sign of malicious activity
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*Get-Process lsass*"
+
+# ── Suspicious GetTypeFromCLSID ShellExecute ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects suspicious Powershell code that execute COM Objects
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*::GetTypeFromCLSID(*" ScriptBlockText="*.ShellExecute(*"
+
+# ── Suspicious Hyper-V Cmdlets ──
+# Mức độ  : Trung bình
+# Chi tiết: Adversaries may carry out malicious operations using a virtual instance to avoid detection
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText IN ("*New-VM*", "*Set-VMFirmware*", "*Start-VM*")
+
+# ── Suspicious PowerShell Invocations - Generic ──
+# Mức độ  : Cao
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects suspicious PowerShell invocation command parameters
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText IN ("* -enc *", "* -EncodedCommand *", "* -ec *") ScriptBlockText IN ("* -w hidden *", "* -window hidden *", "* -windowstyle hidden *", "* -w 1 *") ScriptBlockText IN ("* -noni *", "* -noninteractive *")
+
+# ── Suspicious PowerShell Invocations - Specific ──
+# Mức độ  : Cao
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects suspicious PowerShell invocation command parameters
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") (ScriptBlockText="*-nop*" ScriptBlockText="* -w *" ScriptBlockText="*hidden*" ScriptBlockText="* -c *" ScriptBlockText="*[Convert]::FromBase64String*") OR (ScriptBlockText="* -w *" ScriptBlockText="*hidden*" ScriptBlockText="*-noni*" ScriptBlockText="*-nop*" ScriptBlockText="* -c *" ScriptBlockText="*iex*" ScriptBlockText="*New-Object*") OR (ScriptBlockText="* -w *" ScriptBlockText="*hidden*" ScriptBlockText="*-ep*" ScriptBlockText="*bypass*" ScriptBlockText="*-Enc*") OR (ScriptBlockText="*powershell*" ScriptBlockText="*reg*" ScriptBlockText="*add*" ScriptBlockText IN ("*\\software\\microsoft\\windows\\currentversion\\run*", "*\\software\\wow6432node\\microsoft\\windows\\currentversion\\run*", "*\\software\\microsoft\\windows\\currentversion\\policies\\explorer\\run*")) OR (ScriptBlockText="*bypass*" ScriptBlockText="*-noprofile*" ScriptBlockText="*-windowstyle*" ScriptBlockText="*hidden*" ScriptBlockText="*new-object*" ScriptBlockText="*system.net.webclient*" ScriptBlockText="*.download*") OR (ScriptBlockText="*iex*" ScriptBlockText="*New-Object*" ScriptBlockText="*Net.WebClient*" ScriptBlockText="*.Download*") NOT (ScriptBlockText IN ("*(New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1*", "*(New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1')*", "*Write-ChocolateyWarning*"))
+
+# ── Change User Agents with WebRequest ──
+# Mức độ  : Trung bình
+# Chi tiết: Adversaries may communicate using application layer protocols associated with web traffic to avoid detection/network filtering by blending in with existing traffic. Commands to the remote system, and 
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText IN ("*Invoke-WebRequest*", "*Invoke-RestMethod*", "* irm *", "*iwr *") ScriptBlockText="*-UserAgent *"
+
+# ── Suspicious IO.FileStream ──
+# Mức độ  : Trung bình
+# Mục đích: Xóa dấu vết
+# Chi tiết: Open a handle on the drive volume via the \\.\ DOS device path specifier and perform direct access read of the first few bytes of the volume.
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*New-Object*" ScriptBlockText="*IO.FileStream*" ScriptBlockText="*\\\\.\\*"
+
+# ── Potential Keylogger Activity ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects PowerShell scripts that contains reference to keystroke capturing functions
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*[Windows.Input.Keyboard]::IsKeyDown([System.Windows.Input.Key]::*"
+
+# ── Potential Suspicious PowerShell Keywords ──
+# Mức độ  : Trung bình
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects potentially suspicious keywords that could indicate the use of a PowerShell exploitation framework
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText IN ("*System.Reflection.Assembly.Load($*", "*[System.Reflection.Assembly]::Load($*", "*[Reflection.Assembly]::Load($*", "*System.Reflection.AssemblyName*", "*Reflection.Emit.AssemblyBuilderAccess*", "*Reflection.Emit.CustomAttributeBuilder*", "*Runtime.InteropServices.UnmanagedType*", "*Runtime.InteropServices.DllImportAttribute*", "*SuspendThread*", "*rundll32*")
+
+# ── Suspicious Get Local Groups Information - PowerShell ──
+# Mức độ  : Thấp
+# Chi tiết: Detects the use of PowerShell modules and cmdlets to gather local group information. Adversaries may use local system permission groups to determine which groups exist and which users belong to a part
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText IN ("*get-localgroup *", "*get-localgroupmember *") OR (ScriptBlockText IN ("*get-wmiobject *", "*gwmi *", "*get-ciminstance *", "*gcim *") ScriptBlockText="*win32_group*")
+
+# ── Powershell Local Email Collection ──
+# Mức độ  : Trung bình
+# Chi tiết: Adversaries may target user email on local systems to collect sensitive information. Files containing email data can be acquired from a users local system, such as Outlook storage or cache files.
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText IN ("*Get-Inbox.ps1*", "*Microsoft.Office.Interop.Outlook*", "*Microsoft.Office.Interop.Outlook.olDefaultFolders*", "*-comobject outlook.application*")
+
+# ── Suspicious Mount-DiskImage ──
+# Mức độ  : Thấp
+# Chi tiết: Adversaries may abuse container files such as disk image (.iso, .vhd) file formats to deliver malicious payloads that may not be tagged with MOTW.
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*Mount-DiskImage *" ScriptBlockText="*-ImagePath *"
+
+# ── PowerShell Deleted Mounted Share ──
+# Mức độ  : Trung bình
+# Mục đích: Xóa dấu vết
+# Chi tiết: Detects when when a mounted share is removed. Adversaries may remove share connections that are no longer useful in order to clean up traces of their operation
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText IN ("*Remove-SmbShare*", "*Remove-FileShare*") NOT (ScriptBlockText="*FileShare.cdxml*" ScriptBlockText="*Microsoft.PowerShell.Core\\Export-ModuleMember*" ScriptBlockText="*ROOT/Microsoft/Windows/Storage/MSFT_FileShare*" ScriptBlockText="*ObjectModelWrapper*" ScriptBlockText="*Cmdletization.MethodParameter*")
+
+# ── Suspicious Connection to Remote Account ──
+# Mức độ  : Thấp
+# Chi tiết: Adversaries with no prior knowledge of legitimate credentials within the system or environment may guess passwords to attempt access to accounts. Without knowledge of the password for an account, an a
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText IN ("*System.DirectoryServices.Protocols.LdapDirectoryIdentifier*", "*System.Net.NetworkCredential*", "*System.DirectoryServices.Protocols.LdapConnection*")
+
+# ── Suspicious New-PSDrive to Admin Share ──
+# Mức độ  : Trung bình
+# Mục đích: Di chuyển ngang mạng
+# Chi tiết: Adversaries may use to interact with a remote network share using Server Message Block (SMB). The adversary may then perform actions as the logged-on user.
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*New-PSDrive*" ScriptBlockText="*-psprovider *" ScriptBlockText="*filesystem*" ScriptBlockText="*-root *" ScriptBlockText="*\\\\*" ScriptBlockText="*$*"
+
+# ── Suspicious TCP Tunnel Via PowerShell Script ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects powershell scripts that creates sockets/listeners which could be indicative of tunneling activity
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*[System.Net.HttpWebRequest]*" ScriptBlockText="*System.Net.Sockets.TcpListener*" ScriptBlockText="*AcceptTcpClient*"
+
+# ── Recon Information for Export with PowerShell ──
+# Mức độ  : Trung bình
+# Chi tiết: Once established within a system or network, an adversary may use automated techniques for collecting internal data
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText IN ("*Get-Service *", "*Get-ChildItem *", "*Get-Process *") ScriptBlockText="*> $env:TEMP\\*"
+
+# ── Remove Account From Domain Admin Group ──
+# Mức độ  : Trung bình
+# Chi tiết: Adversaries may interrupt availability of system and network resources by inhibiting access to accounts utilized by legitimate users. Accounts may be deleted, locked, or manipulated (ex: changed crede
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*Remove-ADGroupMember*" ScriptBlockText="*-Identity *" ScriptBlockText="*-Members *"
+
+# ── Suspicious Service DACL Modification Via Set-Service Cmdlet - PS ──
+# Mức độ  : Cao
+# Chi tiết: Detects usage of the "Set-Service" powershell cmdlet to configure a new SecurityDescriptor that allows a service to be hidden from other utilities such as "sc.exe", "Get-Service"...etc. (Works only in
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText IN ("*-SecurityDescriptorSddl *", "*-sd *") ScriptBlockText="*Set-Service *" ScriptBlockText="*D;;*" ScriptBlockText IN ("*;;;IU*", "*;;;SU*", "*;;;BA*", "*;;;SY*", "*;;;WD*")
+
+# ── Potential PowerShell Obfuscation Using Alias Cmdlets ──
+# Mức độ  : Thấp
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects Set-Alias or New-Alias cmdlet usage. Which can be use as a mean to obfuscate PowerShell scripts
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText IN ("*Set-Alias *", "*New-Alias *") NOT (ScriptBlockText IN ("Set-Alias -Name ncms -Value New-CimSession -Option ReadOnly, AllScope -ErrorAction SilentlyContinue", "Set-Alias -Name gcls -Value Get-CimClass -Option ReadOnly, AllScope -ErrorAction SilentlyContinue", "Set-Alias -Name ncso -Value New-CimSessionOption -Option ReadOnly, AllScope -ErrorAction SilentlyContinue", "Set-Alias -Name gcms -Value Get-CimSession -Option ReadOnly, AllScope -ErrorAction SilentlyContinue", "Set-Alias -Name rcms -Value Remove-cimSession -Option ReadOnly, AllScope -ErrorAction SilentlyContinue", "Set-Alias -Name rcie -Value Register-CimIndicationEvent -Option ReadOnly, AllScope -ErrorAction SilentlyContinue", "Set-Alias -Name gcai -Value Get-CimAssociatedInstance -Option ReadOnly, AllScope -ErrorAction SilentlyContinue", "Set-Alias -Name gcim -Value Get-CimInstance -Option ReadOnly, AllScope -ErrorAction SilentlyContinue", "Set-Alias -Name scim -Value Set-CimInstance -Option ReadOnly, AllScope -ErrorAction SilentlyContinue", "Set-Alias -Name ncim -Value New-CimInstance -Option ReadOnly, AllScope -ErrorAction SilentlyContinue", "Set-Alias -Name rcim -Value Remove-cimInstance -Option ReadOnly, AllScope -ErrorAction SilentlyContinue", "Set-Alias -Name icim -Value Invoke-CimMethod -Option ReadOnly, AllScope -ErrorAction SilentlyContinue"))
+
+# ── Suspicious Get Information for SMB Share ──
+# Mức độ  : Thấp
+# Chi tiết: Adversaries may look for folders and drives shared on remote systems as a means of identifying sources of information to gather as a precursor for Collection and to identify potential systems of inter
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*get-smbshare*"
+
+# ── Suspicious SSL Connection ──
+# Mức độ  : Thấp
+# Chi tiết: Adversaries may employ a known encryption algorithm to conceal command and control traffic rather than relying on any inherent protections provided by a communication protocol.
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*System.Net.Security.SslStream*" ScriptBlockText="*Net.Security.RemoteCertificateValidationCallback*" ScriptBlockText="*.AuthenticateAsClient*"
+
+# ── Suspicious Start-Process PassThru ──
+# Mức độ  : Trung bình
+# Mục đích: Giả mạo tên tiến trình
+# Chi tiết: Powershell use PassThru option to start in background
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText IN ("*Start-Process *", "*saps *") ScriptBlockText="*-PassThru *" ScriptBlockText="*-FilePath *"
+
+# ── Suspicious Unblock-File ──
+# Mức độ  : Trung bình
+# Chi tiết: Remove the Zone.Identifier alternate data stream which identifies the file as downloaded from the internet.
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*Unblock-File *" ScriptBlockText="*-Path *"
+
+# ── Replace Desktop Wallpaper by Powershell ──
+# Mức độ  : Thấp
+# Chi tiết: An adversary may deface systems internal to an organization in an attempt to intimidate or mislead users. This may take the form of modifications to internal websites, or directly to user systems with
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") (ScriptBlockText="*Get-ItemProperty*" ScriptBlockText="*Registry::*" ScriptBlockText="*HKEY_CURRENT_USER\\Control Panel\\Desktop\\*" ScriptBlockText="*WallPaper*") OR ScriptBlockText="*SystemParametersInfo(20,0,*,3)*"
+
+# ── Powershell Suspicious Win32_PnPEntity ──
+# Mức độ  : Thấp
+# Chi tiết: Adversaries may attempt to gather information about attached peripheral devices and components connected to a computer system.
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*Win32_PnPEntity*"
+
+# ── Deletion of Volume Shadow Copies via WMI with PowerShell - PS Script ──
+# Mức độ  : Cao
+# Mục đích: Phá hủy backup/recovery
+# Chi tiết: Detects deletion of Windows Volume Shadow Copies with PowerShell code and Get-WMIObject. This technique is used by numerous ransomware families such as Sodinokibi/REvil
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText IN ("*Get-WmiObject*", "*gwmi*", "*Get-CimInstance*", "*gcim*") ScriptBlockText="*Win32_ShadowCopy*" ScriptBlockText IN ("*.Delete()*", "*Remove-WmiObject*", "*rwmi*", "*Remove-CimInstance*", "*rcim*")
+
+# ── Suspicious PowerShell WindowStyle Option ──
+# Mức độ  : Trung bình
+# Chi tiết: Adversaries may use hidden windows to conceal malicious activity from the plain sight of users. In some cases, windows that would typically be displayed when an application carries out an operation ca
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*powershell*" ScriptBlockText="*WindowStyle*" ScriptBlockText="*Hidden*" NOT (ScriptBlockText="*:\\Program Files\\Amazon\\WorkSpacesConfig\\Scripts\\*" ScriptBlockText="*$PSScriptRoot\\Module\\WorkspaceScriptModule\\WorkspaceScriptModule*")
+
+# ── PowerShell Write-EventLog Usage ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects usage of the "Write-EventLog" cmdlet with 'RawData' flag. The cmdlet can be levreage to write malicious payloads to the EventLog and then retrieve them later for later use
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*Write-EventLog*" ScriptBlockText="*-RawData *"
+
+# ── Zip A Folder With PowerShell For Staging In Temp - PowerShell Script ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects PowerShell scripts that make use of the "Compress-Archive" Cmdlet in order to compress folders and files where the output is stored in a potentially suspicious location that is used often by m
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText IN ("*Compress-Archive -Path*-DestinationPath $env:TEMP*", "*Compress-Archive -Path*-DestinationPath*\\AppData\\Local\\Temp\\*", "*Compress-Archive -Path*-DestinationPath*:\\Windows\\Temp\\*")
+
+# ── SyncAppvPublishingServer Execution to Bypass Powershell Restriction ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects SyncAppvPublishingServer process execution which usually utilized by adversaries to bypass PowerShell execution restrictions.
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*SyncAppvPublishingServer.exe*"
+
+# ── Tamper Windows Defender Remove-MpPreference - ScriptBlockLogging ──
+# Mức độ  : Cao
+# Chi tiết: Detects attempts to remove Windows Defender configuration using the 'MpPreference' cmdlet
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*Remove-MpPreference*" ScriptBlockText IN ("*-ControlledFolderAccessProtectedFolders *", "*-AttackSurfaceReductionRules_Ids *", "*-AttackSurfaceReductionRules_Actions *", "*-CheckForSignaturesBeforeRunningScan *")
+
+# ── Tamper Windows Defender - ScriptBlockLogging ──
+# Mức độ  : Cao
+# Chi tiết: Detects PowerShell scripts attempting to disable scheduled scanning and other parts of Windows Defender ATP or set default actions to allow.
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") (ScriptBlockText="*Set-MpPreference*" ScriptBlockText IN ("*-dbaf $true*", "*-dbaf 1*", "*-dbm $true*", "*-dbm 1*", "*-dips $true*", "*-dips 1*", "*-DisableArchiveScanning $true*", "*-DisableArchiveScanning 1*", "*-DisableBehaviorMonitoring $true*", "*-DisableBehaviorMonitoring 1*", "*-DisableBlockAtFirstSeen $true*", "*-DisableBlockAtFirstSeen 1*", "*-DisableCatchupFullScan $true*", "*-DisableCatchupFullScan 1*", "*-DisableCatchupQuickScan $true*", "*-DisableCatchupQuickScan 1*", "*-DisableIntrusionPreventionSystem $true*", "*-DisableIntrusionPreventionSystem 1*", "*-DisableIOAVProtection $true*", "*-DisableIOAVProtection 1*", "*-DisableRealtimeMonitoring $true*", "*-DisableRealtimeMonitoring 1*", "*-DisableRemovableDriveScanning $true*", "*-DisableRemovableDriveScanning 1*", "*-DisableScanningMappedNetworkDrivesForFullScan $true*", "*-DisableScanningMappedNetworkDrivesForFullScan 1*", "*-DisableScanningNetworkFiles $true*", "*-DisableScanningNetworkFiles 1*", "*-DisableScriptScanning $true*", "*-DisableScriptScanning 1*", "*-MAPSReporting $false*", "*-MAPSReporting 0*", "*-drdsc $true*", "*-drdsc 1*", "*-drtm $true*", "*-drtm 1*", "*-dscrptsc $true*", "*-dscrptsc 1*", "*-dsmndf $true*", "*-dsmndf 1*", "*-dsnf $true*", "*-dsnf 1*", "*-dss $true*", "*-dss 1*")) OR (ScriptBlockText="*Set-MpPreference*" ScriptBlockText IN ("*HighThreatDefaultAction Allow*", "*htdefac Allow*", "*LowThreatDefaultAction Allow*", "*ltdefac Allow*", "*ModerateThreatDefaultAction Allow*", "*mtdefac Allow*", "*SevereThreatDefaultAction Allow*", "*stdefac Allow*"))
+
+# ── Testing Usage of Uncommonly Used Port ──
+# Mức độ  : Trung bình
+# Chi tiết: Adversaries may communicate using a protocol and port paring that are typically not associated. For example, HTTPS over port 8088(Citation: Symantec Elfin Mar 2019) or port 587(Citation: Fortinet Agen
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*Test-NetConnection*" ScriptBlockText="*-ComputerName *" ScriptBlockText="*-port *" NOT (ScriptBlockText IN ("* 443 *", "* 80 *"))
+
+# ── Powershell Timestomp ──
+# Mức độ  : Trung bình
+# Mục đích: Xóa dấu vết
+# Chi tiết: Adversaries may modify file time attributes to hide new or changes to existing files. Timestomping is a technique that modifies the timestamps of a file (the modify, access, create, and change times),
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText IN ("*.CreationTime =*", "*.LastWriteTime =*", "*.LastAccessTime =*", "*[IO.File]::SetCreationTime*", "*[IO.File]::SetLastAccessTime*", "*[IO.File]::SetLastWriteTime*")
+
+# ── User Discovery And Export Via Get-ADUser Cmdlet - PowerShell ──
+# Mức độ  : Trung bình
+# Mục đích: Thu thập thông tin user
+# Chi tiết: Detects usage of the Get-ADUser cmdlet to collect user information and output it to a file
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*Get-ADUser *" ScriptBlockText="* -Filter \**" ScriptBlockText IN ("* > *", "* | Select *", "*Out-File*", "*Set-Content*", "*Add-Content*")
+
+# ── Potential Persistence Via PowerShell User Profile Using Add-Content ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects calls to "Add-Content" cmdlet in order to modify the content of the user profile and potentially adding suspicious commands for persistence
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*Add-Content $profile*" ScriptBlockText IN ("*-Value \"IEX *", "*-Value \"Invoke-Expression*", "*-Value \"Invoke-WebRequest*", "*-Value \"Start-Process*", "*-Value 'IEX *", "*-Value 'Invoke-Expression*", "*-Value 'Invoke-WebRequest*", "*-Value 'Start-Process*")
+
+# ── Abuse of Service Permissions to Hide Services Via Set-Service - PS ──
+# Mức độ  : Cao
+# Chi tiết: Detects usage of the "Set-Service" powershell cmdlet to configure a new SecurityDescriptor that allows a service to be hidden from other utilities such as "sc.exe", "Get-Service"...etc. (Works only in
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*Set-Service *" ScriptBlockText="*DCLCWPDTSD*" ScriptBlockText IN ("*-SecurityDescriptorSddl *", "*-sd *")
+
+# ── Registry Modification Attempt Via VBScript - PowerShell ──
+# Mức độ  : Trung bình
+# Mục đích: Sửa registry; Thực thi lệnh/script
+# Chi tiết: Detects attempts to modify the registry using VBScript's CreateObject("Wscript.shell") and RegWrite methods embedded within PowerShell scripts or commands. Threat actors commonly embed VBScript code w
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*CreateObject*" ScriptBlockText="*Wscript.shell*" ScriptBlockText="*.RegWrite*"
+
+# ── Veeam Backup Servers Credential Dumping Script Execution ──
+# Mức độ  : Cao
+# Chi tiết: Detects execution of a PowerShell script that contains calls to the "Veeam.Backup" class, in order to dump stored credentials.
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*[Credentials]*" ScriptBlockText="*[Veeam.Backup.Common.ProtectedStorage]::GetLocalString*" ScriptBlockText="*Invoke-Sqlcmd*" ScriptBlockText="*Veeam Backup and Replication*"
+
+# ── Usage Of Web Request Commands And Cmdlets - ScriptBlock ──
+# Mức độ  : Trung bình
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects the use of various web request commands with commandline tools and Windows PowerShell cmdlets (including aliases) via PowerShell scriptblock logs
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText IN ("*[System.Net.WebRequest]::create*", "*curl *", "*Invoke-RestMethod*", "*Invoke-WebRequest*", "* irm *", "*iwr *", "*Resume-BitsTransfer*", "*Start-BitsTransfer*", "*wget *", "*WinHttp.WinHttpRequest*") NOT Path="C:\\Packages\\Plugins\\Microsoft.GuestConfiguration.ConfigurationforWindows\\*"
+
+# ── Potentially Suspicious Call To Win32_NTEventlogFile Class - PSScript ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects usage of the WMI class "Win32_NTEventlogFile" in a potentially suspicious way (delete, backup, change permissions, etc.) from a PowerShell script
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*Win32_NTEventlogFile*" ScriptBlockText IN ("*.BackupEventlog(*", "*.ChangeSecurityPermissions(*", "*.ChangeSecurityPermissionsEx(*", "*.ClearEventLog(*", "*.Delete(*", "*.DeleteEx(*", "*.Rename(*", "*.TakeOwnerShip(*", "*.TakeOwnerShipEx(*")
+
+# ── PowerShell WMI Win32_Product Install MSI ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects the execution of an MSI file using PowerShell and the WMI Win32_Product class
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*Invoke-CimMethod *" ScriptBlockText="*-ClassName *" ScriptBlockText="*Win32_Product *" ScriptBlockText="*-MethodName *" ScriptBlockText="*.msi*"
+
+# ── Potential WinAPI Calls Via PowerShell Scripts ──
+# Mức độ  : Cao
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects usage of WinAPI functions in PowerShell scripts. It may indicate attempts to perform actions such as process injection, token stealing, or other malicious activities that leverage Windows API 
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") (ScriptBlockText="*VirtualAlloc*" ScriptBlockText="*OpenProcess*" ScriptBlockText="*WriteProcessMemory*" ScriptBlockText="*CreateRemoteThread*") OR (ScriptBlockText="*OpenProcessToken*" ScriptBlockText="*LookupPrivilegeValue*" ScriptBlockText="*AdjustTokenPrivileges*") OR (ScriptBlockText="*OpenProcessToken*" ScriptBlockText="*DuplicateTokenEx*" ScriptBlockText="*CloseHandle*") OR (ScriptBlockText="*WriteProcessMemory*" ScriptBlockText="*VirtualAlloc*" ScriptBlockText="*ReadProcessMemory*" ScriptBlockText="*VirtualFree*") OR (ScriptBlockText="*VirtualAlloc*" ScriptBlockText="*GetDelegateForFunctionPointer*" ScriptBlockText="*Marshal.Copy*")
+
+# ── Windows Defender Exclusions Added - PowerShell ──
+# Mức độ  : Trung bình
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects modifications to the Windows Defender configuration settings using PowerShell to add exclusions
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText IN ("* -ExclusionPath *", "* -ExclusionExtension *", "* -ExclusionProcess *", "* -ExclusionIpAddress *") ScriptBlockText IN ("*Add-MpPreference *", "*Set-MpPreference *")
+
+# ── Windows Firewall Profile Disabled ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects when a user disables the Windows Firewall via a Profile to help evade defense.
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*Set-NetFirewallProfile *" ScriptBlockText="* -Enabled *" ScriptBlockText="* False*" ScriptBlockText IN ("* -All *", "*Public*", "*Domain*", "*Private*")
+
+# ── Winlogon Helper DLL ──
+# Mức độ  : Trung bình
+# Mục đích: Persistence qua autorun
+# Chi tiết: Winlogon.exe is a Windows component responsible for actions at logon/logoff as well as the secure attention sequence (SAS) triggered by Ctrl-Alt-Delete. Registry entries in HKLM\Software[Wow6432Node]M
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*CurrentVersion\\Winlogon*" ScriptBlockText IN ("*Set-ItemProperty*", "*New-Item*")
+
+# ── Powershell WMI Persistence ──
+# Mức độ  : Trung bình
+# Chi tiết: Adversaries may establish persistence and elevate privileges by executing malicious content triggered by a Windows Management Instrumentation (WMI) event subscription.
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") (ScriptBlockText="*New-CimInstance *" ScriptBlockText="*-Namespace root/subscription *" ScriptBlockText="*-ClassName __EventFilter *" ScriptBlockText="*-Property *") OR (ScriptBlockText="*New-CimInstance *" ScriptBlockText="*-Namespace root/subscription *" ScriptBlockText="*-ClassName CommandLineEventConsumer *" ScriptBlockText="*-Property *")
+
+# ── WMIC Unquoted Services Path Lookup - PowerShell ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects known WMI recon method to look for unquoted service paths, often used by pentest inside of powershell scripts attackers enum scripts
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText IN ("*Get-WmiObject *", "*gwmi *") ScriptBlockText="* Win32_Service *" ScriptBlockText="*Name*" ScriptBlockText="*DisplayName*" ScriptBlockText="*PathName*" ScriptBlockText="*StartMode*"
+
+# ── WMImplant Hack Tool ──
+# Mức độ  : Cao
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects parameters used by WMImplant
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText IN ("*WMImplant*", "* change_user *", "* gen_cli *", "* command_exec *", "* disable_wdigest *", "* disable_winrm *", "* enable_wdigest *", "* enable_winrm *", "* registry_mod *", "* remote_posh *", "* sched_job *", "* service_mod *", "* process_kill *", "* active_users *", "* basic_info *", "* power_off *", "* vacant_system *", "* logon_events *")
+
+# ── Suspicious X509Enrollment - Ps Script ──
+# Mức độ  : Trung bình
+# Chi tiết: Detect use of X509Enrollment
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText IN ("*X509Enrollment.CBinaryConverter*", "*884e2002-217d-11da-b2a4-000e7bbb2b09*")
+
+# ── Powershell XML Execute Command ──
+# Mức độ  : Trung bình
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Adversaries may abuse PowerShell commands and scripts for execution. PowerShell is a powerful interactive command-line interface and scripting environment included in the Windows operating system. (Ci
+source IN ("WinEventLog:Microsoft-Windows-PowerShell/Operational", "WinEventLog:PowerShellCore/Operational") Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") EventCode=4104 EventCode=4104 Channel IN ("Microsoft-Windows-PowerShell/Operational", "PowerShellCore/Operational") ScriptBlockText="*New-Object*" ScriptBlockText="*System.Xml.XmlDocument*" ScriptBlockText="*.Load*" ScriptBlockText IN ("*IEX *", "*Invoke-Expression *", "*Invoke-Command *", "*ICM -*")

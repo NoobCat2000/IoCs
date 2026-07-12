@@ -1,0 +1,166 @@
+# ── Network Connection Initiated By AddinUtil.EXE ──
+# Mức độ  : Cao
+# Chi tiết: Detects a network connection initiated by the Add-In deployment cache updating utility "AddInutil.exe". This could indicate a potential command and control communication as this tool doesn't usually i
+EventCode=5156 Channel="Security" Direction="%%14593" Application="*\\addinutil.exe"
+
+# ── Uncommon Connection to Active Directory Web Services ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects uncommon network connections to the Active Directory Web Services (ADWS) from processes not typically associated with ADWS management.
+EventCode=5156 Channel="Security" Direction="True" DestPort=9389 NOT (Application="\\device\\harddiskvolume*\\Windows\\system32\\dsac.exe" OR Application="\\device\\harddiskvolume*\\Program Files\\Microsoft Monitoring Agent\\" OR Application IN ("\\device\\harddiskvolume*\\Program Files\\PowerShell\\7\\pwsh.exe*", "\\device\\harddiskvolume*\\Program Files\\PowerShell\\7-preview\\pwsh.ex*", "\\device\\harddiskvolume*\\Windows\\System32\\WindowsPowerShell\\*", "\\device\\harddiskvolume*\\Windows\\SysWOW64\\WindowsPowerShell\\*"))
+
+# ── Uncommon Network Connection Initiated By Certutil.EXE ──
+# Mức độ  : Cao
+# Mục đích: Tải file từ mạng
+# Chi tiết: Detects a network connection initiated by the certutil.exe utility. Attackers can abuse the utility in order to download malware or additional payloads.
+EventCode=5156 Channel="Security" Application="*\\certutil.exe" Direction="%%14593" DestPort IN (80, 135, 443, 445)
+
+# ── Outbound Network Connection Initiated By Cmstp.EXE ──
+# Mức độ  : Cao
+# Chi tiết: Detects a network connection initiated by Cmstp.EXE Its uncommon for "cmstp.exe" to initiate an outbound network connection. Investigate the source of such requests to determine if they are malicious.
+EventCode=5156 Channel="Security" Application="*\\cmstp.exe" Direction="%%14593" NOT (DestAddress="127.0.0.0/8" OR DestAddress="10.0.0.0/8" OR DestAddress="172.16.0.0/12" OR DestAddress="192.168.0.0/16" OR DestAddress="169.254.0.0/16" OR DestAddress="::1/128" OR DestAddress="fe80::/10" OR DestAddress="fc00::/7")
+
+# ── Outbound Network Connection Initiated By Microsoft Dialer ──
+# Mức độ  : Cao
+# Chi tiết: Detects outbound network connection initiated by Microsoft Dialer. The Microsoft Dialer, also known as Phone Dialer, is a built-in utility application included in various versions of the Microsoft Win
+EventCode=5156 Channel="Security" Application="*:\\Windows\\System32\\dialer.exe" Direction="%%14593" NOT (DestAddress="127.0.0.0/8" OR DestAddress="10.0.0.0/8" OR DestAddress="172.16.0.0/12" OR DestAddress="192.168.0.0/16" OR DestAddress="169.254.0.0/16" OR DestAddress="::1/128" OR DestAddress="fe80::/10" OR DestAddress="fc00::/7")
+
+# ── Network Connection Initiated By Eqnedt32.EXE ──
+# Mức độ  : Cao
+# Chi tiết: Detects network connections from the Equation Editor process "eqnedt32.exe".
+EventCode=5156 Channel="Security" Application="*\\eqnedt32.exe"
+
+# ── Network Connection Initiated via Finger.EXE ──
+# Mức độ  : Cao
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects network connections via finger.exe, which can be abused by threat actors to retrieve remote commands for execution on Windows devices. In one ClickFix malware campaign, adversaries leveraged t
+EventCode=5156 Channel="Security" Direction="%%14593" Application="*\\finger.exe"
+
+# ── Network Connection Initiated By IMEWDBLD.EXE ──
+# Mức độ  : Cao
+# Mục đích: Tải file từ mạng
+# Chi tiết: Detects a network connection initiated by IMEWDBLD.EXE. This might indicate potential abuse of the utility as a LOLBIN in order to download arbitrary files or additional payloads.
+EventCode=5156 Channel="Security" Direction="%%14593" Application="*\\IMEWDBLD.exe"
+
+# ── Network Connection Initiated Via Notepad.EXE ──
+# Mức độ  : Cao
+# Mục đích: Chèn mã vào tiến trình
+# Chi tiết: Detects a network connection that is initiated by the "notepad.exe" process. This might be a sign of process injection from a beacon process or something similar. Notepad rarely initiates a network co
+EventCode=5156 Channel="Security" Application="*\\notepad.exe" NOT DestPort=9100
+
+# ── Office Application Initiated Network Connection To Non-Local IP ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects an office application (Word, Excel, PowerPoint)  that initiate a network connection to a non-private IP addresses. This rule aims to detect traffic similar to one seen exploited in CVE-2021-42
+EventCode=5156 Channel="Security" Application IN ("*\\excel.exe", "*\\outlook.exe", "*\\powerpnt.exe", "*\\winword.exe", "*\\wordview.exe") Direction="%%14593" NOT (DestAddress="127.0.0.0/8" OR DestAddress="10.0.0.0/8" OR DestAddress="172.16.0.0/12" OR DestAddress="192.168.0.0/16" OR DestAddress="169.254.0.0/16" OR DestAddress="::1/128" OR DestAddress="fe80::/10" OR DestAddress="fc00::/7" OR DestAddress="2.16.56.0/23" OR DestAddress="2.17.248.0/21" OR DestAddress="13.107.240.0/21" OR DestAddress="20.184.0.0/13" OR DestAddress="23.61.224.0/20" OR DestAddress="20.192.0.0/10" OR DestAddress="23.72.0.0/13" OR DestAddress="23.3.88.0/22" OR DestAddress="23.216.132.0/22" OR DestAddress="40.76.0.0/14" OR DestAddress="51.10.0.0/15" OR DestAddress="51.103.0.0/16" OR DestAddress="51.104.0.0/15" OR DestAddress="51.142.136.0/22" OR DestAddress="52.160.0.0/11" OR DestAddress="95.101.96.0/21" OR DestAddress="204.79.197.0/24" OR (DestAddress="13.107.4.0/22" OR DestAddress="13.107.6.152/31" OR DestAddress="13.107.18.10/31" OR DestAddress="13.107.42.0/23" OR DestAddress="13.107.128.0/22" OR DestAddress="23.35.224.0/20" OR DestAddress="23.53.40.0/22" OR DestAddress="23.103.160.0/20" OR DestAddress="23.216.76.0/22" OR DestAddress="40.96.0.0/13" OR DestAddress="40.104.0.0/15" OR DestAddress="52.96.0.0/14" OR DestAddress="131.253.33.215/32" OR DestAddress="132.245.0.0/16" OR DestAddress="150.171.32.0/22" OR DestAddress="204.79.197.215/32" OR DestAddress="2603:1006::/40" OR DestAddress="2603:1016::/36" OR DestAddress="2603:1026::/36" OR DestAddress="2603:1036::/36" OR DestAddress="2603:1046::/36" OR DestAddress="2603:1056::/36" OR DestAddress="2620:1ec:4::152/128" OR DestAddress="2620:1ec:4::153/128" OR DestAddress="2620:1ec:c::10/128" OR DestAddress="2620:1ec:c::11/128" OR DestAddress="2620:1ec:d::10/128" OR DestAddress="2620:1ec:d::11/128" OR DestAddress="2620:1ec:8f0::/46" OR DestAddress="2620:1ec:900::/46" OR DestAddress="2620:1ec:a92::152/128" OR DestAddress="2620:1ec:a92::153/128" DestPort IN (80, 443)) OR (DestAddress="13.107.6.152/31" OR DestAddress="13.107.18.10/31" OR DestAddress="13.107.128.0/22" OR DestAddress="23.103.160.0/20" OR DestAddress="40.96.0.0/13" OR DestAddress="40.104.0.0/15" OR DestAddress="52.96.0.0/14" OR DestAddress="131.253.33.215/32" OR DestAddress="132.245.0.0/16" OR DestAddress="150.171.32.0/22" OR DestAddress="204.79.197.215/32" OR DestAddress="2603:1006::/40" OR DestAddress="2603:1016::/36" OR DestAddress="2603:1026::/36" OR DestAddress="2603:1036::/36" OR DestAddress="2603:1046::/36" OR DestAddress="2603:1056::/36" OR DestAddress="2620:1ec:4::152/128" OR DestAddress="2620:1ec:4::153/128" OR DestAddress="2620:1ec:c::10/128" OR DestAddress="2620:1ec:c::11/128" OR DestAddress="2620:1ec:d::10/128" OR DestAddress="2620:1ec:d::11/128" OR DestAddress="2620:1ec:8f0::/46" OR DestAddress="2620:1ec:900::/46" OR DestAddress="2620:1ec:a92::152/128" OR DestAddress="2620:1ec:a92::153/128" DestPort IN (143, 587, 993, 995) Protocol="6") OR (DestAddress="40.92.0.0/15" OR DestAddress="40.107.0.0/16" OR DestAddress="52.100.0.0/14" OR DestAddress="52.238.78.88/32" OR DestAddress="104.47.0.0/17" OR DestAddress="2a01:111:f400::/48" OR DestAddress="2a01:111:f403::/48" DestPort=443) OR (DestAddress="40.92.0.0/15" OR DestAddress="40.107.0.0/16" OR DestAddress="52.100.0.0/14" OR DestAddress="52.238.78.88/32" OR DestAddress="104.47.0.0/17" OR DestAddress="2a01:111:f400::/48" OR DestAddress="2a01:111:f403::/48" DestPort=25) OR (DestAddress="13.107.136.0/22" OR DestAddress="40.108.128.0/17" OR DestAddress="52.104.0.0/14" OR DestAddress="104.146.128.0/17" OR DestAddress="150.171.40.0/22" OR DestAddress="2603:1061:1300::/40" OR DestAddress="2620:1ec:8f8::/46" OR DestAddress="2620:1ec:908::/46" OR DestAddress="2a01:111:f402::/48" DestPort IN (80, 443) Protocol="6") OR (DestAddress="13.107.6.171/32" OR DestAddress="13.107.18.15/32" OR DestAddress="13.107.140.6/32" OR DestAddress="20.64.0.0/10" OR DestAddress="52.108.0.0/14" OR DestAddress="52.244.37.168/32" OR DestAddress="2603:1006:1400::/40" OR DestAddress="2603:1016:2400::/40" OR DestAddress="2603:1026:2400::/40" OR DestAddress="2603:1036:2400::/40" OR DestAddress="2603:1046:1400::/40" OR DestAddress="2603:1056:1400::/40" OR DestAddress="2603:1063:2000::/38" OR DestAddress="2620:1ec:c::15/128" OR DestAddress="2620:1ec:8fc::6/128" OR DestAddress="2620:1ec:a92::171/128" OR DestAddress="2a01:111:f100:2000::a83e:3019/128" OR DestAddress="2a01:111:f100:2002::8975:2d79/128" OR DestAddress="2a01:111:f100:2002::8975:2da8/128" OR DestAddress="2a01:111:f100:7000::6fdd:6cd5/128" OR DestAddress="2a01:111:f100:a004::bfeb:88cf/128" DestPort IN (80, 443) Protocol="6") OR (DestAddress="172.128.0.0/10" OR DestAddress="20.20.32.0/19" OR DestAddress="20.103.156.88/32" OR DestAddress="20.190.128.0/18" OR DestAddress="20.231.128.0/19" OR DestAddress="40.126.0.0/18" OR DestAddress="57.150.0.0/15" OR DestAddress="2603:1006:2000::/48" OR DestAddress="2603:1007:200::/48" OR DestAddress="2603:1016:1400::/48" OR DestAddress="2603:1017::/48" OR DestAddress="2603:1026:3000::/48" OR DestAddress="2603:1027:1::/48" OR DestAddress="2603:1036:3000::/48" OR DestAddress="2603:1037:1::/48" OR DestAddress="2603:1046:2000::/48" OR DestAddress="2603:1047:1::/48" OR DestAddress="2603:1056:2000::/48" OR DestAddress="2603:1057:2::/48" DestPort IN (80, 443) Protocol="6") OR (DestAddress="13.64.0.0/11" OR DestAddress="13.107.6.192/32" OR DestAddress="13.107.9.192/32" OR DestAddress="13.89.179.14/32" OR DestAddress="20.40.0.0/14" OR DestAddress="20.48.0.0/12" OR DestAddress="20.64.0.0/12" OR DestAddress="52.123.0.0/16" OR DestAddress="52.108.0.0/14" OR DestAddress="52.136.0.0/13" OR DestAddress="57.150.0.0/15" OR DestAddress="80.239.150.67/32" OR DestAddress="2620:1ec:4::192/128" OR DestAddress="2620:1ec:a92::192/128" DestPort=443 Protocol="6") OR (DestinationHostname="*.deploy.static.akamaitechnologies.com" DestPort=443 Protocol="6"))
+
+# ── Office Application Initiated Network Connection Over Uncommon Ports ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects an office suit application (Word, Excel, PowerPoint, Outlook) communicating to target systems over uncommon ports.
+EventCode=5156 Channel="Security" Direction="%%14593" Application IN ("*\\excel.exe", "*\\outlook.exe", "*\\powerpnt.exe", "*\\winword.exe", "*\\wordview.exe") NOT (DestPort IN (53, 80, 139, 389, 443, 445, 3268) OR (Application="*:\\Program Files\\Microsoft Office\\*" Application="*\\OUTLOOK.EXE" DestPort IN (143, 465, 587, 993, 995)))
+
+# ── Python Initiated Connection ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects a Python process initiating a network connection. While this often relates to package installation, it can also indicate a potential malicious script communicating with a C&C server.
+EventCode=5156 Channel="Security" Direction="%%14593" Application="*\\python*" Application="*.exe*" NOT ((DestAddress="127.0.0.1" SourceAddress="127.0.0.1") OR (CommandLine="*pip.exe*" CommandLine="*install*")) NOT ((ParentImage="C:\\ProgramData\\Anaconda3\\Scripts\\conda.exe" CommandLine="*:\\ProgramData\\Anaconda3\\Scripts\\conda-script.py*" CommandLine="*update*") OR (ParentImage="C:\\ProgramData\\Anaconda3\\python.exe" CommandLine="*C:\\ProgramData\\Anaconda3\\Scripts\\jupyter-notebook-script.py*"))
+
+# ── Outbound RDP Connections Over Non-Standard Tools ──
+# Mức độ  : Cao
+# Mục đích: Di chuyển ngang mạng
+# Chi tiết: Detects Non-Standard tools initiating a connection over port 3389 indicating possible lateral movement. An initial baseline is required before using this utility to exclude third party RDP tooling tha
+EventCode=5156 Channel="Security" DestPort=3389 Direction="%%14593" NOT (Application IN ("\\device\\harddiskvolume*\\Windows\\System32\\mstsc.exe", "\\device\\harddiskvolume*\\Windows\\SysWOW64\\mstsc.exe")) NOT ((SourcePort=53 Application="\\device\\harddiskvolume*\\Windows\\System32\\dns.exe" Protocol="17") OR Application IN ("*\\Avast Software\\Avast\\AvastSvc.exe", "*\\Avast\\AvastSvc.exe") OR Application="*\\RDCMan.exe" OR Application="\\device\\harddiskvolume*\\Program Files\\Google\\Chrome\\Application\\chrome.exe" OR Application IN ("*\\FSAssessment.exe", "*\\FSDiscovery.exe", "*\\MobaRTE.exe", "*\\mRemote.exe", "*\\mRemoteNG.exe", "*\\Passwordstate.exe", "*\\RemoteDesktopManager.exe", "*\\RemoteDesktopManager64.exe", "*\\RemoteDesktopManagerFree.exe", "*\\RSSensor.exe", "*\\RTS2App.exe", "*\\RTSApp.exe", "*\\spiceworks-finder.exe", "*\\Terminals.exe", "*\\ws_TunnelService.exe") OR Application IN ("*\\thor.exe", "*\\thor64.exe") OR Application="\\device\\harddiskvolume*\\Program Files\\SplunkUniversalForwarder\\bin\\*" OR Application="*\\Ranger\\SentinelRanger.exe" OR Application="\\device\\harddiskvolume*\\Program Files\\Mozilla Firefox\\firefox.exe" OR Application IN ("\\device\\harddiskvolume*\\Program Files\\TSplus\\Java\\bin\\HTML5service.exe", "\\device\\harddiskvolume*\\Program Files (x86)\\TSplus\\Java\\bin\\HTML5service.exe") OR NOT Application=* OR Application="" OR Application="<unknown process>")
+
+# ── RDP Over Reverse SSH Tunnel ──
+# Mức độ  : Cao
+# Mục đích: Di chuyển ngang mạng
+# Chi tiết: Detects svchost hosting RDP termsvcs communicating with the loopback address and on TCP port 3389
+EventCode=5156 Channel="Security" SourcePort=3389 Application="*\\svchost.exe" Direction="%%14593" DestAddress="127.0.0.0/8" OR DestAddress="::1/128"
+
+# ── RDP to HTTP or HTTPS Target Ports ──
+# Mức độ  : Cao
+# Mục đích: Di chuyển ngang mạng
+# Chi tiết: Detects svchost hosting RDP termsvcs communicating to target systems on TCP port 80 or 443
+EventCode=5156 Channel="Security" SourcePort=3389 Application="*\\svchost.exe" Direction="%%14593" DestPort IN (80, 443)
+
+# ── RegAsm.EXE Initiating Network Connection To Public IP ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects "RegAsm.exe" initiating a network connection to public IP adresses
+EventCode=5156 Channel="Security" Direction="%%14593" Application="*\\regasm.exe" NOT (DestAddress="127.0.0.0/8" OR DestAddress="10.0.0.0/8" OR DestAddress="172.16.0.0/12" OR DestAddress="192.168.0.0/16" OR DestAddress="169.254.0.0/16" OR DestAddress="::1/128" OR DestAddress="fe80::/10" OR DestAddress="fc00::/7")
+
+# ── Network Connection Initiated By Regsvr32.EXE ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects a network connection initiated by "Regsvr32.exe"
+EventCode=5156 Channel="Security" Direction="%%14593" Application="*\\regsvr32.exe"
+
+# ── Remote Access Tool - AnyDesk Incoming Connection ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects incoming connections to AnyDesk. This could indicate a potential remote attacker trying to connect to a listening instance of AnyDesk and use it as potential command and control channel.
+EventCode=5156 Channel="Security" Application IN ("*\\AnyDesk.exe", "*\\AnyDeskMSI.exe") Direction="%%14592"
+
+# ── Rundll32 Internet Connection ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects a rundll32 that communicates with public IP addresses
+EventCode=5156 Channel="Security" Application="*\\rundll32.exe" Direction="%%14593" NOT (DestAddress="127.0.0.0/8" OR DestAddress="10.0.0.0/8" OR DestAddress="172.16.0.0/12" OR DestAddress="192.168.0.0/16" OR DestAddress="169.254.0.0/16" OR DestAddress="::1/128" OR DestAddress="fe80::/10" OR DestAddress="fc00::/7" OR DestAddress="20.0.0.0/8" OR DestAddress="51.103.0.0/16" OR DestAddress="51.104.0.0/16" OR DestAddress="51.105.0.0/16" OR CommandLine="*\\system32\\PcaSvc.dll,PcaPatchSdbTask" OR SourceHostname="*.internal.cloudapp.net" OR (ParentImage="C:\\Windows\\System32\\svchost.exe" DestPort=443))
+
+# ── Silenttrinity Stager Msbuild Activity ──
+# Mức độ  : Cao
+# Chi tiết: Detects a possible remote connections to Silenttrinity c2
+EventCode=5156 Channel="Security" Application="*\\msbuild.exe" DestPort IN (80, 443) Direction="%%14593"
+
+# ── Network Communication Initiated To File Sharing Domains From Process Located In Suspicious Folder ──
+# Mức độ  : Cao
+# Mục đích: Tải file từ mạng
+# Chi tiết: Detects executables located in potentially suspicious directories initiating network connections towards file sharing domains.
+EventCode=5156 Channel="Security" Application IN ("*:\\$Recycle.bin*", "*:\\Perflogs\\*", "*:\\Temp\\*", "*:\\Users\\Default\\*", "*:\\Users\\Public\\*", "*:\\Windows\\Fonts\\*", "*:\\Windows\\IME\\*", "*:\\Windows\\System32\\Tasks\\*", "*:\\Windows\\Tasks\\*", "*:\\Windows\\Temp\\*", "*\\AppData\\Temp\\*", "*\\config\\systemprofile\\*", "*\\Windows\\addins\\*") DestinationHostname IN ("*.githubusercontent.com", "*0x0.st", "*anonfiles.com", "*bashupload.com", "*cdn.discordapp.com", "*chunk.io", "*ddns.net", "*dl.dropboxusercontent.com", "*ghostbin.co", "*github.com", "*glitch.me", "*gofile.io", "*hastebin.com", "*mediafire.com", "*mega.co.nz", "*mega.nz", "*onrender.com", "*pages.dev", "*paste.ee", "*pastebin.com", "*pastebin.pl", "*pastetext.net", "*pixeldrain.com", "*privatlab.com", "*privatlab.net", "*send.exploit.in", "*sendspace.com", "*storage.googleapis.com", "*storjshare.io", "*supabase.co", "*temp.sh", "*transfer.sh", "*trycloudflare.com", "*ufile.io", "*w3spaces.com", "*workers.dev", "*x0.at") Direction="%%14593"
+
+# ── Network Connection Initiated From Process Located In Potentially Suspicious Or Uncommon Location ──
+# Mức độ  : Cao
+# Mục đích: Tải file từ mạng
+# Chi tiết: Detects a network connection initiated by programs or processes running from suspicious or uncommon files system locations.
+EventCode=5156 Channel="Security" Direction="%%14593" Application IN ("*:\\$Recycle.bin*", "*:\\Perflogs\\*", "*:\\Temp\\*", "*:\\Users\\Default\\*", "*:\\Users\\Public\\*", "*:\\Windows\\Fonts\\*", "*:\\Windows\\IME\\*", "*:\\Windows\\System32\\Tasks\\*", "*:\\Windows\\Tasks\\*", "*\\config\\systemprofile\\*", "*\\Contacts\\*", "*\\Favorites\\*", "*\\Favourites\\*", "*\\Music\\*", "*\\Pictures\\*", "*\\Videos\\*", "*\\Windows\\addins\\*") NOT (DestinationHostname IN ("*.githubusercontent.com", "*0x0.st", "*anonfiles.com", "*bashupload.com", "*cdn.discordapp.com", "*chunk.io", "*ddns.net", "*dl.dropboxusercontent.com", "*ghostbin.co", "*github.com", "*glitch.me", "*gofile.io", "*hastebin.com", "*mediafire.com", "*mega.co.nz", "*mega.nz", "*onrender.com", "*pages.dev", "*paste.ee", "*pastebin.com", "*pastebin.pl", "*pastetext.net", "*portmap.io", "*privatlab.com", "*privatlab.net", "*send.exploit.in", "*sendspace.com", "*storage.googleapis.com", "*storjshare.io", "*supabase.co", "*temp.sh", "*transfer.sh", "*trycloudflare.com", "*ufile.io", "*w3spaces.com", "*workers.dev", "*x0.at"))
+
+# ── Potentially Suspicious Malware Callback Communication ──
+# Mức độ  : Cao
+# Chi tiết: Detects programs that connect to known malware callback ports based on statistical analysis from two different sandbox system databases
+EventCode=5156 Channel="Security" Direction="%%14593" DestPort IN (100, 198, 200, 243, 473, 666, 700, 743, 777, 1443, 1515, 1777, 1817, 1904, 1960, 2443, 2448, 3360, 3675, 3939, 4040, 4433, 4438, 4443, 4444, 4455, 5445, 5552, 5649, 6625, 7210, 7777, 8143, 8843, 9631, 9943, 10101, 12102, 12103, 12322, 13145, 13394, 13504, 13505, 13506, 13507, 14102, 14103, 14154, 49180, 65520, 65535) NOT (DestAddress="127.0.0.0/8" OR DestAddress="10.0.0.0/8" OR DestAddress="172.16.0.0/12" OR DestAddress="192.168.0.0/16" OR DestAddress="169.254.0.0/16" OR DestAddress="::1/128" OR DestAddress="fe80::/10" OR DestAddress="fc00::/7") NOT (Application IN ("\\device\\harddiskvolume*\\Program Files\\*", "\\device\\harddiskvolume*\\Program Files (x86)\\*"))
+
+# ── Communication To Uncommon Destination Ports ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects programs that connect to uncommon destination ports
+EventCode=5156 Channel="Security" Direction="%%14593" DestPort IN (8080, 8888) NOT (DestAddress="127.0.0.0/8" OR DestAddress="10.0.0.0/8" OR DestAddress="172.16.0.0/12" OR DestAddress="192.168.0.0/16" OR DestAddress="169.254.0.0/16" OR DestAddress="::1/128" OR DestAddress="fe80::/10" OR DestAddress="fc00::/7") NOT (Application IN ("\\device\\harddiskvolume*\\Program Files\\*", "\\device\\harddiskvolume*\\Program Files (x86)\\*"))
+
+# ── Uncommon Outbound Kerberos Connection ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects uncommon outbound network activity via Kerberos default port indicating possible lateral movement or first stage PrivEsc via delegation.
+EventCode=5156 Channel="Security" DestPort=88 Direction="%%14593" NOT Application="\\device\\harddiskvolume*\\Windows\\System32\\lsass.exe" NOT (Application IN ("\\device\\harddiskvolume*\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe", "\\device\\harddiskvolume*\\Program Files\\Google\\Chrome\\Application\\chrome.exe") OR Application IN ("\\device\\harddiskvolume*\\Program Files (x86)\\Mozilla Firefox\\firefox.exe", "\\device\\harddiskvolume*\\Program Files\\Mozilla Firefox\\firefox.exe") OR Application="*\\tomcat\\bin\\tomcat8.exe")
+
+# ── Microsoft Sync Center Suspicious Network Connections ──
+# Mức độ  : Trung bình
+# Mục đích: Chèn mã vào tiến trình
+# Chi tiết: Detects suspicious connections from Microsoft Sync Center to non-private IPs.
+EventCode=5156 Channel="Security" Application="*\\mobsync.exe" NOT (DestAddress="127.0.0.0/8" OR DestAddress="10.0.0.0/8" OR DestAddress="172.16.0.0/12" OR DestAddress="192.168.0.0/16" OR DestAddress="169.254.0.0/16" OR DestAddress="::1/128" OR DestAddress="fe80::/10" OR DestAddress="fc00::/7")
+
+# ── Suspicious Outbound SMTP Connections ──
+# Mức độ  : Trung bình
+# Chi tiết: Adversaries may steal data by exfiltrating it over an un-encrypted network protocol other than that of the existing command and control channel. The data may also be sent to an alternate network locat
+EventCode=5156 Channel="Security" DestPort IN (25, 587, 465, 2525) Direction="%%14593" NOT (Application IN ("*\\thunderbird.exe", "*\\outlook.exe") OR Application="\\device\\harddiskvolume*\\Program Files\\Microsoft\\Exchange Server\\*" OR (Application="\\device\\harddiskvolume*\\Program Files\\WindowsApps\\microsoft.windowscommunicationsapps_*" Application="*\\HxTsr.exe"))
+
+# ── Outbound Network Connection To Public IP Via Winlogon ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects a "winlogon.exe" process that initiate network communications with public IP addresses
+EventCode=5156 Channel="Security" Application="*\\winlogon.exe" Direction="%%14593" NOT (DestAddress="127.0.0.0/8" OR DestAddress="10.0.0.0/8" OR DestAddress="172.16.0.0/12" OR DestAddress="192.168.0.0/16" OR DestAddress="169.254.0.0/16" OR DestAddress="::1/128" OR DestAddress="fe80::/10" OR DestAddress="fc00::/7")
+
+# ── Suspicious Wordpad Outbound Connections ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects a network connection initiated by "wordpad.exe" over uncommon destination ports. This might indicate potential process injection activity from a beacon or similar mechanisms.
+EventCode=5156 Channel="Security" Direction="%%14593" Application="*\\wordpad.exe" NOT (DestPort IN (80, 139, 443, 445, 465, 587, 993, 995))
+
+# ── Local Network Connection Initiated By Script Interpreter ──
+# Mức độ  : Trung bình
+# Mục đích: Tải file từ mạng
+# Chi tiết: Detects a script interpreter (Wscript/Cscript) initiating a local network connection to download or execute a script hosted on a shared folder.
+EventCode=5156 Channel="Security" Direction="%%14593" Application IN ("*\\wscript.exe", "*\\cscript.exe") DestAddress="127.0.0.0/8" OR DestAddress="10.0.0.0/8" OR DestAddress="172.16.0.0/12" OR DestAddress="192.168.0.0/16" OR DestAddress="169.254.0.0/16" OR DestAddress="::1/128" OR DestAddress="fe80::/10" OR DestAddress="fc00::/7"
+
+# ── Outbound Network Connection Initiated By Script Interpreter ──
+# Mức độ  : Cao
+# Mục đích: Tải file từ mạng
+# Chi tiết: Detects a script interpreter wscript/cscript opening a network connection to a non-local network. Adversaries may use script to download malicious payloads.
+EventCode=5156 Channel="Security" Direction="%%14593" Application IN ("*\\wscript.exe", "*\\cscript.exe") NOT (DestAddress="127.0.0.0/8" OR DestAddress="10.0.0.0/8" OR DestAddress="172.16.0.0/12" OR DestAddress="192.168.0.0/16" OR DestAddress="169.254.0.0/16" OR DestAddress="::1/128" OR DestAddress="fe80::/10" OR DestAddress="fc00::/7" OR DestAddress="20.0.0.0/11")

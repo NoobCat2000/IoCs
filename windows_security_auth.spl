@@ -1,0 +1,812 @@
+# ── Potential Access Token Abuse ──
+# Mức độ  : Trung bình
+# Mục đích: Chiếm quyền token
+# Chi tiết: Detects potential token impersonation and theft. Example, when using "DuplicateToken(Ex)" and "ImpersonateLoggedOnUser" with the "LOGON32_LOGON_NEW_CREDENTIALS flag".
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4624 LogonType=9 LogonProcessName="Advapi" AuthenticationPackageName="Negotiate" ImpersonationLevel="%%1833"
+
+# ── Admin User Remote Logon ──
+# Mức độ  : Thấp
+# Mục đích: Dùng tài khoản hợp lệ
+# Chi tiết: Detect remote login by Administrator user (depending on internal pattern).
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4624 LogonType=10 AuthenticationPackageName="Negotiate" TargetUserName="Admin*"
+
+# ── DiagTrackEoP Default Login Username ──
+# Mức độ  : Nghiêm trọng
+# Chi tiết: Detects the default "UserName" used by the DiagTrackEoP POC
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4624 LogonType=9 TargetOutboundUserName="thisisnotvaliduser"
+
+# ── A Member Was Added to a Security-Enabled Global Group ──
+# Mức độ  : Thấp
+# Chi tiết: Detects activity when a member is added to a security-enabled global group
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode IN (4728, 632)
+
+# ── A Member Was Removed From a Security-Enabled Global Group ──
+# Mức độ  : Thấp
+# Chi tiết: Detects activity when a member is removed from a security-enabled global group
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode IN (633, 4729)
+
+# ── Successful Overpass the Hash Attempt ──
+# Mức độ  : Cao
+# Chi tiết: Detects successful logon with logon type 9 (NewCredentials) which matches the Overpass the Hash behavior of e.g Mimikatz's sekurlsa::pth module.
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4624 LogonType=9 LogonProcessName="seclogo" AuthenticationPackageName="Negotiate"
+
+# ── Pass the Hash Activity 2 ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects the attack technique pass the hash which is used to move laterally inside the network
+source="WinEventLog:Security" Channel="Security" Channel="Security" (EventCode=4624 SubjectUserSid="S-1-0-0" LogonType=3 LogonProcessName="NtLmSsp" KeyLength=0) OR (EventCode=4624 LogonType=9 LogonProcessName="seclogo") NOT TargetUserName="ANONYMOUS LOGON"
+
+# ── RDP Login from Localhost ──
+# Mức độ  : Cao
+# Mục đích: Di chuyển ngang mạng
+# Chi tiết: RDP login with localhost source address may be a tunnelled login
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4624 LogonType=10 IpAddress IN ("::1", "127.0.0.1")
+
+# ── A Security-Enabled Global Group Was Deleted ──
+# Mức độ  : Thấp
+# Chi tiết: Detects activity when a security-enabled global group is deleted
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode IN (4730, 634)
+
+# ── External Remote RDP Logon from Public IP ──
+# Mức độ  : Trung bình
+# Mục đích: Dùng tài khoản hợp lệ
+# Chi tiết: Detects successful logon from public IP address via RDP. This can indicate a publicly-exposed RDP port.
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4624 LogonType=10 NOT (IpAddress="::1/128" OR IpAddress="10.0.0.0/8" OR IpAddress="127.0.0.0/8" OR IpAddress="172.16.0.0/12" OR IpAddress="192.168.0.0/16" OR IpAddress="169.254.0.0/16" OR IpAddress="fc00::/7" OR IpAddress="fe80::/10" OR IpAddress="-")
+
+# ── External Remote SMB Logon from Public IP ──
+# Mức độ  : Cao
+# Mục đích: Dùng tài khoản hợp lệ
+# Chi tiết: Detects successful logon from public IP address via SMB. This can indicate a publicly-exposed SMB port.
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4624 LogonType=3 NOT (IpAddress="::1/128" OR IpAddress="10.0.0.0/8" OR IpAddress="127.0.0.0/8" OR IpAddress="172.16.0.0/12" OR IpAddress="192.168.0.0/16" OR IpAddress="169.254.0.0/16" OR IpAddress="fc00::/7" OR IpAddress="fe80::/10" OR IpAddress="-")
+
+# ── Failed Logon From Public IP ──
+# Mức độ  : Trung bình
+# Mục đích: Dùng tài khoản hợp lệ; Khai thác dịch vụ công khai
+# Chi tiết: Detects a failed logon attempt from a public IP. A login from a public IP can indicate a misconfigured firewall or network boundary.
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4625 NOT (IpAddress="*-*" OR IpAddress="::1/128" OR IpAddress="10.0.0.0/8" OR IpAddress="127.0.0.0/8" OR IpAddress="172.16.0.0/12" OR IpAddress="192.168.0.0/16" OR IpAddress="169.254.0.0/16" OR IpAddress="fc00::/7" OR IpAddress="fe80::/10")
+
+# ── Outgoing Logon with New Credentials ──
+# Mức độ  : Thấp
+# Chi tiết: Detects logon events that specify new credentials
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4624 LogonType=9
+
+# ── Potential Privilege Escalation via Local Kerberos Relay over LDAP ──
+# Mức độ  : Cao
+# Mục đích: Leo thang đặc quyền
+# Chi tiết: Detects a suspicious local successful logon event where the Logon Package is Kerberos, the remote address is set to localhost, and the target user SID is the built-in local Administrator account. This
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4624 LogonType=3 AuthenticationPackageName="Kerberos" IpAddress="127.0.0.1" TargetUserSid="S-1-5-21-*" TargetUserSid="*-500" NOT IpPort="0"
+
+# ── RottenPotato Like Attack Pattern ──
+# Mức độ  : Cao
+# Chi tiết: Detects logon events that have characteristics of events generated during an attack with RottenPotato and the like
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4624 LogonType=3 TargetUserName="ANONYMOUS LOGON" WorkstationName="-" IpAddress IN ("127.0.0.1", "::1")
+
+# ── Successful Account Login Via WMI ──
+# Mức độ  : Thấp
+# Chi tiết: Detects successful logon attempts performed with WMI
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4624 ProcessName="*\\WmiPrvSE.exe"
+
+# ── Windows Filtering Platform Blocked Connection From EDR Agent Binary ──
+# Mức độ  : Cao
+# Chi tiết: Detects a Windows Filtering Platform (WFP) blocked connection event involving common Endpoint Detection and Response (EDR) agents. Adversaries may use WFP filters to prevent Endpoint Detection and Res
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=5157 Application IN ("*\\AmSvc.exe", "*\\cb.exe", "*\\CETASvc.exe", "*\\CNTAoSMgr.exe", "*\\CrAmTray.exe", "*\\CrsSvc.exe", "*\\CSFalconContainer.exe", "*\\CSFalconService.exe", "*\\CybereasonAV.exe", "*\\CylanceSvc.exe", "*\\cyserver.exe", "*\\CyveraService.exe", "*\\CyvrFsFlt.exe", "*\\EIConnector.exe", "*\\elastic-agent.exe", "*\\elastic-endpoint.exe", "*\\EndpointBasecamp.exe", "*\\ExecutionPreventionSvc.exe", "*\\filebeat.exe", "*\\fortiedr.exe", "*\\hmpalert.exe", "*\\hurukai.exe", "*\\LogProcessorService.exe", "*\\mcsagent.exe", "*\\mcsclient.exe", "*\\MsMpEng.exe", "*\\MsSense.exe", "*\\Ntrtscan.exe", "*\\PccNTMon.exe", "*\\QualysAgent.exe", "*\\RepMgr.exe", "*\\RepUtils.exe", "*\\RepUx.exe", "*\\RepWAV.exe", "*\\RepWSC.exe", "*\\sedservice.exe", "*\\SenseCncProxy.exe", "*\\SenseIR.exe", "*\\SenseNdr.exe", "*\\SenseSampleUploader.exe", "*\\SentinelAgent.exe", "*\\SentinelAgentWorker.exe", "*\\SentinelBrowserNativeHost.exe", "*\\SentinelHelperService.exe", "*\\SentinelServiceHost.exe", "*\\SentinelStaticEngine.exe", "*\\SentinelStaticEngineScanner.exe", "*\\sfc.exe", "*\\sophos ui.exe", "*\\sophosfilescanner.exe", "*\\sophosfs.exe", "*\\sophoshealth.exe", "*\\sophosips.exe", "*\\sophosLivequeryservice.exe", "*\\sophosnetfilter.exe", "*\\sophosntpservice.exe", "*\\sophososquery.exe", "*\\sspservice.exe", "*\\TaniumClient.exe", "*\\TaniumCX.exe", "*\\TaniumDetectEngine.exe", "*\\TMBMSRV.exe", "*\\TmCCSF.exe", "*\\TmListen.exe", "*\\TmWSCSvc.exe", "*\\Traps.exe", "*\\winlogbeat.exe", "*\\WSCommunicator.exe", "*\\xagt.exe")
+
+# ── Azure AD Health Monitoring Agent Registry Keys Access ──
+# Mức độ  : Trung bình
+# Chi tiết: This detection uses Windows security events to detect suspicious access attempts to the registry key of Azure AD Health monitoring agent. This detection requires an access control entry (ACE) on the s
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode IN (4656, 4663) ObjectType="Key" ObjectName="\\REGISTRY\\MACHINE\\SOFTWARE\\Microsoft\\Microsoft Online\\Reporting\\MonitoringAgent" NOT (ProcessName IN ("*Microsoft.Identity.Health.Adfs.DiagnosticsAgent.exe*", "*Microsoft.Identity.Health.Adfs.InsightsService.exe*", "*Microsoft.Identity.Health.Adfs.MonitoringAgent.Startup.exe*", "*Microsoft.Identity.Health.Adfs.PshSurrogate.exe*", "*Microsoft.Identity.Health.Common.Clients.ResourceMonitor.exe*"))
+
+# ── Azure AD Health Service Agents Registry Keys Access ──
+# Mức độ  : Trung bình
+# Chi tiết: This detection uses Windows security events to detect suspicious access attempts to the registry key values and sub-keys of Azure AD Health service agents (e.g AD FS). Information from AD Health servi
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode IN (4656, 4663) ObjectType="Key" ObjectName="\\REGISTRY\\MACHINE\\SOFTWARE\\Microsoft\\ADHealthAgent" NOT (ProcessName IN ("*Microsoft.Identity.Health.Adfs.DiagnosticsAgent.exe*", "*Microsoft.Identity.Health.Adfs.InsightsService.exe*", "*Microsoft.Identity.Health.Adfs.MonitoringAgent.Startup.exe*", "*Microsoft.Identity.Health.Adfs.PshSurrogate.exe*", "*Microsoft.Identity.Health.Common.Clients.ResourceMonitor.exe*"))
+
+# ── Powerview Add-DomainObjectAcl DCSync AD Extend Right ──
+# Mức độ  : Cao
+# Chi tiết: Backdooring domain object to grant the rights associated with DCSync to a regular user or machine account using Powerview\Add-DomainObjectAcl DCSync Extended Right cmdlet, will allow to re-obtain the 
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=5136 AttributeLDAPDisplayName="ntSecurityDescriptor" AttributeValue IN ("*1131f6ad-9c07-11d1-f79f-00c04fc2dcd2*", "*1131f6aa-9c07-11d1-f79f-00c04fc2dcd2*", "*89e95b76-444d-4c62-991a-0facbeda640c*") NOT (ObjectClass IN ("dnsNode", "dnsZoneScope", "dnsZone"))
+
+# ── AD Privileged Users or Groups Reconnaissance ──
+# Mức độ  : Cao
+# Chi tiết: Detect priv users or groups recon based on 4661 eventid and known privileged users or groups SIDs
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4661 ObjectType IN ("SAM_USER", "SAM_GROUP") ObjectName IN ("*-512", "*-502", "*-500", "*-505", "*-519", "*-520", "*-544", "*-551", "*-555") OR ObjectName="*admin*" NOT SubjectUserName="*$"
+
+# ── AD Object WriteDAC Access ──
+# Mức độ  : Nghiêm trọng
+# Chi tiết: Detects WRITE_DAC access to a domain object
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4662 ObjectServer="DS" AccessMask="0x40000" ObjectType IN ("19195a5b-6da0-11d0-afd3-00c04fd930c9", "domainDNS")
+
+# ── Active Directory Replication from Non Machine Account ──
+# Mức độ  : Nghiêm trọng
+# Mục đích: Dump thông tin xác thực
+# Chi tiết: Detects potential abuse of Active Directory Replication Service (ADRS) from a non machine account to request credentials.
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4662 AccessMask="0x100" Properties IN ("*1131f6aa-9c07-11d1-f79f-00c04fc2dcd2*", "*1131f6ad-9c07-11d1-f79f-00c04fc2dcd2*", "*89e95b76-444d-4c62-991a-0facbeda640c*") NOT (SubjectUserName IN ("*$", "MSOL_*"))
+
+# ── Potential AD User Enumeration From Non-Machine Account ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects read access to a domain user from a non-machine account
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4662 ObjectType="*bf967aba-0de6-11d0-a285-00aa003049e2*" AccessMask IN ("*1*", "*3*", "*4*", "*7*", "*9*", "*B*", "*D*", "*F*") NOT (SubjectUserName IN ("*$", "MSOL_*"))
+
+# ── ADCS Certificate Template Configuration Vulnerability ──
+# Mức độ  : Thấp
+# Chi tiết: Detects certificate creation with template allowing risk permission subject
+source="WinEventLog:Security" Channel="Security" Channel="Security" (EventCode=4898 TemplateContent="*CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT*") OR (EventCode=4899 NewTemplateContent="*CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT*")
+
+# ── ADCS Certificate Template Configuration Vulnerability with Risky EKU ──
+# Mức độ  : Cao
+# Chi tiết: Detects certificate creation with template allowing risk permission subject and risky EKU
+source="WinEventLog:Security" Channel="Security" Channel="Security" (EventCode=4898 TemplateContent IN ("*1.3.6.1.5.5.7.3.2*", "*1.3.6.1.5.2.3.4*", "*1.3.6.1.4.1.311.20.2.2*", "*2.5.29.37.0*") TemplateContent="*CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT*") OR (EventCode=4899 NewTemplateContent IN ("*1.3.6.1.5.5.7.3.2*", "*1.3.6.1.5.2.3.4*", "*1.3.6.1.4.1.311.20.2.2*", "*2.5.29.37.0*") NewTemplateContent="*CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT*")
+
+# ── Add or Remove Computer from DC ──
+# Mức độ  : Thấp
+# Chi tiết: Detects the creation or removal of a computer. Can be used to detect attacks such as DCShadow via the creation of a new SPN.
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode IN (4741, 4743)
+
+# ── Access To ADMIN$ Network Share ──
+# Mức độ  : Thấp
+# Mục đích: Di chuyển ngang mạng
+# Chi tiết: Detects access to ADMIN$ network share
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=5140 ShareName="Admin$" NOT SubjectUserName="*$"
+
+# ── Enabled User Right in AD to Control User Objects ──
+# Mức độ  : Cao
+# Chi tiết: Detects scenario where if a user is assigned the SeEnableDelegationPrivilege right in Active Directory it would allow control of other AD user objects.
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4704 PrivilegeList="*SeEnableDelegationPrivilege*"
+
+# ── Active Directory User Backdoors ──
+# Mức độ  : Cao
+# Chi tiết: Detects scenarios where one can control another users or computers account without having to use their credentials.
+source="WinEventLog:Security" Channel="Security" Channel="Security" (EventCode=4738 NOT (AllowedToDelegateTo IN ("", "-") OR NOT AllowedToDelegateTo=*)) OR (EventCode=5136 AttributeLDAPDisplayName="msDS-AllowedToDelegateTo") OR (EventCode=5136 ObjectClass="user" AttributeLDAPDisplayName="servicePrincipalName") OR (EventCode=5136 AttributeLDAPDisplayName="msDS-AllowedToActOnBehalfOfOtherIdentity")
+
+# ── Weak Encryption Enabled and Kerberoast ──
+# Mức độ  : Cao
+# Chi tiết: Detects scenario where weak encryption is enabled for a user profile which could be used for hash/password cracking.
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4738 (NewUacValue IN ("*8***", "*9***", "*A***", "*B***", "*C***", "*D***", "*E***", "*F***") NOT (OldUacValue IN ("*8***", "*9***", "*A***", "*B***", "*C***", "*D***", "*E***", "*F***"))) OR (NewUacValue IN ("*1****", "*3****", "*5****", "*7****", "*9****", "*B****", "*D****", "*F****") NOT (OldUacValue IN ("*1****", "*3****", "*5****", "*7****", "*9****", "*B****", "*D****", "*F****"))) OR (NewUacValue IN ("*8**", "*9**", "*A**", "*B**", "*C**", "*D**", "*E**", "*F**") NOT (OldUacValue IN ("*8**", "*9**", "*A**", "*B**", "*C**", "*D**", "*E**", "*F**")))
+
+# ── Hacktool Ruler ──
+# Mức độ  : Cao
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: This events that are generated when using the hacktool Ruler by Sensepost
+source="WinEventLog:Security" Channel="Security" Channel="Security" (EventCode=4776 Workstation="RULER") OR (EventCode IN (4624, 4625) WorkstationName="RULER")
+
+# ── Remote Task Creation via ATSVC Named Pipe ──
+# Mức độ  : Trung bình
+# Mục đích: Lên lịch tác vụ độc hại
+# Chi tiết: Detects remote task creation via at.exe or API interacting with ATSVC namedpipe
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=5145 ShareName="\\\\\*\\IPC$" RelativeTargetName="atsvc" AccessList="*WriteData*"
+
+# ── Security Eventlog Cleared ──
+# Mức độ  : Cao
+# Chi tiết: One of the Windows Eventlogs has been cleared. e.g. caused by "wevtutil cl" command execution
+source="WinEventLog:Security" Channel="Security" Channel="Security" (EventCode=517 Provider_Name="Security") OR (EventCode=1102 Provider_Name="Microsoft-Windows-Eventlog")
+
+# ── Processes Accessing the Microphone and Webcam ──
+# Mức độ  : Trung bình
+# Chi tiết: Potential adversaries accessing the microphone and webcam in an endpoint.
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode IN (4657, 4656, 4663) ObjectName IN ("*\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\CapabilityAccessManager\\ConsentStore\\microphone\\NonPackaged*", "*\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\CapabilityAccessManager\\ConsentStore\\webcam\\NonPackaged*")
+
+# ── CobaltStrike Service Installations - Security ──
+# Mức độ  : Cao
+# Mục đích: Di chuyển ngang mạng
+# Chi tiết: Detects known malicious service installs that appear in cases in which a Cobalt Strike beacon elevates privileges or lateral movement
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4697 (ServiceFileName="*ADMIN$*" ServiceFileName="*.exe*") OR (ServiceFileName="*%COMSPEC%*" ServiceFileName="*start*" ServiceFileName="*powershell*") OR ServiceFileName="*powershell -nop -w hidden -encodedcommand*" OR ServiceFileName="*SUVYIChOZXctT2JqZWN0IE5ldC5XZWJjbGllbnQpLkRvd25sb2FkU3RyaW5nKCdodHRwOi8vMTI3LjAuMC4xO*" OR ServiceFileName="*lFWCAoTmV3LU9iamVjdCBOZXQuV2ViY2xpZW50KS5Eb3dubG9hZFN0cmluZygnaHR0cDovLzEyNy4wLjAuMT*" OR ServiceFileName="*JRVggKE5ldy1PYmplY3QgTmV0LldlYmNsaWVudCkuRG93bmxvYWRTdHJpbmcoJ2h0dHA6Ly8xMjcuMC4wLjE6*"
+
+# ── Failed Code Integrity Checks ──
+# Mức độ  : Thông tin
+# Chi tiết: Detects code integrity failures such as missing page hashes or corrupted drivers due unauthorized modification. This could be a sign of tampered binaries.
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode IN (5038, 6281) NOT (param1 IN ("*\\CSFalconServiceUninstallTool_*", "*\\Program Files\\CrowdStrike\\*", "*\\System32\\drivers\\CrowdStrike\\*", "*\\Windows\\System32\\ScriptControl64_*") OR param1="*\\Program Files\\Sophos\\*")
+
+# ── DCERPC SMB Spoolss Named Pipe ──
+# Mức độ  : Trung bình
+# Mục đích: Di chuyển ngang mạng
+# Chi tiết: Detects the use of the spoolss named pipe over SMB. This can be used to trigger the authentication via NTLM of any machine that has the spoolservice enabled.
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=5145 ShareName="\\\\\*\\IPC$" RelativeTargetName="spoolss"
+
+# ── DCOM InternetExplorer.Application Iertutil DLL Hijack - Security ──
+# Mức độ  : Cao
+# Mục đích: Di chuyển ngang mạng
+# Chi tiết: Detects a threat actor creating a file named `iertutil.dll` in the `C:\Program Files\Internet Explorer\` directory over the network for a DCOM InternetExplorer DLL Hijack scenario.
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=5145 RelativeTargetName="*\\Internet Explorer\\iertutil.dll" NOT SubjectUserName="*$"
+
+# ── Mimikatz DC Sync ──
+# Mức độ  : Cao
+# Mục đích: Dump thông tin xác thực
+# Chi tiết: Detects Mimikatz DC sync security events
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4662 Properties IN ("*Replicating Directory Changes All*", "*1131f6ad-9c07-11d1-f79f-00c04fc2dcd2*", "*1131f6aa-9c07-11d1-f79f-00c04fc2dcd2*", "*9923a32a-3607-11d2-b9be-0000f87a36b2*", "*89e95b76-444d-4c62-991a-0facbeda640c*") AccessMask="0x100" NOT (SubjectDomainName="Window Manager" OR SubjectUserName IN ("NT AUT*", "MSOL_*") OR SubjectUserName="*$")
+
+# ── Windows Default Domain GPO Modification ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects modifications to Default Domain or Default Domain Controllers Group Policy Objects (GPOs). Adversaries may modify these default GPOs to deploy malicious configurations across the domain.
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=5136 ObjectClass="groupPolicyContainer" ObjectDN IN ("CN={31B2F340-016D-11D2-945F-00C04FB984F9},CN=POLICIES,CN=SYSTEM*", "CN={6AC1786C-016F-11D2-945F-00C04FB984F9},CN=POLICIES,CN=SYSTEM*")
+
+# ── Device Installation Blocked ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects an installation of a device that is forbidden by the system policy
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=6423
+
+# ── Windows Event Auditing Disabled ──
+# Mức độ  : Thấp
+# Chi tiết: Detects scenarios where system auditing (i.e.: Windows event log auditing) is disabled. This may be used in a scenario where an entity would want to bypass local logging to evade detection when Window
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4719 AuditPolicyChanges IN ("*%%8448*", "*%%8450*") NOT (SubcategoryGuid IN ("{0CCE9210-69AE-11D9-BED3-505054503030}", "{0CCE9211-69AE-11D9-BED3-505054503030}", "{0CCE9212-69AE-11D9-BED3-505054503030}", "{0CCE9215-69AE-11D9-BED3-505054503030}", "{0CCE9217-69AE-11D9-BED3-505054503030}", "{0CCE921B-69AE-11D9-BED3-505054503030}", "{0CCE922B-69AE-11D9-BED3-505054503030}", "{0CCE922F-69AE-11D9-BED3-505054503030}", "{0CCE9230-69AE-11D9-BED3-505054503030}", "{0CCE9235-69AE-11D9-BED3-505054503030}", "{0CCE9236-69AE-11D9-BED3-505054503030}", "{0CCE9237-69AE-11D9-BED3-505054503030}", "{0CCE923F-69AE-11D9-BED3-505054503030}", "{0CCE9240-69AE-11D9-BED3-505054503030}", "{0CCE9242-69AE-11D9-BED3-505054503030}"))
+
+# ── Important Windows Event Auditing Disabled ──
+# Mức độ  : Cao
+# Chi tiết: Detects scenarios where system auditing for important events such as "Process Creation" or "Logon" events is disabled.
+source="WinEventLog:Security" Channel="Security" Channel="Security" (EventCode=4719 SubcategoryGuid IN ("{0CCE9210-69AE-11D9-BED3-505054503030}", "{0CCE9211-69AE-11D9-BED3-505054503030}", "{0CCE9212-69AE-11D9-BED3-505054503030}", "{0CCE9215-69AE-11D9-BED3-505054503030}", "{0CCE921B-69AE-11D9-BED3-505054503030}", "{0CCE922B-69AE-11D9-BED3-505054503030}", "{0CCE922F-69AE-11D9-BED3-505054503030}", "{0CCE9230-69AE-11D9-BED3-505054503030}", "{0CCE9235-69AE-11D9-BED3-505054503030}", "{0CCE9236-69AE-11D9-BED3-505054503030}", "{0CCE9237-69AE-11D9-BED3-505054503030}", "{0CCE923F-69AE-11D9-BED3-505054503030}", "{0CCE9240-69AE-11D9-BED3-505054503030}", "{0CCE9242-69AE-11D9-BED3-505054503030}") AuditPolicyChanges IN ("*%%8448*", "*%%8450*")) OR (EventCode=4719 SubcategoryGuid="{0CCE9217-69AE-11D9-BED3-505054503030}" AuditPolicyChanges="*%%8448*")
+
+# ── ETW Logging Disabled In .NET Processes - Registry ──
+# Mức độ  : Cao
+# Mục đích: Sửa registry
+# Chi tiết: Potential adversaries stopping ETW providers recording loaded .NET assemblies.
+source="WinEventLog:Security" Channel="Security" Channel="Security" (EventCode=4657 ObjectName="*\\SOFTWARE\\Microsoft\\.NETFramework" ObjectValueName="ETWEnabled" NewValue=0) OR (EventCode=4657 ObjectName="*\\Environment*" ObjectValueName IN ("COMPlus_ETWEnabled", "COMPlus_ETWFlags") NewValue=0)
+
+# ── DPAPI Domain Backup Key Extraction ──
+# Mức độ  : Cao
+# Mục đích: Dump thông tin xác thực
+# Chi tiết: Detects tools extracting LSA secret DPAPI domain backup key from Domain Controllers
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4662 ObjectType="SecretObject" AccessMask="0x2" ObjectName="*BCKUPKEY*"
+
+# ── DPAPI Domain Master Key Backup Attempt ──
+# Mức độ  : Trung bình
+# Mục đích: Dump thông tin xác thực
+# Chi tiết: Detects anyone attempting a backup for the DPAPI Master Key. This events gets generated at the source and not the Domain Controller.
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4692
+
+# ── External Disk Drive Or USB Storage Device Was Recognized By The System ──
+# Mức độ  : Thấp
+# Chi tiết: Detects external disk drives or plugged-in USB devices.
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=6416 ClassName="DiskDrive" OR DeviceDescription="USB Mass Storage Device"
+
+# ── Persistence and Execution at Scale via GPO Scheduled Task ──
+# Mức độ  : Cao
+# Mục đích: Lên lịch tác vụ độc hại
+# Chi tiết: Detect lateral movement using GPO scheduled task, usually used to deploy ransomware at scale
+source="WinEventLog:Security" Channel="Security" Channel="Security" (EventCode=5136 AttributeLDAPDisplayName IN ("gPCMachineExtensionNames", "gPCUserExtensionNames") AttributeValue IN ("*CAB54552-DEEA-4691-817E-ED4A4D1AFC72*", "*AADCED64-746C-4633-A97C-D61349046527*")) OR (EventCode=5145 ShareName="*\\SYSVOL" RelativeTargetName="*ScheduledTasks.xml" AccessList IN ("*WriteData*", "*%%4417*"))
+
+# ── Hidden Local User Creation ──
+# Mức độ  : Cao
+# Chi tiết: Detects the creation of a local hidden user account which should not happen for event ID 4720.
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4720 TargetUserName="*$" NOT TargetUserName="HomeGroupUser$"
+
+# ── HackTool - EDRSilencer Execution - Filter Added ──
+# Mức độ  : Cao
+# Chi tiết: Detects execution of EDRSilencer, a tool that abuses the Windows Filtering Platform (WFP) to block the outbound traffic of running EDR agents based on specific hardcoded filter names.
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode IN (5441, 5447) FilterName="*Custom Outbound Filter*"
+
+# ── HackTool - NoFilter Execution ──
+# Mức độ  : Cao
+# Mục đích: Chiếm quyền token
+# Chi tiết: Detects execution of NoFilter, a tool for abusing the Windows Filtering Platform for privilege escalation via hardcoded policy name indicators
+source="WinEventLog:Security" Channel="Security" Channel="Security" (EventCode=5447 FilterName="*RonPolicy*") OR (EventCode=5449 ProviderContextName="*RonPolicy*")
+
+# ── HybridConnectionManager Service Installation ──
+# Mức độ  : Cao
+# Chi tiết: Rule to detect the Hybrid Connection Manager service installation.
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4697 ServiceName="HybridConnectionManager" ServiceFileName="*HybridConnectionManager*"
+
+# ── Impacket PsExec Execution ──
+# Mức độ  : Cao
+# Mục đích: Di chuyển ngang mạng
+# Chi tiết: Detects execution of Impacket's psexec.py.
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=5145 ShareName="\\\\\*\\IPC$" RelativeTargetName IN ("*RemCom_stdin*", "*RemCom_stdout*", "*RemCom_stderr*")
+
+# ── Possible Impacket SecretDump Remote Activity ──
+# Mức độ  : Cao
+# Mục đích: Dump thông tin xác thực
+# Chi tiết: Detect AD credential dumping using impacket secretdump HKTL
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=5145 ShareName="\\\\\*\\ADMIN$" RelativeTargetName="*SYSTEM32\\*" RelativeTargetName="*.tmp*"
+
+# ── Invoke-Obfuscation CLIP+ Launcher - Security ──
+# Mức độ  : Cao
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects Obfuscated use of Clip.exe to execute PowerShell
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4697 ServiceFileName="*cmd*" ServiceFileName="*&&*" ServiceFileName="*clipboard]::*"
+
+# ── Invoke-Obfuscation Obfuscated IEX Invocation - Security ──
+# Mức độ  : Cao
+# Chi tiết: Detects all variations of obfuscated powershell IEX invocation code generated by Invoke-Obfuscation framework from the code block linked in the references
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4697
+| rex field=ServiceFileName "(?<ServiceFileNameMatch>\\$PSHome\\[\\s*\\d{1,3}\\s*\\]\\s*\\+\\s*\\$PSHome\\[)"
+| eval ServiceFileNameCondition=if(isnotnull(ServiceFileNameMatch), "true", "false")
+| rex field=ServiceFileName "(?<ServiceFileNameMatch2>\\$ShellId\\[\\s*\\d{1,3}\\s*\\]\\s*\\+\\s*\\$ShellId\\[)"
+| eval ServiceFileNameCondition2=if(isnotnull(ServiceFileNameMatch2), "true", "false")
+| rex field=ServiceFileName "(?<ServiceFileNameMatch3>\\$env:Public\\[\\s*\\d{1,3}\\s*\\]\\s*\\+\\s*\\$env:Public\\[)"
+| eval ServiceFileNameCondition3=if(isnotnull(ServiceFileNameMatch3), "true", "false")
+| rex field=ServiceFileName "(?<ServiceFileNameMatch4>\\$env:ComSpec\\[(\\s*\\d{1,3}\\s*,){2})"
+| eval ServiceFileNameCondition4=if(isnotnull(ServiceFileNameMatch4), "true", "false")
+| rex field=ServiceFileName "(?<ServiceFileNameMatch5>\\\\*mdr\\*\\W\\s*\\)\\.Name)"
+| eval ServiceFileNameCondition5=if(isnotnull(ServiceFileNameMatch5), "true", "false")
+| rex field=ServiceFileName "(?<ServiceFileNameMatch6>\\$VerbosePreference\\.ToString\\()"
+| eval ServiceFileNameCondition6=if(isnotnull(ServiceFileNameMatch6), "true", "false")
+| rex field=ServiceFileName "(?<ServiceFileNameMatch7>\\String\\]\\s*\\$VerbosePreference)"
+| eval ServiceFileNameCondition7=if(isnotnull(ServiceFileNameMatch7), "true", "false")
+| search ServiceFileNameCondition="true" OR ServiceFileNameCondition2="true" OR ServiceFileNameCondition3="true" OR ServiceFileNameCondition4="true" OR ServiceFileNameCondition5="true" OR ServiceFileNameCondition6="true" OR ServiceFileNameCondition7="true"
+
+# ── Invoke-Obfuscation STDIN+ Launcher - Security ──
+# Mức độ  : Cao
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects Obfuscated use of stdin to execute PowerShell
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4697 ServiceFileName="*cmd*" ServiceFileName="*powershell*" ServiceFileName IN ("*${input}*", "*noexit*") ServiceFileName IN ("* /c *", "* /r *")
+
+# ── Invoke-Obfuscation VAR+ Launcher - Security ──
+# Mức độ  : Cao
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects Obfuscated use of Environment Variables to execute PowerShell
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4697 ServiceFileName="*cmd*" ServiceFileName="*\"set*" ServiceFileName="*-f*" ServiceFileName IN ("*/c*", "*/r*")
+
+# ── Invoke-Obfuscation COMPRESS OBFUSCATION - Security ──
+# Mức độ  : Trung bình
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects Obfuscated Powershell via COMPRESS OBFUSCATION
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4697 ServiceFileName="*new-object*" ServiceFileName="*text.encoding]::ascii*" ServiceFileName="*readtoend*" ServiceFileName IN ("*system.io.compression.deflatestream*", "*system.io.streamreader*")
+
+# ── Invoke-Obfuscation RUNDLL LAUNCHER - Security ──
+# Mức độ  : Trung bình
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects Obfuscated Powershell via RUNDLL LAUNCHER
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4697 ServiceFileName="*rundll32.exe*" ServiceFileName="*shell32.dll*" ServiceFileName="*shellexec_rundll*" ServiceFileName="*powershell*"
+
+# ── Invoke-Obfuscation Via Stdin - Security ──
+# Mức độ  : Cao
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects Obfuscated Powershell via Stdin in Scripts
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4697 ServiceFileName="*set*" ServiceFileName="*&&*" ServiceFileName IN ("*environment*", "*invoke*", "*${input)*")
+
+# ── Invoke-Obfuscation Via Use Clip - Security ──
+# Mức độ  : Cao
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects Obfuscated Powershell via use Clip.exe in Scripts
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4697 ServiceFileName="*(Clipboard|i*"
+
+# ── Invoke-Obfuscation Via Use MSHTA - Security ──
+# Mức độ  : Cao
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects Obfuscated Powershell via use MSHTA in Scripts
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4697 ServiceFileName="*mshta*" ServiceFileName="*vbscript:createobject*" ServiceFileName="*.run*" ServiceFileName="*window.close*"
+
+# ── Invoke-Obfuscation Via Use Rundll32 - Security ──
+# Mức độ  : Cao
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects Obfuscated Powershell via use Rundll32 in Scripts
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4697 ServiceFileName="*&&*" ServiceFileName="*rundll32*" ServiceFileName="*shell32.dll*" ServiceFileName="*shellexec_rundll*" ServiceFileName IN ("*value*", "*invoke*", "*comspec*", "*iex*")
+
+# ── Invoke-Obfuscation VAR++ LAUNCHER OBFUSCATION - Security ──
+# Mức độ  : Cao
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects Obfuscated Powershell via VAR++ LAUNCHER
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4697 ServiceFileName="*&&set*" ServiceFileName="*cmd*" ServiceFileName="*/c*" ServiceFileName="*-f*" ServiceFileName IN ("*{0}*", "*{1}*", "*{2}*", "*{3}*", "*{4}*", "*{5}*")
+
+# ── ISO Image Mounted ──
+# Mức độ  : Trung bình
+# Mục đích: Phishing
+# Chi tiết: Detects the mount of an ISO image on an endpoint
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4663 ObjectServer="Security" ObjectType="File" ObjectName="\\Device\\CdRom*" NOT (ObjectName IN ("\\Device\\CdRom0\\autorun.ico", "\\Device\\CdRom0\\setup.exe", "\\Device\\CdRom0\\setup64.exe"))
+
+# ── Kerberoasting Activity - Initial Query ──
+# Mức độ  : Trung bình
+# Chi tiết: This rule will collect the data needed to start looking into possible kerberoasting activity. Further analysis or computation within the query is needed focusing on requests from one specific host/IP 
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4769 Status="0x0" TicketEncryptionType="0x17" NOT (ServiceName IN ("*krbtgt", "*$") OR TargetUserName="*$@*")
+
+# ── Potential AS-REP Roasting via Kerberos TGT Requests ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects suspicious Kerberos TGT requests with pre-authentication disabled (Pre-Authentication Type = 0) and Ticket Encryption Type (0x17) i.e, RC4-HMAC. This may indicate an AS-REP Roasting attack, wh
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4768 TicketEncryptionType="0x17" ServiceName="krbtgt" PreAuthType=0
+
+# ── Potential Kerberos Coercion by Spoofing SPNs via DNS Manipulation ──
+# Mức độ  : Cao
+# Chi tiết: Detects modifications to DNS records in Active Directory where the Distinguished Name (DN) contains a base64-encoded blob matching the pattern "1UWhRCAAAAA...BAAAA". This pattern corresponds to a mars
+source="WinEventLog:Security" Channel="Security" Channel="Security" (EventCode IN (5136, 5137) ObjectClass="dnsNode" ObjectDN="*UWhRCA*" ObjectDN="*BAAAA*" ObjectDN="*CN=MicrosoftDNS*") OR (EventCode=4662 AdditionalInfo="*UWhRCA*" AdditionalInfo="*BAAAA*" AdditionalInfo="*CN=MicrosoftDNS*")
+
+# ── First Time Seen Remote Named Pipe ──
+# Mức độ  : Cao
+# Mục đích: Di chuyển ngang mạng
+# Chi tiết: This detection excludes known namped pipes accessible remotely and notify on newly observed ones, may help to detect lateral movement and remote exec using named pipes
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=5145 ShareName="\\\\\*\\IPC$" NOT (RelativeTargetName IN ("atsvc", "samr", "lsarpc", "lsass", "winreg", "netlogon", "srvsvc", "protected_storage", "wkssvc", "browser", "netdfs", "svcctl", "spoolss", "ntsvcs", "LSM_API_service", "HydraLsPipe", "TermSrv_API_service", "MsFteWds", "sql\\query", "eventlog"))
+
+# ── LSASS Access From Non System Account ──
+# Mức độ  : Trung bình
+# Mục đích: Dump thông tin xác thực
+# Chi tiết: Detects potential mimikatz-like tools accessing LSASS from non system account
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode IN (4663, 4656) AccessMask IN ("0x100000", "0x1010", "0x1400", "0x1410", "0x1418", "0x1438", "0x143a", "0x1f0fff", "0x1f1fff", "0x1f2fff", "0x1f3fff", "0x40", "143a", "1f0fff", "1f1fff", "1f2fff", "1f3fff") ObjectType="Process" ObjectName="*\\lsass.exe" NOT (SubjectUserName="*$" OR ProcessName IN ("*:\\Program Files\\*", "*:\\Program Files (x86)\\*") OR (ProcessName="C:\\Windows\\System32\\wbem\\WmiPrvSE.exe" AccessMask="0x1410")) NOT ProcessName="*\\SteamLibrary\\steamapps\\*"
+
+# ── Credential Dumping Tools Service Execution - Security ──
+# Mức độ  : Cao
+# Mục đích: Dump thông tin xác thực
+# Chi tiết: Detects well-known credential dumping tools execution via service execution events
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4697 ServiceFileName IN ("*cachedump*", "*dumpsvc*", "*fgexec*", "*gsecdump*", "*mimidrv*", "*pwdump*", "*servpw*")
+
+# ── WCE wceaux.dll Access ──
+# Mức độ  : Nghiêm trọng
+# Mục đích: Dump thông tin xác thực
+# Chi tiết: Detects wceaux.dll access while WCE pass-the-hash remote command execution on source host
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode IN (4656, 4663) ObjectName="*\\wceaux.dll"
+
+# ── Metasploit SMB Authentication ──
+# Mức độ  : Cao
+# Mục đích: Di chuyển ngang mạng
+# Chi tiết: Alerts on Metasploit host's authentications on the domain.
+source="WinEventLog:Security" Channel="Security" Channel="Security"
+| rex field=WorkstationName "(?<WorkstationNameMatch>^[A-Za-z0-9]{16}$)"
+| eval WorkstationNameCondition=if(isnotnull(WorkstationNameMatch), "true", "false")
+| rex field=Workstation "(?<WorkstationMatch>^[A-Za-z0-9]{16}$)"
+| eval WorkstationCondition=if(isnotnull(WorkstationMatch), "true", "false")
+| search (EventCode IN (4625, 4624) LogonType=3 AuthenticationPackageName="NTLM" WorkstationNameCondition="true") OR (EventCode=4776 WorkstationCondition="true")
+
+# ── Metasploit Or Impacket Service Installation Via SMB PsExec ──
+# Mức độ  : Cao
+# Mục đích: Di chuyển ngang mạng
+# Chi tiết: Detects usage of Metasploit SMB PsExec (exploit/windows/smb/psexec) and Impacket psexec.py by triggering on specific service installation
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4697 ServiceStartType=3 ServiceType="0x10" NOT ServiceName="PSEXESVC"
+| regex ServiceFileName="^%systemroot%\\\\[a-zA-Z]{8}\\.exe$"
+| regex ServiceName="(^[a-zA-Z]{4}$)|(^[a-zA-Z]{8}$)|(^[a-zA-Z]{16}$)"
+
+# ── Meterpreter or Cobalt Strike Getsystem Service Installation - Security ──
+# Mức độ  : Cao
+# Mục đích: Chiếm quyền token
+# Chi tiết: Detects the use of getsystem Meterpreter/Cobalt Strike command by detecting a specific service installation
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4697 (ServiceFileName="*/c*" ServiceFileName="*echo*" ServiceFileName="*\\pipe\\*" ServiceFileName IN ("*cmd*", "*%COMSPEC%*")) OR (ServiceFileName="*rundll32*" ServiceFileName="*.dll,a*" ServiceFileName="*/p:*") OR ServiceFileName="\\\\127.0.0.1\\ADMIN$\\*"
+
+# ── NetNTLM Downgrade Attack ──
+# Mức độ  : Cao
+# Mục đích: Sửa registry
+# Chi tiết: Detects NetNTLM downgrade attack
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4657 ObjectName="*\\REGISTRY\\MACHINE\\SYSTEM*" ObjectName="*ControlSet*" ObjectName="*\\Control\\Lsa*" ObjectValueName IN ("LmCompatibilityLevel", "NtlmMinClientSec", "RestrictSendingNTLMTraffic")
+
+# ── Windows Network Access Suspicious desktop.ini Action ──
+# Mức độ  : Trung bình
+# Mục đích: Persistence qua autorun
+# Chi tiết: Detects unusual processes accessing desktop.ini remotely over network share, which can be leveraged to alter how Explorer displays a folder's content (i.e. renaming files) without changing them on dis
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=5145 ObjectType="File" RelativeTargetName="*\\desktop.ini" AccessList IN ("*WriteData*", "*DELETE*", "*WriteDAC*", "*AppendData*", "*AddSubdirectory*")
+
+# ── New or Renamed User Account with '$' Character ──
+# Mức độ  : Trung bình
+# Mục đích: Giả mạo tên tiến trình
+# Chi tiết: Detects the creation of a user with the "$" character. This can be used by attackers to hide a user or trick detection systems that lack the parsing mechanisms.
+source="WinEventLog:Security" Channel="Security" Channel="Security" (EventCode=4720 SamAccountName="*$*") OR (EventCode=4781 NewTargetUserName="*$*") NOT (EventCode=4720 TargetUserName="HomeGroupUser$")
+
+# ── Denied Access To Remote Desktop ──
+# Mức độ  : Trung bình
+# Mục đích: Di chuyển ngang mạng
+# Chi tiết: This event is generated when an authenticated user who is not allowed to log on remotely attempts to connect to this computer through Remote Desktop. Often, this event can be generated by attackers wh
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4825
+
+# ── Password Policy Enumerated ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects when the password policy is enumerated.
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4661 AccessList="*%%5392*" ObjectServer="Security Account Manager"
+
+# ── Windows Pcap Drivers ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects Windows Pcap driver installation based on a list of associated .sys files.
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4697 ServiceFileName IN ("*pcap*", "*npcap*", "*npf*", "*nm3*", "*ndiscap*", "*nmnt*", "*windivert*", "*USBPcap*", "*pktmon*")
+
+# ── Possible PetitPotam Coerce Authentication Attempt ──
+# Mức độ  : Cao
+# Chi tiết: Detect PetitPotam coerced authentication activity.
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=5145 ShareName="\\\\*" ShareName="*\\IPC$" RelativeTargetName="lsarpc" SubjectUserName="ANONYMOUS LOGON"
+
+# ── PetitPotam Suspicious Kerberos TGT Request ──
+# Mức độ  : Cao
+# Chi tiết: Detect suspicious Kerberos TGT requests. Once an attacer obtains a computer certificate by abusing Active Directory Certificate Services in combination with PetitPotam, the next step would be to lever
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4768 TargetUserName="*$" CertThumbprint="*" NOT (IpAddress="::1" OR CertThumbprint="")
+
+# ── Possible DC Shadow Attack ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects DCShadow via create new SPN
+source="WinEventLog:Security" Channel="Security" Channel="Security" (EventCode=4742 ServicePrincipalNames="*GC/*") OR (EventCode=5136 AttributeLDAPDisplayName="servicePrincipalName" AttributeValue="GC/*")
+
+# ── PowerShell Scripts Installed as Services - Security ──
+# Mức độ  : Cao
+# Chi tiết: Detects powershell script installed as a Service
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4697 ServiceFileName IN ("*powershell*", "*pwsh*")
+
+# ── Protected Storage Service Access ──
+# Mức độ  : Cao
+# Mục đích: Di chuyển ngang mạng
+# Chi tiết: Detects access to a protected_storage service over the network. Potential abuse of DPAPI to extract domain backup keys from Domain Controllers
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=5145 ShareName="*IPC*" RelativeTargetName="protected_storage"
+
+# ── RDP over Reverse SSH Tunnel WFP ──
+# Mức độ  : Cao
+# Mục đích: Di chuyển ngang mạng
+# Chi tiết: Detects svchost hosting RDP termsvcs communicating with the loopback address
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=5156 (SourcePort=3389 DestAddress IN ("127.*", "::1")) OR (DestPort=3389 SourceAddress IN ("127.*", "::1")) NOT (FilterOrigin="AppContainer Loopback" OR Application IN ("*\\thor.exe", "*\\thor64.exe"))
+
+# ── Register new Logon Process by Rubeus ──
+# Mức độ  : Cao
+# Chi tiết: Detects potential use of Rubeus via registered new trusted logon process
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4611 LogonProcessName="User32LogonProcesss"
+
+# ── Service Registry Key Read Access Request ──
+# Mức độ  : Thấp
+# Chi tiết: Detects "read access" requests on the services registry key. Adversaries may execute their own malicious payloads by hijacking the Registry entries used by services. Adversaries may use flaws in the p
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4663 ObjectName="*\\SYSTEM\\*" ObjectName="*ControlSet\\Services\\*" AccessList="*%%1538*"
+
+# ── Remote PowerShell Sessions Network Connections (WinRM) ──
+# Mức độ  : Cao
+# Mục đích: Thực thi lệnh/script
+# Chi tiết: Detects basic PowerShell Remoting (WinRM) by monitoring for network inbound connections to ports 5985 OR 5986
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=5156 DestPort IN (5985, 5986) LayerRTID=44
+
+# ── Replay Attack Detected ──
+# Mức độ  : Cao
+# Chi tiết: Detects possible Kerberos Replay Attack on the domain controllers when "KRB_AP_ERR_REPEAT" Kerberos response is sent to the client
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4649
+
+# ── SAM Registry Hive Handle Request ──
+# Mức độ  : Cao
+# Chi tiết: Detects handles requested to SAM registry hive
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4656 ObjectType="Key" ObjectName="*\\SAM"
+
+# ── SCM Database Handle Failure ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects non-system users failing to get a handle of the SCM database.
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4656 ObjectType="SC_MANAGER OBJECT" ObjectName="ServicesActive" AccessMask="0xf003f" NOT SubjectLogonId="0x3e4"
+
+# ── SCM Database Privileged Operation ──
+# Mức độ  : Trung bình
+# Mục đích: Leo thang đặc quyền
+# Chi tiết: Detects non-system users performing privileged operation os the SCM database
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4674 ObjectType="SC_MANAGER OBJECT" ObjectName="servicesactive" PrivilegeList="SeTakeOwnershipPrivilege" NOT (SubjectLogonId="0x3e4" ProcessName="*:\\Windows\\System32\\services.exe")
+
+# ── Potential Secure Deletion with SDelete ──
+# Mức độ  : Trung bình
+# Mục đích: Xóa dấu vết
+# Chi tiết: Detects files that have extensions commonly seen while SDelete is used to wipe files.
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode IN (4656, 4663, 4658) ObjectName IN ("*.AAA", "*.ZZZ")
+
+# ── Remote Access Tool Services Have Been Installed - Security ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects service installation of different remote access tools software. These software are often abused by threat actors to perform
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4697 ServiceName IN ("*AmmyyAdmin*", "*AnyDesk*", "*Atera*", "*BASupportExpressSrvcUpdater*", "*BASupportExpressStandaloneService*", "*chromoting*", "*GoToAssist*", "*GoToMyPC*", "*jumpcloud*", "*LMIGuardianSvc*", "*LogMeIn*", "*monblanking*", "*Parsec*", "*RManService*", "*RPCPerformanceService*", "*RPCService*", "*SplashtopRemoteService*", "*SSUService*", "*TeamViewer*", "*TightVNC*", "*vncserver*", "*Zoho*")
+
+# ── Service Installed By Unusual Client - Security ──
+# Mức độ  : Cao
+# Chi tiết: Detects a service installed by a client which has PID 0 or whose parent has PID 0
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4697 ClientProcessId=0 OR ParentProcessId=0
+
+# ── File Access Of Signal Desktop Sensitive Data ──
+# Mức độ  : Trung bình
+# Mục đích: Dump thông tin xác thực
+# Chi tiết: Detects access to Signal Desktop's sensitive data files: db.sqlite and config.json. The db.sqlite file in Signal Desktop stores all locally saved messages in an encrypted SQLite database, while the co
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4663 ObjectType="File" ObjectName="*\\AppData\\Roaming\\Signal\\*" ObjectName IN ("*\\config.json", "*\\db.sqlite") NOT (ProcessName IN ("*\\signal-portable.exe", "*\\signal.exe"))
+
+# ── SMB Create Remote File Admin Share ──
+# Mức độ  : Cao
+# Mục đích: Di chuyển ngang mạng
+# Chi tiết: Look for non-system accounts SMB accessing a file with write (0x2) access mask via administrative share (i.e C$).
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=5145 ShareName="*C$" AccessMask="0x2" NOT SubjectUserName="*$" NOT IpAddress="::1"
+
+# ── A New Trust Was Created To A Domain ──
+# Mức độ  : Trung bình
+# Chi tiết: Addition of domains is seldom and should be verified for legitimacy.
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4706
+
+# ── Addition of SID History to Active Directory Object ──
+# Mức độ  : Trung bình
+# Mục đích: Chiếm quyền token
+# Chi tiết: An attacker can use the SID history attribute to gain additional privileges.
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode IN (4765, 4766) OR (EventCode=4738 NOT (SidHistory IN ("-", "%%1793")) NOT NOT SidHistory=*)
+
+# ── Win Susp Computer Name Containing Samtheadmin ──
+# Mức độ  : Nghiêm trọng
+# Mục đích: Dùng tài khoản hợp lệ
+# Chi tiết: Detects suspicious computer name samtheadmin-{1..100}$ generated by hacktool
+source="WinEventLog:Security" Channel="Security" Channel="Security" (SamAccountName="SAMTHEADMIN-*" SamAccountName="*$") OR (TargetUserName="SAMTHEADMIN-*" TargetUserName="*$")
+
+# ── Password Change on Directory Service Restore Mode (DSRM) Account ──
+# Mức độ  : Cao
+# Chi tiết: Detects potential attempts made to set the Directory Services Restore Mode administrator password. The Directory Service Restore Mode (DSRM) account is a local administrator account on Domain Controll
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4794
+
+# ── Account Tampering - Suspicious Failed Logon Reasons ──
+# Mức độ  : Trung bình
+# Mục đích: Dùng tài khoản hợp lệ
+# Chi tiết: This method uses uncommon error codes on failed logons to determine suspicious activity and tampering with accounts that have been disabled or somehow restricted.
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode IN (4625, 4776) Status IN ("0xC0000072", "0xC000006F", "0xC0000070", "0xC0000413", "0xC000018C", "0xC000015B") OR SubStatus IN ("0xC0000072", "0xC000006F", "0xC0000070", "0xC0000413", "0xC000018C", "0xC000015B") NOT SubjectUserSid="S-1-0-0"
+
+# ── Group Policy Abuse for Privilege Addition ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects the first occurrence of a modification to Group Policy Object Attributes to add privileges to user accounts or use them to add users as local admins.
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=5136 AttributeLDAPDisplayName="gPCMachineExtensionNames" AttributeValue IN ("*827D319E-6EAC-11D2-A4EA-00C04F79F83A*", "*803E14A0-B4FB-11D0-A0D0-00A0C90F574B*")
+
+# ── Startup/Logon Script Added to Group Policy Object ──
+# Mức độ  : Trung bình
+# Mục đích: Persistence qua autorun
+# Chi tiết: Detects the modification of Group Policy Objects (GPO) to add a startup/logon script to users or computer objects.
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode IN (5136, 5145) (AttributeLDAPDisplayName IN ("gPCMachineExtensionNames", "gPCUserExtensionNames") AttributeValue="*42B5FAAE-6536-11D2-AE5A-0000F87571E3*" AttributeValue IN ("*40B6664F-4972-11D1-A7CA-0000F87571E3*", "*40B66650-4972-11D1-A7CA-0000F87571E3*")) OR (ShareName="*\\SYSVOL" RelativeTargetName IN ("*\\scripts.ini", "*\\psscripts.ini") AccessList="*%%4417*")
+
+# ── Kerberos Manipulation ──
+# Mức độ  : Cao
+# Chi tiết: Detects failed Kerberos TGT issue operation. This can be a sign of manipulations of TGT messages by an attacker.
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode IN (675, 4768, 4769, 4771) Status IN ("0x9", "0xA", "0xB", "0xF", "0x10", "0x11", "0x13", "0x14", "0x1A", "0x1F", "0x21", "0x22", "0x23", "0x24", "0x26", "0x27", "0x28", "0x29", "0x2C", "0x2D", "0x2E", "0x2F", "0x31", "0x32", "0x3E", "0x3F", "0x40", "0x41", "0x43", "0x44")
+
+# ── Suspicious LDAP-Attributes Used ──
+# Mức độ  : Cao
+# Chi tiết: Detects the usage of particular AttributeLDAPDisplayNames, which are known for data exchange via LDAP by the tool LDAPFragger and are additionally not commonly used in companies.
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=5136 AttributeValue="*" AttributeLDAPDisplayName IN ("primaryInternationalISDNNumber", "otherFacsimileTelephoneNumber", "primaryTelexNumber")
+
+# ── Suspicious Windows ANONYMOUS LOGON Local Account Created ──
+# Mức độ  : Cao
+# Chi tiết: Detects the creation of suspicious accounts similar to ANONYMOUS LOGON, such as using additional spaces. Created as an covering detection for exclusion of Logon Type 3 from ANONYMOUS LOGON accounts.
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4720 SamAccountName="*ANONYMOUS*" SamAccountName="*LOGON*"
+
+# ── Suspicious Remote Logon with Explicit Credentials ──
+# Mức độ  : Trung bình
+# Mục đích: Dùng tài khoản hợp lệ
+# Chi tiết: Detects suspicious processes logging on with explicit credentials
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4648 ProcessName IN ("*\\cmd.exe", "*\\powershell.exe", "*\\pwsh.exe", "*\\winrs.exe", "*\\wmic.exe", "*\\net.exe", "*\\net1.exe", "*\\reg.exe") NOT (TargetServerName="localhost" OR (SubjectUserName="*$" TargetUserName="*$"))
+
+# ── Password Dumper Activity on LSASS ──
+# Mức độ  : Cao
+# Mục đích: Dump thông tin xác thực
+# Chi tiết: Detects process handle on LSASS process with certain access mask and object type SAM_DOMAIN
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4656 ProcessName="*\\lsass.exe" AccessMask="0x705" ObjectType="SAM_DOMAIN"
+
+# ── Potentially Suspicious AccessMask Requested From LSASS ──
+# Mức độ  : Trung bình
+# Mục đích: Dump thông tin xác thực
+# Chi tiết: Detects process handle on LSASS process with certain access mask
+source="WinEventLog:Security" Channel="Security" Channel="Security" (EventCode=4656 ObjectName="*\\lsass.exe" AccessMask IN ("*0x40*", "*0x1400*", "*0x100000*", "*0x1410*", "*0x1010*", "*0x1438*", "*0x143a*", "*0x1418*", "*0x1f0fff*", "*0x1f1fff*", "*0x1f2fff*", "*0x1f3fff*")) OR (EventCode=4663 ObjectName="*\\lsass.exe" AccessList IN ("*4484*", "*4416*")) NOT ((ProcessName IN ("*\\csrss.exe", "*\\GamingServices.exe", "*\\lsm.exe", "*\\MicrosoftEdgeUpdate.exe", "*\\minionhost.exe", "*\\MRT.exe", "*\\MsMpEng.exe", "*\\perfmon.exe", "*\\procexp.exe", "*\\procexp64.exe", "*\\procexp64a.exe", "*\\svchost.exe", "*\\taskmgr.exe", "*\\thor.exe", "*\\thor64.exe", "*\\vmtoolsd.exe", "*\\VsTskMgr.exe", "*\\wininit.exe", "*\\wmiprvse.exe", "*RtkAudUService64") ProcessName IN ("*:\\Program Files (x86)\\*", "*:\\Program Files\\*", "*:\\ProgramData\\Microsoft\\Windows Defender\\Platform\\*", "*:\\Windows\\SysNative\\*", "*:\\Windows\\System32\\*", "*:\\Windows\\SysWow64\\*", "*:\\Windows\\Temp\\asgard2-agent\\*")) OR ProcessName="*:\\Program Files*" OR ProcessName IN ("*:\\Windows\\System32\\taskhostw.exe", "*:\\Windows\\System32\\msiexec.exe", "*:\\Windows\\CCM\\CcmExec.exe") OR (ProcessName IN ("*:\\Windows\\Sysmon64.exe", "*:\\Windows\\Sysmon64a.exe") AccessList="*%%4484*") OR (ProcessName="*:\\Windows\\Temp\\asgard2-agent-sc\\aurora\\*" ProcessName="*\\aurora-agent-64.exe" AccessList="*%%4484*") OR (ProcessName="*\\x64\\SCENARIOENGINE.EXE" AccessList="*%%4484*") OR (ProcessName="*:\\Users\\*" ProcessName="*\\AppData\\Local\\Temp\\is-*" ProcessName="*\\avira_system_speedup.tmp" AccessList="*%%4484*") OR (ProcessName="*:\\Windows\\Temp\\*" ProcessName="*\\avira_speedup_setup_update.tmp" AccessList="*%%4484*") OR (ProcessName="*:\\Windows\\System32\\snmp.exe" AccessList="*%%4484*") OR (ProcessName="*:\\Windows\\SystemTemp\\*" ProcessName="*\\GoogleUpdate.exe" AccessList="*%%4484*")) NOT (ProcessName IN ("*\\procmon64.exe", "*\\procmon64a.exe", "*\\procmon.exe") AccessList="*%%4484*")
+
+# ── Reconnaissance Activity ──
+# Mức độ  : Cao
+# Chi tiết: Detects activity as "net user administrator /domain" and "net group domain admins /domain"
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4661 AccessMask="0x2d" ObjectType IN ("SAM_USER", "SAM_GROUP") ObjectName="S-1-5-21-*" ObjectName IN ("*-500", "*-512")
+
+# ── Password Protected ZIP File Opened ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects the extraction of password protected ZIP archives. See the filename variable for more details on which file has been opened.
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=5379 TargetName="*Microsoft_Windows_Shell_ZipFolder:filename*" NOT TargetName="*\\Temporary Internet Files\\Content.Outlook*"
+
+# ── Password Protected ZIP File Opened (Suspicious Filenames) ──
+# Mức độ  : Cao
+# Mục đích: Tải file từ mạng; Giả mạo tên tiến trình
+# Chi tiết: Detects the extraction of password protected ZIP archives with suspicious file names. See the filename variable for more details on which file has been opened.
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=5379 TargetName="*Microsoft_Windows_Shell_ZipFolder:filename*" TargetName IN ("*invoice*", "*new order*", "*rechnung*", "*factura*", "*delivery*", "*purchase*", "*order*", "*payment*")
+
+# ── Password Protected ZIP File Opened (Email Attachment) ──
+# Mức độ  : Cao
+# Mục đích: Phishing
+# Chi tiết: Detects the extraction of password protected ZIP archives. See the filename variable for more details on which file has been opened.
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=5379 TargetName="*Microsoft_Windows_Shell_ZipFolder:filename*" TargetName="*\\Temporary Internet Files\\Content.Outlook*"
+
+# ── Uncommon Outbound Kerberos Connection - Security ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects uncommon outbound network activity via Kerberos default port indicating possible lateral movement or first stage PrivEsc via delegation.
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=5156 DestPort=88 NOT (Application IN ("\\device\\harddiskvolume*", "C:*") Application="*\\Windows\\System32\\lsass.exe") NOT ((Application IN ("\\device\\harddiskvolume*", "C:*") Application IN ("*\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe", "*\\Program Files\\Google\\Chrome\\Application\\chrome.exe")) OR (Application IN ("\\device\\harddiskvolume*", "C:*") Application IN ("*\\Program Files (x86)\\Mozilla Firefox\\firefox.exe", "*\\Program Files\\Mozilla Firefox\\firefox.exe")) OR Application="*\\tomcat\\bin\\tomcat8.exe")
+
+# ── Possible Shadow Credentials Added ──
+# Mức độ  : Cao
+# Chi tiết: Detects possible addition of shadow credentials to an active directory object.
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=5136 AttributeLDAPDisplayName="msDS-KeyCredentialLink"
+
+# ── Suspicious PsExec Execution ──
+# Mức độ  : Cao
+# Mục đích: Di chuyển ngang mạng
+# Chi tiết: detects execution of psexec or paexec with renamed service name, this rule helps to filter out the noise if psexec is used for legit purposes or if attacker uses a different psexec client other than s
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=5145 ShareName="\\\\\*\\IPC$" RelativeTargetName IN ("*-stdin", "*-stdout", "*-stderr") NOT RelativeTargetName="PSEXESVC*"
+
+# ── Suspicious Access to Sensitive File Extensions ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects known sensitive file extensions accessed on a network share
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=5145 RelativeTargetName IN ("*.bak", "*.dmp", "*.edb", "*.kirbi", "*.msg", "*.nsf", "*.nst", "*.oab", "*.ost", "*.pst", "*.rdp")
+
+# ── Suspicious Kerberos RC4 Ticket Encryption ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects service ticket requests using RC4 encryption type
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4769 TicketOptions="0x40810000" TicketEncryptionType="0x17" NOT ServiceName="*$"
+
+# ── Suspicious Scheduled Task Creation ──
+# Mức độ  : Cao
+# Mục đích: Lên lịch tác vụ độc hại
+# Chi tiết: Detects suspicious scheduled task creation events. Based on attributes such as paths, commands line flags, etc.
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4698 TaskContent IN ("*\\AppData\\Local\\Temp\\*", "*\\AppData\\Roaming\\*", "*\\Users\\Public\\*", "*\\WINDOWS\\Temp\\*", "*C:\\Temp\\*", "*\\Desktop\\*", "*\\Downloads\\*", "*\\Temporary Internet*", "*C:\\ProgramData\\*", "*C:\\Perflogs\\*") TaskContent IN ("*regsvr32*", "*rundll32*", "*cmd.exe</Command>*", "*cmd</Command>*", "*<Arguments>/c *", "*<Arguments>/k *", "*<Arguments>/r *", "*powershell*", "*pwsh*", "*mshta*", "*wscript*", "*cscript*", "*certutil*", "*bitsadmin*", "*bash.exe*", "*bash *", "*scrcons*", "*wmic *", "*wmic.exe*", "*forfiles*", "*scriptrunner*", "*hh.exe*")
+
+# ── Important Scheduled Task Deleted/Disabled ──
+# Mức độ  : Cao
+# Mục đích: Lên lịch tác vụ độc hại
+# Chi tiết: Detects when adversaries stop services or processes by deleting or disabling their respective scheduled tasks in order to conduct data destructive activities
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode IN (4699, 4701) TaskName IN ("*\\Windows\\SystemRestore\\SR*", "*\\Windows\\Windows Defender\\*", "*\\Windows\\BitLocker*", "*\\Windows\\WindowsBackup\\*", "*\\Windows\\WindowsUpdate\\*", "*\\Windows\\UpdateOrchestrator\\Schedule*", "*\\Windows\\ExploitGuard*") NOT (EventCode=4699 SubjectUserName="*$" TaskName="*\\Windows\\Windows Defender\\*")
+
+# ── Suspicious Scheduled Task Update ──
+# Mức độ  : Cao
+# Mục đích: Lên lịch tác vụ độc hại
+# Chi tiết: Detects update to a scheduled task event that contain suspicious keywords.
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4702 TaskContentNew IN ("*\\AppData\\Local\\Temp\\*", "*\\AppData\\Roaming\\*", "*\\Users\\Public\\*", "*\\WINDOWS\\Temp\\*", "*C:\\Temp\\*", "*\\Desktop\\*", "*\\Downloads\\*", "*\\Temporary Internet*", "*C:\\ProgramData\\*", "*C:\\Perflogs\\*") TaskContentNew IN ("*regsvr32*", "*rundll32*", "*cmd.exe</Command>*", "*cmd</Command>*", "*<Arguments>/c *", "*<Arguments>/k *", "*<Arguments>/r *", "*powershell*", "*pwsh*", "*mshta*", "*wscript*", "*cscript*", "*certutil*", "*bitsadmin*", "*bash.exe*", "*bash *", "*scrcons*", "*wmic *", "*wmic.exe*", "*forfiles*", "*scriptrunner*", "*hh.exe*")
+
+# ── Unauthorized System Time Modification ──
+# Mức độ  : Thấp
+# Mục đích: Xóa dấu vết
+# Chi tiết: Detect scenarios where a potentially unauthorized application or user is modifying the system time.
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4616 NOT (ProcessName="C:\\Windows\\System32\\svchost.exe" SubjectUserSid="S-1-5-19") NOT (ProcessName IN ("C:\\Program Files\\VMware\\VMware Tools\\vmtoolsd.exe", "C:\\Program Files (x86)\\VMware\\VMware Tools\\vmtoolsd.exe", "C:\\Windows\\System32\\VBoxService.exe", "C:\\Windows\\System32\\oobe\\msoobe.exe"))
+
+# ── Remote Service Activity via SVCCTL Named Pipe ──
+# Mức độ  : Trung bình
+# Mục đích: Di chuyển ngang mạng
+# Chi tiết: Detects remote service activity via remote access to the svcctl named pipe
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=5145 ShareName="\\\\\*\\IPC$" RelativeTargetName="svcctl" AccessList="*WriteData*"
+
+# ── SysKey Registry Keys Access ──
+# Mức độ  : Cao
+# Chi tiết: Detects handle requests and access operations to specific registry keys to calculate the SysKey
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode IN (4656, 4663) ObjectType="key" ObjectName IN ("*lsa\\JD", "*lsa\\GBG", "*lsa\\Skew1", "*lsa\\Data")
+
+# ── Sysmon Channel Reference Deletion ──
+# Mức độ  : Cao
+# Mục đích: Sửa registry
+# Chi tiết: Potential threat actor tampering with Sysmon manifest and eventually disabling it
+source="WinEventLog:Security" Channel="Security" Channel="Security" (EventCode=4657 ObjectName IN ("*WINEVT\\Publishers\\{5770385f-c22a-43e0-bf4c-06f5698ffbd9}*", "*WINEVT\\Channels\\Microsoft-Windows-Sysmon/Operational*") ObjectValueName="Enabled" NewValue=0) OR (EventCode=4663 ObjectName IN ("*WINEVT\\Publishers\\{5770385f-c22a-43e0-bf4c-06f5698ffbd9}*", "*WINEVT\\Channels\\Microsoft-Windows-Sysmon/Operational*") AccessMask="0x10000")
+
+# ── Tap Driver Installation - Security ──
+# Mức độ  : Thấp
+# Chi tiết: Detects the installation of a well-known TAP driver service. This could be a sign of potential preparation for data exfiltration using tunnelling techniques.
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4697 ServiceFileName="*tap0901*"
+
+# ── Suspicious Teams Application Related ObjectAcess Event ──
+# Mức độ  : Cao
+# Chi tiết: Detects an access to authentication tokens and accounts of Microsoft Teams desktop application.
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4663 ObjectName IN ("*\\Microsoft\\Teams\\Cookies*", "*\\Microsoft\\Teams\\Local Storage\\leveldb*") NOT ProcessName="*\\Microsoft\\Teams\\current\\Teams.exe*"
+
+# ── Transferring Files with Credential Data via Network Shares ──
+# Mức độ  : Trung bình
+# Mục đích: Dump thông tin xác thực
+# Chi tiết: Transferring files with well-known filenames (sensitive files with credential data) using network shares
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=5145 RelativeTargetName IN ("*\\mimidrv*", "*\\lsass*", "*\\windows\\minidump\\*", "*\\hiberfil*", "*\\sqldmpr*") OR RelativeTargetName IN ("Windows\\NTDS\\ntds.dit", "Windows\\System32\\config\\SAM", "Windows\\System32\\config\\SECURITY", "Windows\\System32\\config\\SYSTEM")
+
+# ── User Added to Local Administrator Group ──
+# Mức độ  : Trung bình
+# Mục đích: Dùng tài khoản hợp lệ
+# Chi tiết: Detects the addition of a new member to the local administrator group, which could be legitimate activity or a sign of privilege escalation activity
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4732 TargetUserName="Administr*" OR TargetSid="S-1-5-32-544" NOT SubjectUserName="*$"
+
+# ── User Couldn't Call a Privileged Service 'LsaRegisterLogonProcess' ──
+# Mức độ  : Cao
+# Chi tiết: The 'LsaRegisterLogonProcess' function verifies that the application making the function call is a logon process by checking that it has the SeTcbPrivilege privilege set. Possible Rubeus tries to get 
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4673 Service="LsaRegisterLogonProcess()" Keywords="0x8010000000000000"
+
+# ── Local User Creation ──
+# Mức độ  : Thấp
+# Chi tiết: Detects local user creation on Windows servers, which shouldn't happen in an Active Directory environment. Apply this Sigma Use Case on your Windows server logs and not on your DC logs.
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4720
+
+# ── Potential Privileged System Service Operation - SeLoadDriverPrivilege ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects the usage of the 'SeLoadDriverPrivilege' privilege. This privilege is required to load or unload a device driver. With this privilege, the user can dynamically load and unload device drivers o
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4673 PrivilegeList="SeLoadDriverPrivilege" Service="-" NOT (ProcessName IN ("C:\\Windows\\explorer.exe", "C:\\Windows\\HelpPane.exe", "C:\\Windows\\ImmersiveControlPanel\\SystemSettings.exe", "C:\\Windows\\System32\\Dism.exe", "C:\\Windows\\System32\\fltMC.exe", "C:\\Windows\\System32\\mmc.exe", "C:\\Windows\\System32\\rundll32.exe", "C:\\Windows\\System32\\RuntimeBroker.exe", "C:\\Windows\\System32\\ShellHost.exe", "C:\\Windows\\System32\\svchost.exe", "C:\\Windows\\System32\\SystemSettingsBroker.exe", "C:\\Windows\\System32\\wimserv.exe") OR ProcessName="C:\\Program Files\\WindowsApps\\Microsoft*") NOT (ProcessName IN ("*\\AppData\\Local\\Microsoft\\Teams\\current\\Teams.exe", "*\\Google\\Chrome\\Application\\chrome.exe", "*\\procexp.exe", "*\\procexp64.exe", "*\\procexp64a.exe", "*\\procmon.exe", "*\\procmon64.exe", "*\\procmon64a.exe") OR (ProcessName IN ("C:\\Program Files (x86)\\Dropbox\\*", "C:\\Program Files\\Dropbox\\*") ProcessName="*\\Dropbox.exe"))
+
+# ── User Logoff Event ──
+# Mức độ  : Thông tin
+# Chi tiết: Detects a user log-off activity. Could be used for example to correlate information during forensic investigations
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode IN (4634, 4647)
+
+# ── VSSAudit Security Event Source Registration ──
+# Mức độ  : Thông tin
+# Mục đích: Dump thông tin xác thực
+# Chi tiết: Detects the registration of the security event source VSSAudit. It would usually trigger when volume shadow copy operations happen.
+source="WinEventLog:Security" Channel="Security" Channel="Security" AuditSourceName="VSSAudit" EventCode IN (4904, 4905)
+
+# ── Windows Defender Exclusion List Modified ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects modifications to the Windows Defender exclusion registry key. This could indicate a potentially suspicious or even malicious activity by an attacker trying to add a new exclusion in order to b
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4657 ObjectName="*\\Microsoft\\Windows Defender\\Exclusions\\*"
+
+# ── Windows Defender Exclusion Registry Key - Write Access Requested ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects write access requests to the Windows Defender exclusions registry keys. This could be an indication of an attacker trying to request a handle or access the object to write new exclusions in or
+source="WinEventLog:Security" Channel="Security" Channel="Security" AccessList IN ("*%%4417*", "*%%4418*") EventCode IN (4656, 4663) ObjectName="*\\Microsoft\\Windows Defender\\Exclusions\\*"
+
+# ── WMI Persistence - Security ──
+# Mức độ  : Trung bình
+# Chi tiết: Detects suspicious WMI event filter and command line event consumer based on WMI and Security Logs.
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4662 ObjectType="WMI Namespace" ObjectName="*subscription*"
+
+# ── T1047 Wmiprvse Wbemcomn DLL Hijack ──
+# Mức độ  : Cao
+# Mục đích: Di chuyển ngang mạng
+# Chi tiết: Detects a threat actor creating a file named `wbemcomn.dll` in the `C:\Windows\System32\wbem\` directory over the network for a WMI DLL Hijack scenario.
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=5145 RelativeTargetName="*\\wbem\\wbemcomn.dll" NOT SubjectUserName="*$"
+
+# ── Locked Workstation ──
+# Mức độ  : Thông tin
+# Chi tiết: Detects locked workstation session events that occur automatically after a standard period of inactivity.
+source="WinEventLog:Security" Channel="Security" Channel="Security" EventCode=4800
